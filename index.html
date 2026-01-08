@@ -51,12 +51,25 @@
 
                 <!-- Location Section -->
                 <div class="form-section">
-                    <h2>Location</h2>
+                    <h2>Locations</h2>
                     <div class="form-group">
-                        <label for="location">Pick-up/Drop-off Location *</label>
-                        <input type="text" id="location" name="location" placeholder="Enter address or location" required>
+                        <label for="pickup_location">Pick-up Location *</label>
+                        <input type="text" id="pickup_location" name="pickup_location" class="location-input" placeholder="Enter pick-up address or location" required>
                         <small>Start typing to see suggestions</small>
                     </div>
+                    
+                    <div id="dropoffContainer">
+                        <div class="dropoff-group" data-index="0">
+                            <h3>Drop-off Location #1 *</h3>
+                            <div class="form-group">
+                                <input type="text" id="dropoff_0" name="dropoff_0" class="location-input" placeholder="Enter drop-off address or location" required>
+                                <small>Start typing to see suggestions</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="addDropoffBtn" class="btn-secondary">+ Add Another Drop-off Location</button>
+                    <small class="location-note">The final drop-off location will be your final destination.</small>
                 </div>
 
                 <!-- Passenger Information -->

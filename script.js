@@ -9,6 +9,12 @@ document.addEventListener('DOMContentLoaded', function() {
 // Counter for date/time groups
 let dateTimeCounter = 1;
 
+// Counter for dropoff location groups
+let dropoffCounter = 1;
+
+// Store autocomplete instances
+let autocompleteInstances = [];
+
 /**
  * Initialize form functionality
  */
