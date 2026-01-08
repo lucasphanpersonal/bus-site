@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Get a quote for charter bus bookings - easy and convenient">
+    <title>Bus Charter Quote Request</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚌 Bus Charter Services</h1>
+            <p class="subtitle">Request a Quote for Your Charter Bus Booking</p>
+        </header>
+
+        <main class="main-content">
+            <section class="intro-section">
+                <p>Fill out the form below to receive a personalized quote for your charter bus needs. We'll get back to you as soon as possible!</p>
+            </section>
+
+            <form id="bookingForm" class="booking-form">
+                <!-- Trip Details Section -->
+                <div class="form-section">
+                    <h2>Trip Details</h2>
+                    
+                    <div id="dateTimeContainer">
+                        <div class="date-time-group" data-index="0">
+                            <h3>Date & Time #1</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="date_0">Date *</label>
+                                    <input type="date" id="date_0" name="date_0" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="start_time_0">Start Time *</label>
+                                    <input type="time" id="start_time_0" name="start_time_0" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="end_time_0">End Time *</label>
+                                    <input type="time" id="end_time_0" name="end_time_0" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="addDateBtn" class="btn-secondary">+ Add Another Date</button>
+                </div>
+
+                <!-- Location Section -->
+                <div class="form-section">
+                    <h2>Location</h2>
+                    <div class="form-group">
+                        <label for="location">Pick-up/Drop-off Location *</label>
+                        <input type="text" id="location" name="location" placeholder="Enter address or location" required>
+                        <small>Start typing to see suggestions</small>
+                    </div>
+                </div>
+
+                <!-- Passenger Information -->
+                <div class="form-section">
+                    <h2>Passenger Information</h2>
+                    <div class="form-group">
+                        <label for="passengers">Number of Passengers *</label>
+                        <input type="number" id="passengers" name="passengers" min="1" max="500" placeholder="e.g., 50" required>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="form-section">
+                    <h2>Contact Information</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" placeholder="(555) 123-4567" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="company">Company/Organization (Optional)</label>
+                            <input type="text" id="company" name="company" placeholder="ABC Company">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description Section -->
+                <div class="form-section">
+                    <h2>Trip Description</h2>
+                    <div class="form-group">
+                        <label for="description">Brief Description *</label>
+                        <textarea id="description" name="description" rows="4" placeholder="Tell us about your trip (e.g., corporate event, wedding, field trip)" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Special Notes or Requirements</label>
+                        <textarea id="notes" name="notes" rows="4" placeholder="Any additional information, special requests, or requirements"></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" id="submitBtn" class="btn-primary">
+                        <span class="btn-text">Get Your Quote</span>
+                        <span class="btn-loader" style="display: none;">
+                            <span class="spinner"></span> Submitting...
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Status Messages -->
+                <div id="statusMessage" class="status-message" style="display: none;"></div>
+            </form>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 Bus Charter Services. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
