@@ -282,7 +282,18 @@ async function handleFormSubmit(event) {
             // Remove extra date/time groups
             const groups = document.querySelectorAll('.date-time-group');
             groups.forEach((group, idx) => {
-                if (idx > 0) group.remove();
+                if (idx > 0) {
+                    group.remove();
+                } else {
+                    // For the first group, remove extra dropoff locations
+                    const dropoffContainer = group.querySelector('.dropoff-container');
+                    if (dropoffContainer) {
+                        const dropoffGroups = dropoffContainer.querySelectorAll('.dropoff-group');
+                        dropoffGroups.forEach((dropoffGroup, dropoffIdx) => {
+                            if (dropoffIdx > 0) dropoffGroup.remove();
+                        });
+                    }
+                }
             });
             dateTimeCounter = 1;
             dropoffCounters = { 0: 1 };
@@ -329,7 +340,7 @@ function collectFormData() {
                 date: dateInput.value,
                 startTime: startTime.value,
                 endTime: endTime.value,
-                pickup: pickupInput.value,
+                pickup: pickupInput.value.trim(),
                 dropoffs: []
             };
             
@@ -339,9 +350,11 @@ function collectFormData() {
                 const dropoffGroups = dropoffContainer.querySelectorAll('.dropoff-group');
                 dropoffGroups.forEach((dropoffGroup) => {
                     const dropoffIndex = dropoffGroup.dataset.dropoffIndex;
-                    const dropoffInput = dropoffGroup.querySelector(`#dropoff_${index}_${dropoffIndex}`);
-                    if (dropoffInput && dropoffInput.value) {
-                        tripDay.dropoffs.push(dropoffInput.value);
+                    if (dropoffIndex !== undefined && dropoffIndex !== null) {
+                        const dropoffInput = dropoffGroup.querySelector(`#dropoff_${index}_${dropoffIndex}`);
+                        if (dropoffInput && dropoffInput.value && dropoffInput.value.trim()) {
+                            tripDay.dropoffs.push(dropoffInput.value.trim());
+                        }
                     }
                 });
             }
@@ -372,8 +385,8 @@ function validateFormData(formData) {
     // Validate each trip day
     for (const day of formData.tripDays) {
         if (!day.date || !day.startTime || !day.endTime) return false;
-        if (!day.pickup) return false;
-        if (!day.dropoffs.length) return false;
+        if (!day.pickup || !day.pickup.trim()) return false;
+        if (!day.dropoffs.length || day.dropoffs.some(d => !d || !d.trim())) return false;
     }
     
     if (!formData.passengers || formData.passengers < 1) return false;
