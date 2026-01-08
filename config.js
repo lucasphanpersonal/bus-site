@@ -10,20 +10,20 @@ const CONFIG = {
     // 4. The form will submit to: https://docs.google.com/forms/d/e/{FORM_ID}/formResponse
     
     googleForm: {
-        actionUrl: 'YOUR_GOOGLE_FORM_ACTION_URL', // e.g., 'https://docs.google.com/forms/d/e/1FAIpQLSe.../formResponse'
+        actionUrl: 'https://docs.google.com/forms/d/e/1Ia4ABMuotgUXg9J9KRsiLWx7zWNDcw1WOo-g46TAUy8/formResponse', // e.g., 'https://docs.google.com/forms/d/e/1FAIpQLSe.../formResponse'
         
         // Map your form fields to Google Form entry IDs
         // You'll get these by inspecting your Google Form
         fields: {
-            dates: 'entry.1234567890',        // Replace with actual entry ID
-            location: 'entry.1234567891',     // Replace with actual entry ID
-            passengers: 'entry.1234567892',   // Replace with actual entry ID
-            name: 'entry.1234567893',         // Replace with actual entry ID
-            email: 'entry.1234567894',        // Replace with actual entry ID (or use emailAddress)
-            phone: 'entry.1234567895',        // Replace with actual entry ID
-            company: 'entry.1234567896',      // Replace with actual entry ID
-            description: 'entry.1234567897',  // Replace with actual entry ID
-            notes: 'entry.1234567898'         // Replace with actual entry ID
+            dates: 'entry.630078859',        // Replace with actual entry ID
+            location: 'entry.1923535521',     // Replace with actual entry ID
+            passengers: 'entry.444654228',   // Replace with actual entry ID
+            name: 'entry.1143231549',         // Replace with actual entry ID
+            email: 'entry.1395274550',        // Replace with actual entry ID (or use emailAddress)
+            phone: 'entry.118255376',        // Replace with actual entry ID
+            company: 'entry.2056082094',      // Replace with actual entry ID
+            description: 'entry.280408210',  // Replace with actual entry ID
+            notes: 'entry.1946711073'         // Replace with actual entry ID
         }
     },
 
@@ -36,7 +36,7 @@ const CONFIG = {
     // 5. Restrict the key to your domain for security
     
     googleMaps: {
-        apiKey: 'YOUR_GOOGLE_MAPS_API_KEY'  // Replace with actual API key
+        apiKey: 'AIzaSyDYXGdDhcVtvRHre4dhaKaGf_a8nfjzmL4'  // Replace with actual API key
     }
 };
 
