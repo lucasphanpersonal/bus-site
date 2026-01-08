@@ -22,7 +22,8 @@ const CONFIG = {
             phone: 'entry.118255376',        // Replace with actual entry ID
             company: 'entry.2056082094',      // Replace with actual entry ID
             description: 'entry.280408210',  // Replace with actual entry ID
-            notes: 'entry.1946711073'         // Replace with actual entry ID
+            notes: 'entry.1946711073',        // Replace with actual entry ID
+            routeInfo: 'entry.ROUTE_INFO'     // Optional: Add a separate field for computed route information (distance, time, etc.)
         }
     },
 
@@ -30,12 +31,18 @@ const CONFIG = {
     // To get your API key:
     // 1. Go to https://console.cloud.google.com/
     // 2. Create a new project or select existing
-    // 3. Enable Google Maps JavaScript API and Places API
+    // 3. Enable Google Maps JavaScript API, Places API, and Distance Matrix API
     // 4. Create credentials (API Key)
     // 5. Restrict the key to your domain for security
     
     googleMaps: {
         apiKey: 'AIzaSyDYXGdDhcVtvRHre4dhaKaGf_a8nfjzmL4'  // Replace with actual API key
+    },
+
+    // Route computation settings
+    routeComputation: {
+        enabled: true,  // Set to false to disable route computation
+        showSummary: true  // Show route summary to user before submission
     }
 };
 
