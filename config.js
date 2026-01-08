@@ -10,7 +10,7 @@ const CONFIG = {
     // 4. The form will submit to: https://docs.google.com/forms/d/e/{FORM_ID}/formResponse
     
     googleForm: {
-        actionUrl: 'https://docs.google.com/forms/d/e/1Ia4ABMuotgUXg9J9KRsiLWx7zWNDcw1WOo-g46TAUy8/formResponse', // e.g., 'https://docs.google.com/forms/d/e/1FAIpQLSe.../formResponse'
+        actionUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfcZqm_Kw8gcg-Jf8-cqaVfNsUUhTqy9rsjep8lckpVEjBE2A/formResponse', // e.g., 'https://docs.google.com/forms/d/e/1FAIpQLSe.../formResponse'
         
         // Map your form fields to Google Form entry IDs
         // You'll get these by inspecting your Google Form
