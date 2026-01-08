@@ -5,8 +5,10 @@ A modern, responsive website for requesting charter bus booking quotes. The site
 ## Features
 
 - ✨ **Modern & Responsive Design** - Works seamlessly on desktop, tablet, and mobile devices
-- 📅 **Multiple Date/Time Support** - Add multiple dates and time ranges for your trip
-- 📍 **Smart Location Input** - Google Maps autocomplete for easy location entry
+- 📅 **Multiple Trip Days Support** - Add multiple trip days with dates and time ranges
+- 📍 **Smart Location Input** - Google Maps autocomplete for pickup and dropoff locations
+- 🗺️ **Multiple Locations Per Day** - Each trip day can have one pickup and multiple dropoff locations
+- 🎯 **Final Destination Tracking** - The last dropoff location automatically becomes the final destination
 - 👥 **Passenger Management** - Specify number of passengers
 - 📧 **Contact Information** - Collect all necessary contact details
 - 📝 **Trip Description** - Detailed description and special notes sections
@@ -27,8 +29,7 @@ cd bus-site
 
 1. Create a new Google Form at [forms.google.com](https://forms.google.com)
 2. Add the following fields to your form:
-   - **Dates & Times** - Long answer text field
-   - **Location** - Short answer text field
+   - **Trip Days (Dates, Times & Locations)** - Paragraph text field (Long answer)
    - **Number of Passengers** - Number field
    - **Full Name** - Short answer text field
    - **Email Address** - Email field (or use built-in email collection)
@@ -47,6 +48,8 @@ cd bus-site
    - Right-click on your form and select "Inspect" or "View Page Source"
    - Search for `entry.` to find entry IDs (e.g., `entry.1234567890`)
    - Each form field has a unique entry ID
+
+**Note:** The "Trip Days" field will contain formatted data including dates, times, pickup location, and all dropoff locations for each day.
 
 ### 3. Configure Google Maps API
 
@@ -69,8 +72,7 @@ const CONFIG = {
     googleForm: {
         actionUrl: 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse',
         fields: {
-            dates: 'entry.XXXXXXXXX',
-            location: 'entry.XXXXXXXXX',
+            tripDays: 'entry.XXXXXXXXX',      // Contains dates, times, and locations for each day
             passengers: 'entry.XXXXXXXXX',
             name: 'entry.XXXXXXXXX',
             email: 'entry.XXXXXXXXX',

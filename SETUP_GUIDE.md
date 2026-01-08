@@ -12,28 +12,23 @@ This guide will walk you through setting up your Google Form to work with the bu
 
 Add the following questions to your form in order:
 
-### Field 1: Dates & Times
+### Field 1: Trip Days (Dates, Times & Locations)
 - **Type**: Paragraph (Long answer text)
-- **Question**: "Trip Dates and Times"
+- **Question**: "Trip Days with Dates, Times, and Locations"
 - **Required**: Yes
-- **Description**: "We'll format this automatically from your input"
+- **Description**: "We'll format this automatically from your input. Each day will include date, times, pickup location, and all dropoff locations."
 
-### Field 2: Location
-- **Type**: Short answer
-- **Question**: "Pick-up/Drop-off Location"
-- **Required**: Yes
-
-### Field 3: Number of Passengers
+### Field 2: Number of Passengers
 - **Type**: Short answer (or Number if available)
 - **Question**: "Number of Passengers"
 - **Required**: Yes
 
-### Field 4: Full Name
+### Field 3: Full Name
 - **Type**: Short answer
 - **Question**: "Full Name"
 - **Required**: Yes
 
-### Field 5: Email Address
+### Field 4: Email Address
 - **Type**: Short answer or Email
 - **Question**: "Email Address"
 - **Required**: Yes
@@ -41,23 +36,23 @@ Add the following questions to your form in order:
 
 **Alternative**: Enable "Collect email addresses" in form settings instead of creating this field manually.
 
-### Field 6: Phone Number
+### Field 5: Phone Number
 - **Type**: Short answer
 - **Question**: "Phone Number"
 - **Required**: Yes
 
-### Field 7: Company/Organization
+### Field 6: Company/Organization
 - **Type**: Short answer
 - **Question**: "Company or Organization (Optional)"
 - **Required**: No
 
-### Field 8: Trip Description
+### Field 7: Trip Description
 - **Type**: Paragraph (Long answer text)
 - **Question**: "Brief Trip Description"
 - **Required**: Yes
 - **Description**: "Tell us about your event or trip"
 
-### Field 9: Special Notes
+### Field 8: Special Notes
 - **Type**: Paragraph (Long answer text)
 - **Question**: "Special Notes or Requirements"
 - **Required**: No
@@ -104,15 +99,14 @@ To get the entry IDs for each field:
 
 If you find these entry IDs:
 ```
-entry.123456789  → Dates & Times
-entry.234567890  → Location
-entry.345678901  → Number of Passengers
-entry.456789012  → Full Name
-entry.567890123  → Email Address
-entry.678901234  → Phone Number
-entry.789012345  → Company/Organization
-entry.890123456  → Trip Description
-entry.901234567  → Special Notes
+entry.123456789  → Trip Days (Dates, Times & Locations)
+entry.234567890  → Number of Passengers
+entry.345678901  → Full Name
+entry.456789012  → Email Address
+entry.567890123  → Phone Number
+entry.678901234  → Company/Organization
+entry.789012345  → Trip Description
+entry.890123456  → Special Notes
 ```
 
 ## Step 5: Update config.js
@@ -127,15 +121,14 @@ const CONFIG = {
         
         // Replace these with your actual entry IDs
         fields: {
-            dates: 'entry.123456789',
-            location: 'entry.234567890',
-            passengers: 'entry.345678901',
-            name: 'entry.456789012',
-            email: 'entry.567890123',
-            phone: 'entry.678901234',
-            company: 'entry.789012345',
-            description: 'entry.890123456',
-            notes: 'entry.901234567'
+            tripDays: 'entry.123456789',     // Contains dates, times, and locations for each day
+            passengers: 'entry.234567890',
+            name: 'entry.345678901',
+            email: 'entry.456789012',
+            phone: 'entry.567890123',
+            company: 'entry.678901234',
+            description: 'entry.789012345',
+            notes: 'entry.890123456'
         }
     },
     // ... rest of config

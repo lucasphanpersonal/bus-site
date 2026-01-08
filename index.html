@@ -26,7 +26,8 @@
                     
                     <div id="dateTimeContainer">
                         <div class="date-time-group" data-index="0">
-                            <h3>Date & Time #1</h3>
+                            <h3>Trip Day #1</h3>
+                            
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="date_0">Date *</label>
@@ -43,20 +44,34 @@
                                     <input type="time" id="end_time_0" name="end_time_0" required>
                                 </div>
                             </div>
+                            
+                            <!-- Locations for this day -->
+                            <div class="locations-subsection">
+                                <h4>Locations for This Day</h4>
+                                
+                                <div class="form-group">
+                                    <label for="pickup_0">Pick-up Location *</label>
+                                    <input type="text" id="pickup_0" name="pickup_0" class="location-input" placeholder="Enter pick-up address or location" required>
+                                    <small>Start typing to see suggestions</small>
+                                </div>
+                                
+                                <div class="dropoff-container" data-day-index="0">
+                                    <div class="dropoff-group" data-dropoff-index="0">
+                                        <div class="form-group">
+                                            <label for="dropoff_0_0">Drop-off Location #1 *</label>
+                                            <input type="text" id="dropoff_0_0" name="dropoff_0_0" class="location-input" placeholder="Enter drop-off address or location" required>
+                                            <small>Start typing to see suggestions</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button type="button" class="btn-secondary add-dropoff-btn" data-day-index="0">+ Add Another Drop-off</button>
+                                <small class="location-note">The final drop-off location will be your final destination for this day.</small>
+                            </div>
                         </div>
                     </div>
                     
-                    <button type="button" id="addDateBtn" class="btn-secondary">+ Add Another Date</button>
-                </div>
-
-                <!-- Location Section -->
-                <div class="form-section">
-                    <h2>Location</h2>
-                    <div class="form-group">
-                        <label for="location">Pick-up/Drop-off Location *</label>
-                        <input type="text" id="location" name="location" placeholder="Enter address or location" required>
-                        <small>Start typing to see suggestions</small>
-                    </div>
+                    <button type="button" id="addDateBtn" class="btn-secondary">+ Add Another Trip Day</button>
                 </div>
 
                 <!-- Passenger Information -->
