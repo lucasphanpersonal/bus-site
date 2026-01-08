@@ -208,7 +208,8 @@ function collectFormData() {
 
     // Collect date/time groups
     const dateGroups = document.querySelectorAll('.date-time-group');
-    dateGroups.forEach((group, index) => {
+    dateGroups.forEach((group) => {
+        const index = group.dataset.index;
         const dateInput = group.querySelector(`#date_${index}`);
         const startTime = group.querySelector(`#start_time_${index}`);
         const endTime = group.querySelector(`#end_time_${index}`);
