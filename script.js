@@ -635,8 +635,15 @@ async function handleFormSubmit(event) {
         // Submit to Google Forms
         await submitToGoogleForms(formData);
 
-        // Save to localStorage for admin dashboard
-        saveQuoteToLocalStorage(formData);
+        // Send confirmation email if EmailJS is configured
+        if (CONFIG.emailjs && CONFIG.emailjs.enabled) {
+            try {
+                await sendConfirmationEmail(formData);
+            } catch (emailError) {
+                console.warn('Failed to send confirmation email:', emailError);
+                // Don't block submission if email fails
+            }
+        }
 
         // Redirect to success page with query parameters
         const params = new URLSearchParams({
@@ -832,33 +839,13 @@ ${dropoffsText}`;
         return;
     } catch (error) {
         console.error('Google Forms submission error:', error);
-        // Don't throw error - allow submission to continue to localStorage
-        console.warn('Google Forms submission failed, but quote saved locally for admin dashboard');
+        // Don't throw error - allow submission to continue
+        console.warn('Google Forms submission failed');
         return;
     }
 }
 
-/**
- * Save quote to localStorage for admin dashboard
- */
-function saveQuoteToLocalStorage(formData) {
-    const STORAGE_KEY = 'busCharterQuotes';
-    
-    try {
-        const quotes = localStorage.getItem(STORAGE_KEY);
-        const quotesArray = quotes ? JSON.parse(quotes) : [];
-        
-        quotesArray.push({
-            id: Date.now(),
-            ...formData,
-            submittedAt: new Date().toISOString()
-        });
-        
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(quotesArray));
-    } catch (error) {
-        console.error('Error saving quote to localStorage:', error);
-    }
-}
+
 
 /**
  * Show status message
@@ -871,6 +858,61 @@ function showStatusMessage(type, message) {
 
     // Scroll to message
     statusMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/**
+ * Send confirmation email to customer using EmailJS
+ */
+async function sendConfirmationEmail(formData) {
+    if (typeof emailjs === 'undefined') {
+        console.warn('EmailJS library not loaded');
+        return;
+    }
+
+    const templateParams = {
+        customer_name: formData.name,
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        company: formData.company || 'N/A',
+        passengers: formData.passengers,
+        trip_description: formData.description,
+        trip_days: formatTripDaysForEmail(formData.tripDays),
+        notes: formData.notes || 'None',
+        submission_date: new Date().toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
+    };
+
+    try {
+        const response = await emailjs.send(
+            CONFIG.emailjs.serviceId,
+            CONFIG.emailjs.templateId,
+            templateParams
+        );
+        console.log('Confirmation email sent successfully:', response);
+    } catch (error) {
+        console.error('Failed to send confirmation email:', error);
+        throw error;
+    }
+}
+
+/**
+ * Format trip days for email
+ */
+function formatTripDaysForEmail(tripDays) {
+    return tripDays.map((day, idx) => {
+        const overnightNote = day.endsNextDay ? ' (overnight - ends next day)' : '';
+        const dropoffsList = day.dropoffs.map((d, i) => `  ${i + 1}. ${d}`).join('\n');
+        
+        return `Day ${idx + 1}: ${day.date} from ${day.startTime} to ${day.endTime}${overnightNote}
+  Pick-up: ${day.pickup}
+  Drop-offs:
+${dropoffsList}`;
+    }).join('\n\n');
 }
 
 // Make functions globally available for inline event handlers

@@ -95,30 +95,22 @@ The system automatically detects and highlights:
 
 ### Data Storage
 
-⚠️ **CRITICAL INFORMATION**: Quote data is stored in the browser's **localStorage**
+✅ **Data Source**: Quote data is stored in **Google Sheets**
 
-**How it works when deployed to GitHub Pages (or any hosting):**
-- When you deploy to GitHub Pages (e.g., `yourusername.github.io/bus-site`), the admin dashboard will work
-- Quote data **IS** stored long-term in the browser's localStorage (won't expire)
-- Data persists across browser sessions and remains even after closing the browser
-- **However**: Data is stored **only in the specific browser** where quotes are submitted
-- Each browser/device has its own separate data storage
+**How it works when deployed:**
+- All quote submissions are automatically saved to your Google Spreadsheet
+- The admin dashboard reads data from Google Sheets via the Sheets API
+- You can access your quotes from **any device, any browser, anywhere**
+- Data is centralized and accessible to your entire team
 
-**The Key Limitation:**
-- Customer submits quote from their phone → Data stored on **their phone's browser**
-- You open admin dashboard on your computer → You **won't see** their quote (data is on their device, not yours)
-- You need to access the admin dashboard from **the same browser where the quote was submitted**
+**Advantages:**
+- ✅ Access quotes from any device (desktop, laptop, tablet, phone)
+- ✅ Works in any browser (Chrome, Firefox, Safari, Edge)
+- ✅ See all customer quotes submitted from anywhere
+- ✅ Share access with team members
+- ✅ Data is backed up by Google's infrastructure
 
-**Solution:** All quotes are also sent to Google Forms, which you can access from anywhere. Use Google Forms as your primary data source, and localStorage as a convenience feature when testing or submitting quotes yourself.
-
-### Important Notes About localStorage
-
-1. **Local Only**: Data is stored on the client side and is not synced across devices
-2. **Browser-Specific**: Data saved in Chrome won't be accessible in Firefox (same device)
-3. **Long-term Storage**: Data persists indefinitely (until browser cache is cleared)
-4. **Not a Backup**: Clearing browser data will delete all stored quotes
-5. **Size Limits**: Browser localStorage has size limits (typically 5-10MB)
-
+📖 **For setup instructions, see [GOOGLE_SHEETS_SETUP.md](GOOGLE_SHEETS_SETUP.md)**
 📖 **For detailed information, see [DATA_STORAGE_GUIDE.md](DATA_STORAGE_GUIDE.md)**
 
 ### Data Backup Recommendations
@@ -133,10 +125,10 @@ For production use, consider:
 ### Route Visualization
 
 When viewing a quote detail:
-- The system automatically displays the route on Google Maps
-- Shows pickup point, all stops, and final destination
+- The system automatically displays a route map for **each trip day**
+- Each map shows pickup point, all stops, and final destination for that specific day
 - Uses Google Directions API for accurate routing
-- Displays the route for the first trip day
+- Multi-day trips will have separate maps for each day
 
 ### Requirements
 
@@ -185,7 +177,7 @@ For production deployment with sensitive data:
    - Activity logging and audit trails
 
 3. **Secure Data Storage**
-   - Move from localStorage to server-side database
+   - Implement backend database for data storage
    - Encrypt sensitive data
    - Regular automated backups
    - Implement data retention policies
@@ -217,7 +209,7 @@ The dashboard provides all information needed to prepare accurate quotes:
 - **Solution**: Verify password is correct; check `admin.js` for the current password
 
 **Problem**: No quotes showing
-- **Solution**: Check that you're using the same browser where forms were submitted; localStorage is browser-specific
+- **Solution**: Verify Google Sheets integration is configured correctly; check spreadsheet sharing settings and API key
 
 **Problem**: Maps not loading
 - **Solution**: Verify Google Maps API is configured correctly; check browser console for errors
@@ -226,7 +218,7 @@ The dashboard provides all information needed to prepare accurate quotes:
 - **Solution**: Route computation requires Google Maps Distance Matrix API; submissions without this will show N/A
 
 **Problem**: Data disappeared
-- **Solution**: Browser data may have been cleared; check Google Forms for backup of submissions
+- **Solution**: Check Google Sheets API configuration; verify spreadsheet sharing settings and API key
 
 ### Browser Console
 

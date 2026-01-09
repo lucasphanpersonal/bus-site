@@ -3,9 +3,11 @@
 // This is client-side authentication suitable for personal use only.
 // For production, implement proper backend authentication.
 const ADMIN_PASSWORD = 'admin123'; // TODO: Change this to a secure password!
-const STORAGE_KEY = 'busCharterQuotes';
 const AUTH_KEY = 'busCharterAuth';
 const METERS_PER_MILE = 1609.34; // Conversion constant
+
+// Global state for loaded quotes
+let loadedQuotes = [];
 
 // State abbreviations for interstate detection
 const US_STATE_ABBREVIATIONS = [
@@ -109,18 +111,18 @@ function updateDataSourceBanner() {
 }
 
 /**
- * Load quotes - from Google Sheets or localStorage depending on configuration
+ * Load quotes - from Google Sheets only
  */
 async function loadQuotes() {
     try {
         let quotes;
         
-        // Check if Google Sheets integration is enabled
+        // Load from Google Sheets
         if (CONFIG.googleSheets && CONFIG.googleSheets.enabled) {
             showLoadingState();
             quotes = await getQuotesFromGoogleSheets();
         } else {
-            quotes = getQuotesFromLocalStorage();
+            throw new Error('Google Sheets integration is not enabled. Please set googleSheets.enabled to true and configure your spreadsheet ID in config.js. See GOOGLE_SHEETS_SETUP.md for detailed setup instructions.');
         }
         
         if (quotes.length === 0) {
@@ -131,6 +133,9 @@ async function loadQuotes() {
         
         // Sort by date (newest first)
         quotes.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+        
+        // Store quotes globally for detail views
+        loadedQuotes = quotes;
         
         // Display quotes
         displayQuotes(quotes);
@@ -412,34 +417,6 @@ function parseRouteInfoText(text) {
     return routeInfo;
 }
 
-/**
- * Get quotes from localStorage (legacy method)
- */
-function getQuotesFromLocalStorage() {
-    const quotesJson = localStorage.getItem(STORAGE_KEY);
-    return quotesJson ? JSON.parse(quotesJson) : [];
-}
-
-/**
- * Get quotes - backward compatible wrapper
- */
-function getQuotes() {
-    // This is kept for backward compatibility with saveQuote function
-    return getQuotesFromLocalStorage();
-}
-
-/**
- * Save quote to localStorage
- */
-function saveQuote(quoteData) {
-    const quotes = getQuotes();
-    quotes.push({
-        id: Date.now(),
-        ...quoteData,
-        submittedAt: new Date().toISOString()
-    });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(quotes));
-}
 
 /**
  * Display quotes in the list
@@ -536,8 +513,7 @@ function updateStats(quotes) {
  * Show quote detail in modal
  */
 function showQuoteDetail(quoteId) {
-    const quotes = getQuotes();
-    const quote = quotes.find(q => q.id === quoteId);
+    const quote = loadedQuotes.find(q => q.id === quoteId);
     
     if (!quote) return;
     
@@ -556,9 +532,9 @@ function showQuoteDetail(quoteId) {
     
     modal.style.display = 'block';
     
-    // Initialize map if Google Maps is available and route info exists
-    if (window.google && quote.routeInfo) {
-        setTimeout(() => initializeQuoteMap(quote), 100);
+    // Initialize maps for all trip days if Google Maps is available
+    if (window.google && quote.tripDays && quote.tripDays.length > 0) {
+        setTimeout(() => initializeQuoteMaps(quote), 100);
     }
 }
 
@@ -657,7 +633,6 @@ function generateQuoteDetailHTML(quote) {
                         <div class="detail-item-value">${quote.routeInfo.totals.stops}</div>
                     </div>
                 </div>
-                <div id="mapContainer" class="map-container"></div>
             </div>
         `;
     }
@@ -708,6 +683,7 @@ function generateQuoteDetailHTML(quote) {
                         `<li><strong>Drop-off ${idx + 1}:</strong> ${dropoff}</li>`
                     ).join('')}
                 </ul>
+                <div id="mapContainer-day-${index}" class="map-container"></div>
             </div>
         `;
     });
@@ -860,37 +836,37 @@ function checkMultipleStates(locations) {
 }
 
 /**
- * Initialize Google Map for quote
+ * Initialize Google Maps for all trip days
  */
-function initializeQuoteMap(quote) {
-    const mapContainer = document.getElementById('mapContainer');
-    if (!mapContainer || !window.google) return;
+function initializeQuoteMaps(quote) {
+    if (!window.google) return;
     
-    // Create map
-    const map = new google.maps.Map(mapContainer, {
-        zoom: 10,
-        mapTypeId: 'roadmap'
-    });
-    
-    const bounds = new google.maps.LatLngBounds();
-    const directionsService = new google.maps.DirectionsService();
-    const directionsRenderer = new google.maps.DirectionsRenderer({
-        map: map,
-        suppressMarkers: false
-    });
-    
-    // For simplicity, show the route for the first trip day
-    // In a more advanced implementation, you could show all days
-    if (quote.tripDays.length > 0) {
-        const firstDay = quote.tripDays[0];
-        const waypoints = firstDay.dropoffs.slice(0, -1).map(location => ({
+    // Create a map for each trip day
+    quote.tripDays.forEach((tripDay, index) => {
+        const mapContainer = document.getElementById(`mapContainer-day-${index}`);
+        if (!mapContainer) return;
+        
+        // Create map for this day
+        const map = new google.maps.Map(mapContainer, {
+            zoom: 10,
+            mapTypeId: 'roadmap'
+        });
+        
+        const directionsService = new google.maps.DirectionsService();
+        const directionsRenderer = new google.maps.DirectionsRenderer({
+            map: map,
+            suppressMarkers: false
+        });
+        
+        // Build waypoints from all dropoffs except the last one
+        const waypoints = tripDay.dropoffs.slice(0, -1).map(location => ({
             location: location,
             stopover: true
         }));
         
         const request = {
-            origin: firstDay.pickup,
-            destination: firstDay.dropoffs[firstDay.dropoffs.length - 1],
+            origin: tripDay.pickup,
+            destination: tripDay.dropoffs[tripDay.dropoffs.length - 1],
             waypoints: waypoints,
             travelMode: google.maps.TravelMode.DRIVING
         };
@@ -899,19 +875,20 @@ function initializeQuoteMap(quote) {
             if (status === 'OK') {
                 directionsRenderer.setDirections(result);
             } else {
-                console.error('Directions request failed:', status);
+                console.error(`Directions request failed for day ${index + 1}:`, status);
                 // Fallback: show markers only
-                showMarkersOnly(map, quote.tripDays[0], bounds);
+                showMarkersOnly(map, tripDay);
             }
         });
-    }
+    });
 }
 
 /**
  * Show markers only (fallback if directions fail)
  */
-function showMarkersOnly(map, tripDay, bounds) {
+function showMarkersOnly(map, tripDay) {
     const geocoder = new google.maps.Geocoder();
+    const bounds = new google.maps.LatLngBounds();
     const locations = [tripDay.pickup, ...tripDay.dropoffs];
     
     locations.forEach((location, index) => {

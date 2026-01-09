@@ -16,6 +16,7 @@ A modern, responsive website for requesting charter bus booking quotes. The site
 - 📧 **Contact Information** - Collect all necessary contact details
 - 📝 **Trip Description** - Detailed description and special notes sections
 - ✅ **Confirmation Page** - Clients receive a professional confirmation page after submission
+- 📬 **Automatic Confirmation Emails** - Optional automatic email confirmations to customers (via EmailJS)
 - 🔗 **Google Forms Integration** - Submissions sent directly to your Google Form
 - ⚡ **Real-time Validation** - Client-side form validation for better UX
 - 🎨 **Clean UI** - Professional look without the typical embedded form appearance
@@ -24,10 +25,10 @@ A modern, responsive website for requesting charter bus booking quotes. The site
 - 🔐 **Secure Admin Access** - Password-protected dashboard
 - 📊 **Analytics Overview** - View total quotes, monthly stats, passengers, and miles
 - 📋 **Quote Management** - Browse and search through all submitted quote requests
-- 🗺️ **Google Maps Integration** - Visual route display for each quote
+- 🗺️ **Per-Day Map Visualization** - Visual route display for each trip day
 - 📈 **Detailed Quote View** - See all trip logistics, booking hours, distances, and notable information
 - ⚠️ **Smart Alerts** - Automatic detection of notable trip characteristics (multi-day, large groups, long distances, interstate travel)
-- 💾 **Data Persistence** - All quotes stored locally for easy access and review
+- 💾 **Google Sheets Integration** - All quotes stored in Google Sheets for access from anywhere
 - 📱 **Responsive Design** - Admin dashboard works on all devices
 
 ## Setup Instructions
@@ -103,7 +104,29 @@ const CONFIG = {
 };
 ```
 
-### 5. Deploy
+### 5. (Optional) Configure Email Confirmations
+
+To send automatic confirmation emails to customers when they submit a quote:
+
+1. Sign up for a free account at [EmailJS](https://www.emailjs.com/) (200 free emails/month)
+2. Connect your email service (Gmail, Outlook, etc.)
+3. Create an email template for quote confirmations
+4. Update `config.js` with your EmailJS credentials:
+
+```javascript
+emailjs: {
+    enabled: true,
+    publicKey: 'YOUR_EMAILJS_PUBLIC_KEY',
+    serviceId: 'YOUR_SERVICE_ID',
+    templateId: 'YOUR_TEMPLATE_ID'
+}
+```
+
+📖 **See [EMAIL_INTEGRATION_GUIDE.md](EMAIL_INTEGRATION_GUIDE.md) for detailed setup instructions and alternative email solutions.**
+
+**Note:** Email integration is optional. The site works perfectly without it - customers will still see a confirmation page and submissions will be saved to Google Forms.
+
+### 6. Deploy
 
 You can host this website using any of these methods:
 
@@ -185,45 +208,19 @@ const ADMIN_PASSWORD = 'your-secure-password-here';
 
 **Note**: This is a client-side implementation suitable for personal use or small businesses. For production use with sensitive data, implement proper backend authentication.
 
-### Data Storage Options
+### Data Storage
 
-The admin dashboard supports two data storage methods:
-
-#### Option 1: localStorage (Default - Limited)
-
-⚠️ **IMPORTANT**: localStorage has significant limitations:
-
-- **Browser-specific**: Data stored in Chrome cannot be accessed in Firefox (even on the same device)
-- **Device-specific**: Data stored on your desktop cannot be accessed on your phone
-- **Not synced**: Data is NOT synced across browsers, devices, or deployments
-- **Same browser requirement**: To see submitted quotes in the admin dashboard, they must be submitted from the **same browser on the same device**
-- **Not suitable for production**: Cannot see customer quotes submitted from their devices
-
-**Use case**: Testing and development only
-
-#### Option 2: Google Sheets Integration (Recommended for Production)
-
-✅ **Connect the admin dashboard to Google Sheets for centralized data storage:**
+The admin dashboard uses **Google Sheets** for centralized data storage:
 
 - **Accessible from anywhere**: View quotes from any device, any browser
 - **See customer quotes**: All quotes submitted by customers appear in the dashboard
-- **Same beautiful UI**: Maps, formatted data, and all features preserved
+- **Beautiful UI**: Maps, formatted data, and all features preserved
 - **Free**: No hosting or database costs
 - **Easy setup**: 5-minute configuration
 
 📖 **See [GOOGLE_SHEETS_SETUP.md](GOOGLE_SHEETS_SETUP.md) for step-by-step setup instructions.**
 
-**Comparison:**
-
-| Feature | localStorage | Google Sheets |
-|---------|-------------|---------------|
-| See customer quotes | ❌ No | ✅ Yes |
-| Access from any device | ❌ No | ✅ Yes |
-| Setup complexity | ✅ None | ⚠️ 5 minutes |
-
 **For Enterprise Use**: For advanced needs, consider implementing a custom backend database with proper authentication.
-
-📖 **See [DATA_STORAGE_GUIDE.md](DATA_STORAGE_GUIDE.md) for detailed information about data storage options.**
 
 ## Route Calculation Feature
 
@@ -324,14 +321,13 @@ This allows you to test the website before setting up the APIs.
 - Restrict your Google Maps API key to your domain
 - Enable CORS restrictions on your APIs where possible
 - For production use, implement proper backend authentication for the admin dashboard
-- Consider encrypting sensitive data if storing in localStorage
 
 ## Future Enhancements
 
 The following features could be added in future updates:
 
 - **Email Notifications**: Backend service to send confirmation emails to clients automatically
-- **Backend Database**: Server-side storage for quotes instead of localStorage
+- **Backend Database**: Server-side storage for quotes with advanced querying
 - **User Authentication**: Proper multi-user authentication system for the admin dashboard
 - **Export Functionality**: Export quotes to CSV/PDF for record-keeping
 - **Quote Status Tracking**: Mark quotes as pending, approved, or completed
