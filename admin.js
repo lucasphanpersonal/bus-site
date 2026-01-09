@@ -101,7 +101,8 @@ function loadQuotes() {
         document.getElementById('quotesList').innerHTML = `
             <div class="empty-state">
                 <div class="empty-state-icon">📋</div>
-                <p>No quote requests yet. They will appear here once submitted.</p>
+                <p>No quote requests yet.</p>
+                <p style="margin-top: 10px; font-size: 0.9rem;">Quotes submitted from <strong>this browser</strong> will appear here.</p>
             </div>
         `;
         updateStats([]);

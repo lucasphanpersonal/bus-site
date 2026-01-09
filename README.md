@@ -187,10 +187,20 @@ const ADMIN_PASSWORD = 'your-secure-password-here';
 
 ### Data Storage
 
-- Quote data is stored in the browser's localStorage
-- Data persists across browser sessions
-- Data is stored locally on the device accessing the admin dashboard
-- For enterprise use, consider implementing a backend database
+⚠️ **IMPORTANT**: Quote data is stored in the browser's localStorage which has the following limitations:
+
+- **Browser-specific**: Data stored in Chrome cannot be accessed in Firefox (even on the same device)
+- **Device-specific**: Data stored on your desktop cannot be accessed on your phone
+- **Not synced**: Data is NOT synced across browsers, devices, or deployments
+- **Same browser requirement**: To see submitted quotes in the admin dashboard, they must be submitted from the **same browser on the same device**
+
+**For Testing**: When testing locally, make sure to submit quotes and view the admin dashboard in the same browser session.
+
+**For Production**: All quotes are also submitted to Google Forms (if configured), which serves as a permanent backup accessible from anywhere.
+
+**For Enterprise Use**: Consider implementing a backend database for centralized data storage.
+
+📖 **See [DATA_STORAGE_GUIDE.md](DATA_STORAGE_GUIDE.md) for detailed information about data storage, deployment considerations, and recommendations.**
 
 ## Route Calculation Feature
 

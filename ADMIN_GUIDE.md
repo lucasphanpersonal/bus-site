@@ -95,24 +95,38 @@ The system automatically detects and highlights:
 
 ### Data Storage
 
-- Quote data is stored in the browser's **localStorage**
-- Data persists across browser sessions
-- Data is stored locally on the device/browser accessing the dashboard
+⚠️ **CRITICAL INFORMATION**: Quote data is stored in the browser's **localStorage**
+
+**How it works when deployed to GitHub Pages (or any hosting):**
+- When you deploy to GitHub Pages (e.g., `yourusername.github.io/bus-site`), the admin dashboard will work
+- Quote data **IS** stored long-term in the browser's localStorage (won't expire)
+- Data persists across browser sessions and remains even after closing the browser
+- **However**: Data is stored **only in the specific browser** where quotes are submitted
 - Each browser/device has its own separate data storage
+
+**The Key Limitation:**
+- Customer submits quote from their phone → Data stored on **their phone's browser**
+- You open admin dashboard on your computer → You **won't see** their quote (data is on their device, not yours)
+- You need to access the admin dashboard from **the same browser where the quote was submitted**
+
+**Solution:** All quotes are also sent to Google Forms, which you can access from anywhere. Use Google Forms as your primary data source, and localStorage as a convenience feature when testing or submitting quotes yourself.
 
 ### Important Notes About localStorage
 
 1. **Local Only**: Data is stored on the client side and is not synced across devices
 2. **Browser-Specific**: Data saved in Chrome won't be accessible in Firefox (same device)
-3. **Not a Backup**: Clearing browser data will delete all stored quotes
-4. **Size Limits**: Browser localStorage has size limits (typically 5-10MB)
+3. **Long-term Storage**: Data persists indefinitely (until browser cache is cleared)
+4. **Not a Backup**: Clearing browser data will delete all stored quotes
+5. **Size Limits**: Browser localStorage has size limits (typically 5-10MB)
+
+📖 **For detailed information, see [DATA_STORAGE_GUIDE.md](DATA_STORAGE_GUIDE.md)**
 
 ### Data Backup Recommendations
 
 For production use, consider:
 1. Regularly exporting quote data (feature could be added)
 2. Implementing a backend database for permanent storage
-3. Using the Google Forms responses as a backup data source
+3. **Using the Google Forms responses as a backup data source (RECOMMENDED)**
 
 ## Google Maps Integration
 
