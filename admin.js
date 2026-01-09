@@ -136,7 +136,8 @@ function buildSheetsApiUrl(spreadsheetId, sheetName, apiKey) {
     }
     
     const encodedSheetName = encodeURIComponent(sheetName);
-    const timestamp = Date.now(); // Use Date.now() for better performance
+    // Generate fresh timestamp on each call to ensure unique URL (Date.now() is called at execution time)
+    const timestamp = Date.now();
     // Note: API key is in URL per Google Sheets API design for public spreadsheet access
     return `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodedSheetName}?key=${apiKey}&_=${timestamp}`;
 }
