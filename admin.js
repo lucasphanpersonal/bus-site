@@ -1571,10 +1571,8 @@ ${signature}`;
                 // Show success message
                 showTemporaryMessage(`✅ Quote ${quote.savedQuote ? 'updated' : 'saved'} with status: ${newStatus}`, 'success');
                 
-                // Reload quotes after a delay
-                setTimeout(() => {
-                    loadQuotes();
-                }, 2000);
+                // Reload quotes immediately to update UI before opening email
+                await loadQuotes();
             }
         } catch (error) {
             console.error('Error saving quote:', error);
@@ -1582,6 +1580,9 @@ ${signature}`;
             showTemporaryMessage('⚠️ Quote not saved to Sheets, but you can still send the email', 'warning');
         }
     }
+    
+    // Close the modal to show the updated quote list
+    closeModal();
     
     // Build mailto link
     const subjectEncoded = encodeURIComponent(subject);
@@ -1591,8 +1592,10 @@ ${signature}`;
     
     const mailtoLink = `mailto:${to}?subject=${subjectEncoded}&body=${body}${bcc}`;
     
-    // Open email client
-    window.location.href = mailtoLink;
+    // Open email client after a short delay to ensure modal closes and UI updates
+    setTimeout(() => {
+        window.location.href = mailtoLink;
+    }, 100);
 }
 
 /**
