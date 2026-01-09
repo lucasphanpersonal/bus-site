@@ -2,10 +2,20 @@
 
 A modern, responsive website for requesting charter bus booking quotes. The site features a beautiful form interface that integrates with Google Forms for data collection, Google Maps for location autocomplete, and includes a private admin dashboard for managing quotes.
 
+## ✨ New: Unique Quote ID System
+
+Every quote now gets a unique identifier (e.g., `QUOTE-20260109-A1B2C`) that:
+- Fixes the status update issue where quotes couldn't be matched reliably
+- Provides a professional reference number for customers
+- Makes it easy to track and reference specific quotes
+
+📖 **See [QUOTE_ID_SETUP.md](QUOTE_ID_SETUP.md) for complete setup instructions.**
+
 ## Features
 
 ### Client-Facing Features
 - ✨ **Modern & Responsive Design** - Works seamlessly on desktop, tablet, and mobile devices
+- 🆔 **Unique Quote IDs** - Each quote gets a professional reference number (e.g., QUOTE-20260109-A1B2C)
 - 📅 **Multiple Trip Days Support** - Add multiple trip days with dates and time ranges
 - 📍 **Smart Location Input** - Google Maps autocomplete for pickup and dropoff locations
 - 🗺️ **Multiple Locations Per Day** - Each trip day can have one pickup and multiple dropoff locations
@@ -15,7 +25,7 @@ A modern, responsive website for requesting charter bus booking quotes. The site
 - 👥 **Passenger Management** - Specify number of passengers
 - 📧 **Contact Information** - Collect all necessary contact details
 - 📝 **Trip Description** - Detailed description and special notes sections
-- ✅ **Confirmation Page** - Clients receive a professional confirmation page after submission
+- ✅ **Confirmation Page** - Clients receive a professional confirmation page with their quote ID after submission
 - 📬 **Automatic Confirmation Emails** - Optional automatic email confirmations to customers (via EmailJS)
 - 🔔 **Admin Notifications** - Optional email notifications to admin when new quotes are received
 - 🔗 **Google Forms Integration** - Submissions sent directly to your Google Form
@@ -24,6 +34,7 @@ A modern, responsive website for requesting charter bus booking quotes. The site
 
 ### Admin Dashboard Features
 - 🔐 **Secure Admin Access** - Password-protected dashboard
+- 🆔 **Quote ID Display** - View unique quote IDs for easy reference and tracking
 - 📊 **Analytics Overview** - View total quotes, monthly stats, passengers, and miles
 - 📋 **Quote Management** - Browse and search through all submitted quote requests
 - 💾 **Save Quote Responses** - Save quote amounts and details directly to Google Sheets
