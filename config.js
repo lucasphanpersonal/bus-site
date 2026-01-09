@@ -178,9 +178,9 @@ Website: lucasphanpersonal.github.io/bus-site
     // See google-apps-script/README.md for setup instructions
     
     appsScript: {
-        enabled: false,  // Set to true after deploying the Apps Script
-        webAppUrl: '',   // Your Apps Script web app URL (e.g., 'https://script.google.com/macros/s/AKfycby.../exec')
-        sharedSecret: 'CHANGE_THIS_SECRET_BEFORE_DEPLOYING',  // Must match SHARED_SECRET in Code.gs. Change to a unique value!
+        enabled: true,  // Set to true after deploying the Apps Script
+        webAppUrl: 'https://script.google.com/macros/s/AKfycbzciOrxnUsYGrZ3Yh1QNe3zKCbMdGN_Cm7pvL11PZTvX36K3DBCVVxUaLPLR2tjyKUs2Q/exec',   // Your Apps Script web app URL (e.g., 'https://script.google.com/macros/s/AKfycby.../exec')
+        sharedSecret: 'lp-test-9994',  // Must match SHARED_SECRET in Code.gs. Change to a unique value!
         // SECURITY: This secret protects your Google Sheet from unauthorized writes.
         // Choose a long, random string that's different from this placeholder.
     }
