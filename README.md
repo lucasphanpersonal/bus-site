@@ -325,6 +325,37 @@ This helps you quickly understand the scope of each quote request and provide ac
 
 ## Customization
 
+### Landing Page Stats
+
+You can show or hide statistics on the landing page (e.g., Years Experience, Happy Clients, Fleet Size) by editing `config.js`:
+
+```javascript
+landingPage: {
+    stats: {
+        enabled: false,  // Set to true to show stats on landing page
+        items: [
+            {
+                number: '15+',
+                label: 'Years Experience'
+            },
+            {
+                number: '1000+',
+                label: 'Happy Clients'
+            },
+            {
+                number: '50+',
+                label: 'Modern Buses'
+            }
+        ]
+    }
+}
+```
+
+- Set `enabled: true` to display the stats section on the landing page
+- Set `enabled: false` to hide the stats section (default)
+- Customize the `number` and `label` values to match your business
+- You can add or remove stat items as needed
+
 ### Changing Colors
 
 Edit the CSS variables in `styles.css`:

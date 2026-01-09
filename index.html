@@ -71,19 +71,15 @@
                 </div>
             </div>
 
-            <!-- Animated Stats -->
-            <div class="stats-section animate-slide-in-bottom delay-5">
-                <div class="stat-card">
-                    <div class="stat-number">15+</div>
-                    <div class="stat-label">Years Experience</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">1000+</div>
-                    <div class="stat-label">Happy Clients</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">50+</div>
-                    <div class="stat-label">Modern Buses</div>
+            <!-- Animated Stats (configured in config.js) -->
+            <div id="statsSection" class="stats-section animate-slide-in-bottom delay-5" style="display: none;">
+                <!-- Stats will be dynamically inserted here if enabled in config -->
+            </div>
+
+            <!-- Animated Bus Element -->
+            <div class="bus-animation-container">
+                <div class="animated-bus">
+                    🚌
                 </div>
             </div>
         </main>
@@ -94,7 +90,30 @@
         </footer>
     </div>
 
+    <script src="config.js"></script>
     <script>
+        // Load stats configuration and display if enabled
+        document.addEventListener('DOMContentLoaded', () => {
+            const statsConfig = CONFIG?.landingPage?.stats;
+            
+            if (statsConfig && statsConfig.enabled && statsConfig.items && statsConfig.items.length > 0) {
+                const statsSection = document.getElementById('statsSection');
+                statsSection.style.display = 'flex';
+                
+                // Clear existing content and add configured stats
+                statsSection.innerHTML = '';
+                statsConfig.items.forEach(stat => {
+                    const statCard = document.createElement('div');
+                    statCard.className = 'stat-card';
+                    statCard.innerHTML = `
+                        <div class="stat-number">${stat.number}</div>
+                        <div class="stat-label">${stat.label}</div>
+                    `;
+                    statsSection.appendChild(statCard);
+                });
+            }
+        });
+
         // Add subtle parallax effect on mouse move with throttling for better performance
         let rafId = null;
         document.addEventListener('mousemove', (e) => {
