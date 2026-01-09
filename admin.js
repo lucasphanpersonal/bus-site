@@ -1317,6 +1317,45 @@ function formatAppsScriptErrorMessage(response, responseText) {
 }
 
 /**
+ * Helper function to handle Apps Script response
+ * Reads response as text, checks HTTP status, parses JSON, and validates success
+ * @param {Response} response - The fetch response object
+ * @param {string} operationType - Type of operation for error messages ('save' or 'update')
+ * @returns {Promise<Object>} Parsed JSON result
+ * @throws {Error} If response is not ok, JSON parse fails, or success is false
+ */
+async function handleAppsScriptResponse(response, operationType = 'save') {
+    console.log('Apps Script HTTP response status:', response.status, response.statusText);
+    
+    // Read response as text first (can only read body once)
+    const responseText = await response.text();
+    
+    // Check if the HTTP response was successful
+    if (!response.ok) {
+        console.error('Apps Script HTTP error response:', responseText);
+        throw new Error(formatAppsScriptErrorMessage(response, responseText));
+    }
+    
+    // Parse the text as JSON
+    let result;
+    try {
+        result = JSON.parse(responseText);
+    } catch (parseError) {
+        console.error('Failed to parse Apps Script response as JSON:', responseText);
+        throw new Error('Invalid response from Apps Script. Expected JSON but got: ' + responseText.substring(0, 200));
+    }
+    
+    console.log('Apps Script response:', result);
+    
+    if (!result.success) {
+        throw new Error(result.message || `Failed to ${operationType} quote`);
+    }
+    
+    console.log(`Quote ${operationType}d successfully to Sheets`);
+    return result;
+}
+
+/**
  * Save quote response to Google Sheets via Apps Script
  */
 async function saveQuoteToSheets(quoteData) {
@@ -1349,33 +1388,8 @@ async function saveQuoteToSheets(quoteData) {
             body: formData.toString()
         });
         
-        console.log('Apps Script HTTP response status:', response.status, response.statusText);
-        
-        // Read response as text first (can only read body once)
-        const responseText = await response.text();
-        
-        // Check if the HTTP response was successful
-        if (!response.ok) {
-            console.error('Apps Script HTTP error response:', responseText);
-            throw new Error(formatAppsScriptErrorMessage(response, responseText));
-        }
-        
-        // Parse the text as JSON
-        let result;
-        try {
-            result = JSON.parse(responseText);
-        } catch (parseError) {
-            console.error('Failed to parse Apps Script response as JSON:', responseText);
-            throw new Error('Invalid response from Apps Script. Expected JSON but got: ' + responseText.substring(0, 200));
-        }
-        
-        console.log('Apps Script response:', result);
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to save quote');
-        }
-        
-        console.log('Quote saved successfully to Sheets');
+        // Handle response using shared helper
+        await handleAppsScriptResponse(response, 'save');
         return true;
         
     } catch (error) {
@@ -1624,9 +1638,7 @@ ${signature}`;
                 emailType,
                 newStatus,
                 hasSavedQuote: !!quote.savedQuote,
-                willUpdate: !!quote.savedQuote,
-                webAppUrl: CONFIG.appsScript.webAppUrl,
-                hasSharedSecret: !!CONFIG.appsScript.sharedSecret
+                willUpdate: !!quote.savedQuote
             });
             
             const quoteDataToSave = {
@@ -1766,33 +1778,8 @@ async function updateQuoteInSheets(quoteData) {
             body: formData.toString()
         });
         
-        console.log('Apps Script HTTP response status:', response.status, response.statusText);
-        
-        // Read response as text first (can only read body once)
-        const responseText = await response.text();
-        
-        // Check if the HTTP response was successful
-        if (!response.ok) {
-            console.error('Apps Script HTTP error response:', responseText);
-            throw new Error(formatAppsScriptErrorMessage(response, responseText));
-        }
-        
-        // Parse the text as JSON
-        let result;
-        try {
-            result = JSON.parse(responseText);
-        } catch (parseError) {
-            console.error('Failed to parse Apps Script response as JSON:', responseText);
-            throw new Error('Invalid response from Apps Script. Expected JSON but got: ' + responseText.substring(0, 200));
-        }
-        
-        console.log('Apps Script response:', result);
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to update quote');
-        }
-        
-        console.log('Quote updated successfully in Sheets');
+        // Handle response using shared helper
+        await handleAppsScriptResponse(response, 'update');
         return true;
         
     } catch (error) {
