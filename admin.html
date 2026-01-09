@@ -423,9 +423,10 @@
         // This runs after config.js is loaded, so CONFIG is available
         if (CONFIG.googleMaps && CONFIG.googleMaps.apiKey && CONFIG.googleMaps.apiKey.trim()) {
             const script = document.createElement('script');
-            const apiKey = encodeURIComponent(CONFIG.googleMaps.apiKey.trim());
+            const apiKey = CONFIG.googleMaps.apiKey.trim();
             script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
             script.async = true;
+            script.defer = true;
             script.onerror = function() {
                 console.error('Failed to load Google Maps API. Please check your API key and network connection.');
             };
