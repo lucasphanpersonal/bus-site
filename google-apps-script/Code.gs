@@ -30,8 +30,8 @@ const CONFIG = {
   
   // Simple shared secret for authentication
   // ⚠️ IMPORTANT: This MUST match sharedSecret in config.js!
-  // If you change this, also update config.js
-  // Current value matches config.js for easy deployment
+  // Current value: 'lp-test-9994' - For production, change to a longer random string
+  // After changing, update config.js to match
   SHARED_SECRET: 'lp-test-9994',
   
   // Enable logging for debugging
@@ -56,50 +56,25 @@ const CONFIG = {
  * - Works reliably across all browsers
  * 
  * Data is passed as form parameters, with the 'data' field containing JSON string.
+ * Note: e.parameter works for form-encoded POST data, but NOT for JSON POST data.
  */
 function doPost(e) {
-  try {
-    // Get parameters from form data (e.parameter works for both GET and POST form data)
-    const params = e.parameter;
-    
-    // Validate authentication
-    if (params.secret !== CONFIG.SHARED_SECRET) {
-      return createResponse(false, 'Authentication failed');
-    }
-    
-    // Parse data parameter (JSON string)
-    let data;
-    try {
-      data = JSON.parse(params.data);
-    } catch (parseError) {
-      return createResponse(false, 'Invalid data parameter: ' + parseError.message);
-    }
-    
-    // Route to appropriate handler
-    switch (params.action) {
-      case 'saveQuote':
-        return handleSaveQuote(data);
-      case 'updateQuote':
-        return handleUpdateQuote(data);
-      case 'deleteQuote':
-        return handleDeleteQuote(data);
-      default:
-        return createResponse(false, 'Unknown action: ' + params.action);
-    }
-    
-  } catch (error) {
-    logError('doPost error', error);
-    return createResponse(false, 'Server error: ' + error.message);
-  }
+  return handleRequest(e.parameter);
 }
 
 /**
  * Handle GET requests (for testing and backwards compatibility)
  */
 function doGet(e) {
+  return handleRequest(e.parameter);
+}
+
+/**
+ * Common request handler for both GET and POST
+ * Extracted to avoid code duplication
+ */
+function handleRequest(params) {
   try {
-    const params = e.parameter;
-    
     // If no action parameter, return API info (for testing)
     if (!params.action) {
       return createResponse(true, 'Bus Charter Quote Management API is running', {
@@ -136,7 +111,7 @@ function doGet(e) {
     }
     
   } catch (error) {
-    logError('doGet error', error);
+    logError('handleRequest error', error);
     return createResponse(false, 'Server error: ' + error.message);
   }
 }

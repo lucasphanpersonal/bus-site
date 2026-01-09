@@ -149,10 +149,12 @@ YES, because:
 - The script only accesses your Google Sheet
 - All executions are logged and auditable
 
-To make it more secure:
-- Change `lp-test-9994` to a longer, random string
-- Update in both Code.gs and config.js
+**IMPORTANT: For production use:**
+- Change `lp-test-9994` to a long, random string (at least 32 characters)
+- Generate a secure secret: `openssl rand -base64 32` or use a password generator
+- Update BOTH Code.gs SHARED_SECRET and config.js sharedSecret
 - Keep the secret confidential
+- Monitor Apps Script execution logs regularly
 
 ## Troubleshooting
 
