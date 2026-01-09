@@ -16,6 +16,7 @@ A modern, responsive website for requesting charter bus booking quotes. The site
 - 📧 **Contact Information** - Collect all necessary contact details
 - 📝 **Trip Description** - Detailed description and special notes sections
 - ✅ **Confirmation Page** - Clients receive a professional confirmation page after submission
+- 📬 **Automatic Confirmation Emails** - Optional automatic email confirmations to customers (via EmailJS)
 - 🔗 **Google Forms Integration** - Submissions sent directly to your Google Form
 - ⚡ **Real-time Validation** - Client-side form validation for better UX
 - 🎨 **Clean UI** - Professional look without the typical embedded form appearance
@@ -24,10 +25,10 @@ A modern, responsive website for requesting charter bus booking quotes. The site
 - 🔐 **Secure Admin Access** - Password-protected dashboard
 - 📊 **Analytics Overview** - View total quotes, monthly stats, passengers, and miles
 - 📋 **Quote Management** - Browse and search through all submitted quote requests
-- 🗺️ **Google Maps Integration** - Visual route display for each quote
+- 🗺️ **Per-Day Map Visualization** - Visual route display for each trip day
 - 📈 **Detailed Quote View** - See all trip logistics, booking hours, distances, and notable information
 - ⚠️ **Smart Alerts** - Automatic detection of notable trip characteristics (multi-day, large groups, long distances, interstate travel)
-- 💾 **Data Persistence** - All quotes stored locally for easy access and review
+- 💾 **Google Sheets Integration** - All quotes stored in Google Sheets for access from anywhere
 - 📱 **Responsive Design** - Admin dashboard works on all devices
 
 ## Setup Instructions
@@ -103,7 +104,29 @@ const CONFIG = {
 };
 ```
 
-### 5. Deploy
+### 5. (Optional) Configure Email Confirmations
+
+To send automatic confirmation emails to customers when they submit a quote:
+
+1. Sign up for a free account at [EmailJS](https://www.emailjs.com/) (200 free emails/month)
+2. Connect your email service (Gmail, Outlook, etc.)
+3. Create an email template for quote confirmations
+4. Update `config.js` with your EmailJS credentials:
+
+```javascript
+emailjs: {
+    enabled: true,
+    publicKey: 'YOUR_EMAILJS_PUBLIC_KEY',
+    serviceId: 'YOUR_SERVICE_ID',
+    templateId: 'YOUR_TEMPLATE_ID'
+}
+```
+
+📖 **See [EMAIL_INTEGRATION_GUIDE.md](EMAIL_INTEGRATION_GUIDE.md) for detailed setup instructions and alternative email solutions.**
+
+**Note:** Email integration is optional. The site works perfectly without it - customers will still see a confirmation page and submissions will be saved to Google Forms.
+
+### 6. Deploy
 
 You can host this website using any of these methods:
 

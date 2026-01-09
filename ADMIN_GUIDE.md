@@ -209,7 +209,7 @@ The dashboard provides all information needed to prepare accurate quotes:
 - **Solution**: Verify password is correct; check `admin.js` for the current password
 
 **Problem**: No quotes showing
-- **Solution**: Check that you're using the same browser where forms were submitted; localStorage is browser-specific
+- **Solution**: Verify Google Sheets integration is configured correctly; check spreadsheet sharing settings and API key
 
 **Problem**: Maps not loading
 - **Solution**: Verify Google Maps API is configured correctly; check browser console for errors
