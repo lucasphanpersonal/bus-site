@@ -6,6 +6,10 @@ const ADMIN_PASSWORD = 'admin123'; // TODO: Change this to a secure password!
 const AUTH_KEY = 'busCharterAuth';
 const METERS_PER_MILE = 1609.34; // Conversion constant
 
+// Configuration constants for Apps Script integration
+const MIN_SHARED_SECRET_LENGTH = 8; // Minimum length for shared secret security
+const WARNING_DISPLAY_DELAY_MS = 3000; // Delay before opening email when Apps Script is disabled
+
 // Global state for loaded quotes
 let loadedQuotes = [];
 
@@ -1303,6 +1307,16 @@ function showMarkersOnly(map, tripDay) {
 }
 
 /**
+ * Helper function to format Apps Script response error message
+ * @param {Response} response - The fetch response object
+ * @param {string} responseText - The response body as text
+ * @returns {string} Formatted error message
+ */
+function formatAppsScriptErrorMessage(response, responseText) {
+    return `HTTP ${response.status}: ${response.statusText}. The Apps Script may not be deployed correctly or the URL may be wrong. Check console for details.`;
+}
+
+/**
  * Save quote response to Google Sheets via Apps Script
  */
 async function saveQuoteToSheets(quoteData) {
@@ -1343,7 +1357,7 @@ async function saveQuoteToSheets(quoteData) {
         // Check if the HTTP response was successful
         if (!response.ok) {
             console.error('Apps Script HTTP error response:', responseText);
-            throw new Error(`HTTP ${response.status}: ${response.statusText}. The Apps Script may not be deployed correctly or the URL may be wrong. Check console for details.`);
+            throw new Error(formatAppsScriptErrorMessage(response, responseText));
         }
         
         // Parse the text as JSON
@@ -1587,7 +1601,7 @@ ${signature}`;
         showTemporaryMessage('⚠️ Warning: Apps Script is disabled. Quote will NOT be saved to Google Sheets! Only the email will be opened. Enable Apps Script in config.js to save quotes.', 'warning');
         
         // Give user time to see the warning before opening email
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, WARNING_DISPLAY_DELAY_MS));
     } else {
         // Validate Apps Script configuration before attempting to save
         if (!CONFIG.appsScript.webAppUrl || CONFIG.appsScript.webAppUrl.includes('YOUR_') || CONFIG.appsScript.webAppUrl === '') {
@@ -1596,9 +1610,9 @@ ${signature}`;
             return; // Don't proceed
         }
         
-        if (!CONFIG.appsScript.sharedSecret || CONFIG.appsScript.sharedSecret === '' || CONFIG.appsScript.sharedSecret.length < 8) {
+        if (!CONFIG.appsScript.sharedSecret || CONFIG.appsScript.sharedSecret === '' || CONFIG.appsScript.sharedSecret.length < MIN_SHARED_SECRET_LENGTH) {
             console.error('❌ Apps Script shared secret is not configured properly');
-            showTemporaryMessage('❌ Apps Script shared secret is not configured or too short. Please update config.js. See APPS_SCRIPT_SETUP.md', 'error');
+            showTemporaryMessage(`❌ Apps Script shared secret is not configured or too short (minimum ${MIN_SHARED_SECRET_LENGTH} characters). Please update config.js. See APPS_SCRIPT_SETUP.md`, 'error');
             return; // Don't proceed
         }
         
@@ -1760,7 +1774,7 @@ async function updateQuoteInSheets(quoteData) {
         // Check if the HTTP response was successful
         if (!response.ok) {
             console.error('Apps Script HTTP error response:', responseText);
-            throw new Error(`HTTP ${response.status}: ${response.statusText}. The Apps Script may not be deployed correctly or the URL may be wrong. Check console for details.`);
+            throw new Error(formatAppsScriptErrorMessage(response, responseText));
         }
         
         // Parse the text as JSON
