@@ -26,10 +26,15 @@ A modern, responsive website for requesting charter bus booking quotes. The site
 - 🔐 **Secure Admin Access** - Password-protected dashboard
 - 📊 **Analytics Overview** - View total quotes, monthly stats, passengers, and miles
 - 📋 **Quote Management** - Browse and search through all submitted quote requests
+- 💾 **Save Quote Responses** - Save quote amounts and details directly to Google Sheets
+- ✏️ **Edit Saved Quotes** - Update quote amounts, details, and status after saving
+- 📊 **Status Tracking** - Track quote status (Sent, Draft, Accepted, Declined) with color-coded badges
+- ✉️ **Email Integration** - Compose quote response emails with pre-filled customer details
 - 🗺️ **Per-Day Map Visualization** - Visual route display for each trip day
 - 📈 **Detailed Quote View** - See all trip logistics, booking hours, distances, and notable information
 - ⚠️ **Smart Alerts** - Automatic detection of notable trip characteristics (multi-day, large groups, long distances, interstate travel)
 - 💾 **Google Sheets Integration** - All quotes stored in Google Sheets for access from anywhere
+- 🔄 **Real-time Updates** - See saved quote information immediately in the dashboard
 - 📱 **Responsive Design** - Admin dashboard works on all devices
 
 ## Setup Instructions
@@ -142,7 +147,24 @@ const CONFIG = {
 
 **Note**: Do NOT put API keys in `config.js`. Use `config-local.js` as described in step 4.
 
-### 5. (Optional) Configure Email Confirmations and Admin Notifications
+### 5. (Optional) Set Up Quote Management
+
+To enable saving quote responses from the admin dashboard:
+
+1. Follow the detailed guide in [APPS_SCRIPT_SETUP.md](APPS_SCRIPT_SETUP.md)
+2. Deploy the Google Apps Script to enable write access to Google Sheets
+3. Update `config.js` with your Apps Script web app URL and shared secret
+
+**What this enables:**
+- ✅ Save quote amounts and details when responding to customers
+- ✅ Edit and update saved quotes
+- ✅ Track quote status (Sent, Draft, Accepted, Declined)
+- ✅ View saved quote information in the admin dashboard
+- ✅ See which quotes have been responded to with status badges
+
+**Note:** This step requires completing the Google Sheets setup first. See [APPS_SCRIPT_SETUP.md](APPS_SCRIPT_SETUP.md) for complete step-by-step instructions.
+
+### 6. (Optional) Configure Email Confirmations and Admin Notifications
 
 To send automatic confirmation emails to customers and notifications to admin when they submit a quote:
 
@@ -175,7 +197,7 @@ emailjs: {
 
 ⚠️ **Security Note:** For production use, consider moving sensitive configuration to environment variables or secret management services instead of hardcoding values.
 
-### 6. Deploy
+### 7. Deploy
 
 You can host this website using any of these methods:
 
