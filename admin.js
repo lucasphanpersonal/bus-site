@@ -177,22 +177,24 @@ async function loadSavedQuoteResponses() {
 }
 
 /**
+ * Get the unique identifier for a quote (quote ID if available, otherwise timestamp)
+ * This helper ensures consistent behavior across all quote matching operations.
+ * 
+ * @param {Object} quote - The quote object
+ * @returns {string} The quote identifier to use for matching
+ */
+function getQuoteIdentifier(quote) {
+    return quote.quoteId || quote.submittedAt;
+}
+
+/**
  * Merge quote requests with saved responses
  */
 function mergeQuotesWithResponses(quotes, savedQuotes) {
     return quotes.map(quote => {
-        // Find matching saved quote by quoteId (primary) or fall back to timestamp (for old quotes)
-        const savedQuote = savedQuotes.find(sq => {
-            // Primary match: Use quote ID if available
-            if (quote.quoteId && sq.quoteRequestId === quote.quoteId) {
-                return true;
-            }
-            // Fallback match: Use timestamp for backward compatibility with old quotes
-            if (!quote.quoteId && sq.quoteRequestId === quote.submittedAt) {
-                return true;
-            }
-            return false;
-        });
+        // Find matching saved quote by quoteId (primary) or timestamp (fallback for old quotes)
+        const quoteIdentifier = getQuoteIdentifier(quote);
+        const savedQuote = savedQuotes.find(sq => sq.quoteRequestId === quoteIdentifier);
         
         if (savedQuote) {
             // Add saved quote data to the quote object
@@ -1575,7 +1577,7 @@ ${signature}`;
             });
             
             const quoteDataToSave = {
-                quoteRequestId: quote.quoteId || quote.submittedAt, // Use quote ID if available, fall back to timestamp
+                quoteRequestId: getQuoteIdentifier(quote), // Use helper for consistent identifier
                 customerName: quote.name,
                 customerEmail: quote.email,
                 quoteAmount: quote.savedQuote?.quoteAmount || amount, // Keep original quote amount

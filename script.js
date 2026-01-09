@@ -19,6 +19,13 @@ let dropoffCounters = { 0: 1 };
 /**
  * Generate a unique quote ID
  * Format: QUOTE-YYYYMMDD-XXXXX (e.g., QUOTE-20260109-A1B2C)
+ * 
+ * @returns {string} A unique quote identifier with format QUOTE-YYYYMMDD-XXXXX
+ * where YYYYMMDD is the current date and XXXXX is a random 5-character alphanumeric code
+ * 
+ * Note: While collisions are statistically rare (1 in 60 million for same-day quotes),
+ * this is suitable for moderate-volume applications. For high-volume use cases,
+ * consider adding server-side validation or using UUIDs.
  */
 function generateQuoteId() {
     const now = new Date();

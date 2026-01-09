@@ -15,7 +15,7 @@ const CONFIG = {
         // Map your form fields to Google Form entry IDs
         // You'll get these by inspecting your Google Form
         fields: {
-            quoteId: 'entry.1234567890',     // Replace with actual entry ID - unique quote identifier
+            quoteId: 'REPLACE_WITH_ACTUAL_ENTRY_ID',     // REQUIRED: Replace with actual entry ID for Quote ID field - unique quote identifier
             tripDays: 'entry.630078859',     // Replace with actual entry ID - this field will contain dates, times, and locations for each day
             passengers: 'entry.444654228',   // Replace with actual entry ID
             name: 'entry.1143231549',         // Replace with actual entry ID
