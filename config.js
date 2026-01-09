@@ -161,17 +161,21 @@ Website: lucasphanpersonal.github.io/bus-site
         apiKey: '',  // Leave empty to use the same Maps API key, or provide a different key
         sheetName: 'Form Responses 1',  // Default sheet name when linking Google Form
         // Column mapping (adjust if your sheet has different column order)
+        // IMPORTANT: This must match the actual column order in your Google Sheet
+        // Current order in "Form Responses 1" sheet:
+        // A: Timestamp, B: Trip Days, C: Passengers, D: Name, E: Email, 
+        // F: Phone, G: Company, H: Description, I: Notes, J: Quote ID
         columns: {
-            timestamp: 0,      // Column A (0-indexed)
-            quoteId: 1,        // Column B - Unique quote identifier
-            tripDays: 2,       // Column C
-            passengers: 3,     // Column D
-            name: 4,           // Column E
-            email: 5,          // Column F
-            phone: 6,          // Column G
-            company: 7,        // Column H
-            description: 8,    // Column I
-            notes: 9           // Column J (includes route info)
+            timestamp: 0,      // Column A - Timestamp
+            tripDays: 1,       // Column B - Trip Days (Dates, Times & Locations)
+            passengers: 2,     // Column C - Number of Passengers
+            name: 3,           // Column D - Full Name
+            email: 4,          // Column E - Email Address
+            phone: 5,          // Column F - Phone Number
+            company: 6,        // Column G - Company/Organization
+            description: 7,    // Column H - Trip Description
+            notes: 8,          // Column I - Special Notes or Instructions
+            quoteId: 9         // Column J - Quote ID
         }
     },
 
