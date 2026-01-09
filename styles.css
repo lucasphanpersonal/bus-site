@@ -1188,21 +1188,21 @@ body.landing-page {
 
 .animated-bus {
     position: absolute;
-    left: 0;
+    left: 50%;
     top: 50%;
     font-size: 4rem;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
-    animation: slideBusAcross 15s linear infinite;
+    animation: busSuspensionBounce 2s ease-in-out infinite;
     will-change: transform;
-    transform: translate(-150px, -50%) scaleX(-1); /* Flip horizontally to face right */
+    transform: translate(-50%, -50%) scaleX(-1); /* Center and flip horizontally to face right */
 }
 
-@keyframes slideBusAcross {
-    0% {
-        transform: translate(-150px, -50%) scaleX(-1);
+@keyframes busSuspensionBounce {
+    0%, 100% {
+        transform: translate(-50%, -50%) scaleX(-1);
     }
-    100% {
-        transform: translate(calc(100vw + 150px), -50%) scaleX(-1);
+    50% {
+        transform: translate(-50%, calc(-50% - 8px)) scaleX(-1);
     }
 }
 
@@ -1295,29 +1295,20 @@ body.landing-page {
     }
 }
 
-/* Sun - stays relatively stationary */
-.sun {
-    top: 8%;
-    right: 10%;
-    font-size: 3rem;
-    opacity: 0.8;
-    animation: sunGlow 3s ease-in-out infinite;
+/* Trees - move for parallax effect (right to left) */
+/* Background trees move slower (behind the bus) */
+.scenery-background .tree {
+    bottom: 35px;
+    font-size: 2rem;
+    opacity: 0.7;
+    animation: moveTreeBackgroundRightToLeft 12s linear infinite;
 }
 
-@keyframes sunGlow {
-    0%, 100% {
-        filter: drop-shadow(0 0 10px rgba(255, 200, 0, 0.5));
-    }
-    50% {
-        filter: drop-shadow(0 0 20px rgba(255, 200, 0, 0.8));
-    }
-}
-
-/* Trees - move faster in foreground for parallax effect (right to left) */
-.tree {
+/* Foreground trees move faster (in front of the bus) */
+.scenery-foreground .tree {
     bottom: 35px;
     font-size: 2.5rem;
-    animation: moveTreeRightToLeft 8s linear infinite;
+    animation: moveTreeForegroundRightToLeft 8s linear infinite;
 }
 
 .tree-1 {
@@ -1350,7 +1341,16 @@ body.landing-page {
     animation-delay: -6.6s;
 }
 
-@keyframes moveTreeRightToLeft {
+@keyframes moveTreeBackgroundRightToLeft {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-120vw);
+    }
+}
+
+@keyframes moveTreeForegroundRightToLeft {
     0% {
         transform: translateX(0);
     }
@@ -1378,12 +1378,12 @@ body.landing-page {
         font-size: 1.5rem;
     }
     
-    .sun {
-        font-size: 2.5rem;
-        right: 5%;
+    .scenery-background .tree {
+        font-size: 1.5rem;
+        bottom: 20px;
     }
     
-    .tree {
+    .scenery-foreground .tree {
         font-size: 2rem;
         bottom: 20px;
     }
@@ -1406,11 +1406,12 @@ body.landing-page {
         font-size: 1.2rem;
     }
     
-    .sun {
-        font-size: 2rem;
+    .scenery-background .tree {
+        font-size: 1.2rem;
+        bottom: 15px;
     }
     
-    .tree {
+    .scenery-foreground .tree {
         font-size: 1.5rem;
         bottom: 15px;
     }
