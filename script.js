@@ -6,6 +6,11 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
 });
 
+// Constants
+const METERS_TO_MILES = 1609.34;
+const UNCONFIGURED_ROUTE_INFO_FIELD = 'entry.ROUTE_INFO';
+const API_CALL_DELAY_MS = 200; // Delay between Distance Matrix API calls to avoid rate limiting
+
 // Counter for date/time groups
 let dateTimeCounter = 1;
 
@@ -280,17 +285,31 @@ async function computeRouteInformation(tripDays) {
 
         // Calculate distance/time for each leg of the journey
         for (let j = 0; j < locations.length - 1; j++) {
+            const origin = locations[j];
+            const destination = locations[j + 1];
+            
+            // Validate locations before API call
+            if (!origin || !origin.trim() || !destination || !destination.trim()) {
+                console.warn(`Skipping invalid location pair at day ${i}, leg ${j}`);
+                continue;
+            }
+            
             try {
-                const result = await getDistanceAndTime(service, locations[j], locations[j + 1]);
+                const result = await getDistanceAndTime(service, origin, destination);
                 if (result) {
                     dayInfo.legs.push({
-                        from: locations[j],
-                        to: locations[j + 1],
+                        from: origin,
+                        to: destination,
                         distance: result.distance,
                         duration: result.duration
                     });
                     dayInfo.totals.distance += result.distance.value;
                     dayInfo.totals.duration += result.duration.value;
+                }
+                
+                // Add delay between API calls to avoid rate limiting
+                if (j < locations.length - 2) {
+                    await new Promise(resolve => setTimeout(resolve, API_CALL_DELAY_MS));
                 }
             } catch (error) {
                 console.error(`Error computing leg ${j} for day ${i}:`, error);
@@ -378,7 +397,7 @@ async function showRouteSummary(formData) {
         `;
 
         // Format route summary
-        const totalMiles = (routeInfo.totals.distance / 1609.34).toFixed(1);
+        const totalMiles = (routeInfo.totals.distance / METERS_TO_MILES).toFixed(1);
         const totalHours = Math.floor(routeInfo.totals.duration / 3600);
         const totalMinutes = Math.floor((routeInfo.totals.duration % 3600) / 60);
         
@@ -395,7 +414,7 @@ async function showRouteSummary(formData) {
 
         // Add details for each trip day
         routeInfo.tripDays.forEach((day) => {
-            const dayMiles = (day.totals.distance / 1609.34).toFixed(1);
+            const dayMiles = (day.totals.distance / METERS_TO_MILES).toFixed(1);
             const dayHours = Math.floor(day.totals.duration / 3600);
             const dayMinutes = Math.floor((day.totals.duration % 3600) / 60);
             
@@ -492,7 +511,7 @@ async function handleFormSubmit(event) {
         }
 
         // Compute route information if enabled
-        if (CONFIG.routeComputation?.enabled && window.google) {
+        if (CONFIG.routeComputation?.enabled && window.google && window.google.maps && window.google.maps.DistanceMatrixService) {
             btnLoader.innerHTML = '<span class="spinner"></span> Computing route information...';
             try {
                 formData.routeInfo = await computeRouteInformation(formData.tripDays);
@@ -672,7 +691,7 @@ ${dropoffsText}`;
     // Format route information if available
     let routeInfoFormatted = '';
     if (formData.routeInfo) {
-        const totalMiles = (formData.routeInfo.totals.distance / 1609.34).toFixed(1);
+        const totalMiles = (formData.routeInfo.totals.distance / METERS_TO_MILES).toFixed(1);
         const totalHours = Math.floor(formData.routeInfo.totals.duration / 3600);
         const totalMinutes = Math.floor((formData.routeInfo.totals.duration % 3600) / 60);
         
@@ -685,7 +704,7 @@ Number of Passengers: ${formData.passengers}
 `;
         
         formData.routeInfo.tripDays.forEach((day) => {
-            const dayMiles = (day.totals.distance / 1609.34).toFixed(1);
+            const dayMiles = (day.totals.distance / METERS_TO_MILES).toFixed(1);
             const dayHours = Math.floor(day.totals.duration / 3600);
             const dayMinutes = Math.floor((day.totals.duration % 3600) / 60);
             
@@ -696,7 +715,7 @@ Number of Passengers: ${formData.passengers}
 `;
             
             day.legs.forEach((leg, idx) => {
-                const legMiles = (leg.distance.value / 1609.34).toFixed(1);
+                const legMiles = (leg.distance.value / METERS_TO_MILES).toFixed(1);
                 const legMinutes = Math.floor(leg.duration.value / 60);
                 routeInfoFormatted += `  Leg ${idx + 1}: ${legMiles} mi, ${legMinutes} min\n`;
             });
@@ -739,7 +758,7 @@ Number of Passengers: ${formData.passengers}
     }
     // If a separate route info field is configured, use it
     if (CONFIG.googleForm.fields.routeInfo && routeInfoFormatted && 
-        CONFIG.googleForm.fields.routeInfo !== 'entry.ROUTE_INFO') {
+        CONFIG.googleForm.fields.routeInfo !== UNCONFIGURED_ROUTE_INFO_FIELD) {
         googleFormData.append(CONFIG.googleForm.fields.routeInfo, routeInfoFormatted);
     }
 
