@@ -287,6 +287,7 @@ async function computeRouteInformation(tripDays) {
         throw new Error('Google Maps Distance Matrix service not available');
     }
 
+    console.log('Starting route computation for', tripDays.length, 'trip day(s)');
     const service = new google.maps.DistanceMatrixService();
     const routeInfo = {
         tripDays: [],
@@ -321,6 +322,7 @@ async function computeRouteInformation(tripDays) {
 
         // Build array of all locations in order: pickup, then all dropoffs
         const locations = [day.pickup, ...day.dropoffs];
+        console.log(`Day ${i + 1}: Computing ${locations.length - 1} leg(s)`);
 
         // Calculate distance/time for each leg of the journey
         for (let j = 0; j < locations.length - 1; j++) {
@@ -353,6 +355,7 @@ async function computeRouteInformation(tripDays) {
                 }
             } catch (error) {
                 console.error(`Error computing leg ${j} for day ${i}:`, error);
+                // Continue with other legs even if one fails
             }
         }
 
@@ -361,8 +364,11 @@ async function computeRouteInformation(tripDays) {
         routeInfo.totals.duration += dayInfo.totals.duration;
         routeInfo.totals.stops += dayInfo.totals.stops;
         routeInfo.totals.bookingHours += bookingTime.totalMinutes;
+        
+        console.log(`Day ${i + 1} complete: ${(dayInfo.totals.distance / METERS_PER_MILE).toFixed(1)} miles, ${Math.floor(dayInfo.totals.duration / 60)} minutes`);
     }
 
+    console.log('Route computation complete:', routeInfo);
     return routeInfo;
 }
 
@@ -371,6 +377,7 @@ async function computeRouteInformation(tripDays) {
  */
 function getDistanceAndTime(service, origin, destination) {
     return new Promise((resolve, reject) => {
+        console.log(`Computing route: ${origin} → ${destination}`);
         service.getDistanceMatrix(
             {
                 origins: [origin],
@@ -384,15 +391,20 @@ function getDistanceAndTime(service, origin, destination) {
                 if (status === google.maps.DistanceMatrixStatus.OK) {
                     const result = response.rows[0]?.elements[0];
                     if (result && result.status === 'OK') {
+                        console.log(`✓ Route computed: ${result.distance.text}, ${result.duration.text}`);
                         resolve({
                             distance: result.distance,
                             duration: result.duration
                         });
                     } else {
-                        reject(new Error(`No route found: ${result?.status || 'Unknown error'}`));
+                        const errorMsg = `No route found between "${origin}" and "${destination}": ${result?.status || 'Unknown error'}`;
+                        console.error(errorMsg);
+                        reject(new Error(errorMsg));
                     }
                 } else {
-                    reject(new Error(`Distance Matrix request failed: ${status}`));
+                    const errorMsg = `Distance Matrix API request failed with status: ${status}`;
+                    console.error(errorMsg);
+                    reject(new Error(errorMsg));
                 }
             }
         );
@@ -638,11 +650,16 @@ async function handleFormSubmit(event) {
             btnLoader.innerHTML = '<span class="spinner"></span> Computing route information...';
             try {
                 formData.routeInfo = await computeRouteInformation(formData.tripDays);
+                console.log('Route computation successful:', formData.routeInfo);
             } catch (error) {
                 console.error('Route computation error:', error);
-                // Continue with submission even if route computation fails
+                // Show a warning to the user but continue with submission
+                console.warn('Continuing with submission without route information');
                 formData.routeInfo = null;
             }
+        } else {
+            console.warn('Route computation skipped - Google Maps API not available');
+            formData.routeInfo = null;
         }
 
         // Show route summary if enabled and available

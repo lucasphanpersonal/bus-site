@@ -20,19 +20,20 @@ const CONFIG_LOCAL = {
         apiKey: ''  // Leave empty to use Google Maps API key, or provide a different key
     },
     
-    // EmailJS Configuration (Optional - only if you want to enable email features)
+    // EmailJS Configuration (REQUIRED for admin notifications to work)
+    // See EMAILJS_SETUP_INSTRUCTIONS.md for detailed setup guide
     emailjs: {
         enabled: true,  // Set to true to enable email features
-        publicKey: 'YOUR_EMAILJS_PUBLIC_KEY_HERE',      // Your EmailJS Public Key (User ID)
-        serviceId: 'YOUR_EMAILJS_SERVICE_ID_HERE',      // Your EmailJS Service ID
-        templateId: 'YOUR_EMAILJS_TEMPLATE_ID_HERE',    // Your EmailJS Template ID for customer confirmations
+        publicKey: 'YOUR_EMAILJS_PUBLIC_KEY_HERE',      // From EmailJS dashboard → Account → General
+        serviceId: 'YOUR_EMAILJS_SERVICE_ID_HERE',      // From EmailJS dashboard → Email Services
+        templateId: '',                                  // Leave empty if not sending customer confirmations
         
-        // Admin Notification Configuration (Optional)
+        // Admin Notification Configuration
+        // When enabled, sends email to admin whenever a quote is submitted
         adminNotification: {
-            enabled: true,  // Set to true to enable admin notifications
-            // Note: You can also set this via environment variable for better security
-            adminEmail: 'huabaohuang622@gmail.com',  // Admin email - consider using environment variable in production
-            adminTemplateId: 'YOUR_ADMIN_TEMPLATE_ID_HERE'  // Your EmailJS Template ID for admin notifications
+            enabled: true,  // Already enabled in config.js
+            adminEmail: 'huabaohuang622@gmail.com',  // Email where notifications are sent
+            adminTemplateId: 'YOUR_ADMIN_TEMPLATE_ID_HERE'  // From EmailJS dashboard → Email Templates
         }
     }
     
