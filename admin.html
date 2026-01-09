@@ -416,6 +416,26 @@
     </div>
     
     <script src="config.js"></script>
+    
+    <!-- Google Maps JavaScript API -->
+    <script>
+        // Load Google Maps API dynamically with the API key from config
+        // This runs after config.js is loaded, so CONFIG is available
+        if (CONFIG.googleMaps && CONFIG.googleMaps.apiKey && CONFIG.googleMaps.apiKey.trim()) {
+            const script = document.createElement('script');
+            const apiKey = CONFIG.googleMaps.apiKey.trim();
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+            script.async = true;
+            script.defer = true;
+            script.onerror = function() {
+                console.error('Failed to load Google Maps API. Please check your API key and network connection.');
+            };
+            document.head.appendChild(script);
+        } else {
+            console.warn('Google Maps API key not configured in config.js');
+        }
+    </script>
+    
     <script src="admin.js"></script>
 </body>
 </html>
