@@ -530,12 +530,14 @@ async function showRouteSummary(formData) {
         }
         
         // Add warning if driving time exceeds booking hours
-        if (drivingExceedsBooking && !hasFailedLegs) {
+        // Only show if we have meaningful driving time data (some legs computed successfully)
+        if (drivingExceedsBooking && totalDrivingMinutes > 0) {
+            const warningNote = hasFailedLegs ? ' Note: This warning is based on partial route data.' : '';
             summaryHTML += `
             <div style="margin-bottom: 20px; padding: 15px; background: #fef2f2; border-radius: 8px; border-left: 4px solid #dc2626;">
                 <p style="margin: 0; font-size: 14px; color: #991b1b;">
                     <strong>⚠️ Warning:</strong> Your estimated driving time (${totalHours}h ${totalMinutes}m) exceeds your booked hours (${totalBookingHours}h ${totalBookingMinutes}m). 
-                    This trip may not be feasible as scheduled. Consider extending your booking hours or adjusting your itinerary.
+                    This trip may not be feasible as scheduled. Consider extending your booking hours or adjusting your itinerary.${warningNote}
                 </p>
             </div>
             `;
@@ -550,9 +552,16 @@ async function showRouteSummary(formData) {
             
             // Check if this day's driving time exceeds booking time
             const dayDrivingMinutes = dayHours * 60 + dayMinutes;
-            const dayBookingMinutes = day.totals.bookingMinutes;
-            const dayWarning = dayDrivingMinutes > dayBookingMinutes;
+            const dayBookingTotalMinutes = day.totals.bookingMinutes;
+            const dayWarning = dayDrivingMinutes > dayBookingTotalMinutes;
             const hasFailedLegsThisDay = day.failedLegs && day.failedLegs.length > 0;
+            
+            // Helper function to escape HTML
+            const escapeHtml = (text) => {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            };
             
             summaryHTML += `
                 <div style="margin-bottom: 20px; padding: 15px; border: 1px solid ${dayWarning ? '#dc2626' : (hasFailedLegsThisDay ? '#f59e0b' : '#e2e8f0')}; border-radius: 8px; ${dayWarning ? 'background: #fef2f2;' : (hasFailedLegsThisDay ? 'background: #fffbeb;' : '')}">
@@ -567,8 +576,8 @@ async function showRouteSummary(formData) {
                             <p style="margin: 0 0 5px 0; font-size: 13px; color: #92400e;"><strong>Failed segments (${day.failedLegs.length}):</strong></p>
                             ${day.failedLegs.map(leg => `
                                 <p style="margin: 3px 0; font-size: 12px; color: #78350f;">
-                                    • ${leg.from} → ${leg.to}<br>
-                                    <span style="font-style: italic; color: #a16207;">${leg.reason}</span>
+                                    • ${escapeHtml(leg.from)} → ${escapeHtml(leg.to)}<br>
+                                    <span style="font-style: italic; color: #a16207;">${escapeHtml(leg.reason)}</span>
                                 </p>
                             `).join('')}
                         </div>
