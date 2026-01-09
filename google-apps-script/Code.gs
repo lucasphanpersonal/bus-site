@@ -129,22 +129,24 @@ function handleSaveQuote(data) {
       sheet = createQuoteResponsesSheet(ss);
     }
     
-    // Prepare row data
+    // Prepare row data - Order must match headers in createQuoteResponsesSheet()
     const rowData = [
-      new Date(), // Timestamp
-      data.quoteRequestId || '', // Link to original request (row number or timestamp)
-      data.customerName || '',
-      data.customerEmail || '',
-      data.quoteAmount || '',
-      data.additionalDetails || '',
-      data.status || 'Sent', // Sent, Draft, Accepted, Declined
-      data.adminName || 'Admin',
-      data.sentDate || new Date().toISOString(),
-      data.tripSummary || '',
-      data.totalMiles || '',
-      data.totalPassengers || '',
-      data.tripDays || '',
-      data.agreedPrice || '' // Agreed price (may differ from initial quote)
+      data.quoteRequestId || '',        // Column A: Quote Request ID (PRIMARY IDENTIFIER)
+      new Date(),                       // Column B: Timestamp
+      data.tripDays || '',              // Column C: Trip Days (count)
+      data.totalPassengers || '',       // Column D: Total Passengers
+      data.customerName || '',          // Column E: Customer Name
+      data.customerEmail || '',         // Column F: Customer Email
+      data.phone || '',                 // Column G: Phone (NEW)
+      data.company || '',               // Column H: Company (NEW)
+      data.tripSummary || '',           // Column I: Trip Summary
+      data.quoteAmount || '',           // Column J: Quote Amount
+      data.additionalDetails || '',     // Column K: Additional Details
+      data.status || 'Sent',            // Column L: Status (Sent, Draft, Accepted, Declined)
+      data.adminName || 'Admin',        // Column M: Admin Name
+      data.sentDate || new Date().toISOString(), // Column N: Sent Date
+      data.totalMiles || '',            // Column O: Total Miles
+      data.agreedPrice || ''            // Column P: Agreed Price (may differ from initial quote)
     ];
     
     // Append to sheet
@@ -180,7 +182,7 @@ function handleUpdateQuote(data) {
     
     let rowIndex = -1;
     for (let i = 1; i < values.length; i++) { // Start at 1 to skip header
-      if (values[i][1] === data.quoteRequestId) { // Column B: quoteRequestId
+      if (values[i][0] === data.quoteRequestId) { // Column A: quoteRequestId (PRIMARY IDENTIFIER)
         rowIndex = i + 1; // Sheet rows are 1-indexed
         break;
       }
@@ -190,12 +192,15 @@ function handleUpdateQuote(data) {
       return createResponse(false, 'Quote not found for update');
     }
     
-    // Update the row
-    sheet.getRange(rowIndex, 5).setValue(data.quoteAmount || ''); // Column E: Quote Amount
-    sheet.getRange(rowIndex, 6).setValue(data.additionalDetails || ''); // Column F: Additional Details
-    sheet.getRange(rowIndex, 7).setValue(data.status || 'Sent'); // Column G: Status
-    sheet.getRange(rowIndex, 14).setValue(data.agreedPrice || ''); // Column N: Agreed Price
-    sheet.getRange(rowIndex, 1).setValue(new Date()); // Column A: Update timestamp
+    // Update the row - Column indices adjusted to match new order
+    // Order: Quote Request ID, Timestamp, Trip Days, Total Passengers, Customer Name, 
+    //        Customer Email, Phone, Company, Trip Summary, Quote Amount, Additional Details, 
+    //        Status, Admin Name, Sent Date, Total Miles, Agreed Price
+    sheet.getRange(rowIndex, 10).setValue(data.quoteAmount || '');      // Column J: Quote Amount
+    sheet.getRange(rowIndex, 11).setValue(data.additionalDetails || ''); // Column K: Additional Details
+    sheet.getRange(rowIndex, 12).setValue(data.status || 'Sent');        // Column L: Status
+    sheet.getRange(rowIndex, 16).setValue(data.agreedPrice || '');       // Column P: Agreed Price
+    sheet.getRange(rowIndex, 2).setValue(new Date());                    // Column B: Update timestamp
     
     log('Quote updated successfully', { rowIndex, customerEmail: data.customerEmail });
     
@@ -238,8 +243,8 @@ function handleDeleteQuote(data) {
     }
     
     // Update status to "Deleted"
-    sheet.getRange(rowIndex, 7).setValue('Deleted');
-    sheet.getRange(rowIndex, 1).setValue(new Date()); // Update timestamp
+    sheet.getRange(rowIndex, 12).setValue('Deleted'); // Column L: Status
+    sheet.getRange(rowIndex, 2).setValue(new Date()); // Column B: Update timestamp
     
     log('Quote deleted (soft)', { rowIndex });
     
@@ -257,22 +262,24 @@ function handleDeleteQuote(data) {
 function createQuoteResponsesSheet(spreadsheet) {
   const sheet = spreadsheet.insertSheet(CONFIG.QUOTE_RESPONSES_SHEET);
   
-  // Set up headers
+  // Set up headers - Order matches Form Responses 1 sheet where possible
   const headers = [
-    'Timestamp',
-    'Quote Request ID',
-    'Customer Name',
-    'Customer Email',
-    'Quote Amount',
-    'Additional Details',
-    'Status',
-    'Admin Name',
-    'Sent Date',
-    'Trip Summary',
-    'Total Miles',
-    'Total Passengers',
-    'Trip Days',
-    'Agreed Price'
+    'Quote Request ID',      // Matches: Quote ID (Column A)
+    'Timestamp',             // Matches: Timestamp (Column B)
+    'Trip Days',             // Matches: Trip Days (Column C)
+    'Total Passengers',      // Matches: Passengers (Column D)
+    'Customer Name',         // Matches: Name (Column E)
+    'Customer Email',        // Matches: Email (Column F)
+    'Phone',                 // Matches: Phone (Column G) - NEW
+    'Company',               // Matches: Company (Column H) - NEW
+    'Trip Summary',          // Similar to: Trip Description (Column I)
+    'Quote Amount',          // Quote-specific field
+    'Additional Details',    // Quote-specific field
+    'Status',                // Quote-specific field (Sent, Accepted, Declined)
+    'Admin Name',            // Quote-specific field
+    'Sent Date',             // Quote-specific field
+    'Total Miles',           // Quote-specific field
+    'Agreed Price'           // Quote-specific field (final price if different from quote)
   ];
   
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);

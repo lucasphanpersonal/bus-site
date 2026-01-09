@@ -1580,6 +1580,8 @@ ${signature}`;
                 quoteRequestId: getQuoteIdentifier(quote), // Use helper for consistent identifier
                 customerName: quote.name,
                 customerEmail: quote.email,
+                phone: quote.phone || '',                  // Add phone number
+                company: quote.company || '',              // Add company
                 quoteAmount: quote.savedQuote?.quoteAmount || amount, // Keep original quote amount
                 additionalDetails: details,
                 status: newStatus,

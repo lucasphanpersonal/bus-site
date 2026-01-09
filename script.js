@@ -1031,6 +1031,7 @@ async function sendConfirmationEmail(formData) {
     }
 
     const templateParams = {
+        to_email: formData.email,  // EmailJS uses 'to_email' for recipient
         customer_name: formData.name,
         customer_email: formData.email,
         customer_phone: formData.phone,
@@ -1083,7 +1084,8 @@ async function sendAdminNotification(formData) {
     }
 
     const templateParams = {
-        admin_email: CONFIG.emailjs.adminNotification.adminEmail,
+        to_email: CONFIG.emailjs.adminNotification.adminEmail,  // EmailJS uses 'to_email' for recipient
+        admin_email: CONFIG.emailjs.adminNotification.adminEmail,  // Keep for backward compatibility
         customer_name: formData.name,
         customer_email: formData.email,
         customer_phone: formData.phone,
