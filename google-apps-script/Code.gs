@@ -85,6 +85,17 @@ function doGet(e) {
 }
 
 /**
+ * Handle OPTIONS requests (CORS preflight)
+ * This is required for cross-origin POST requests from the admin dashboard
+ */
+function doOptions(e) {
+  // Return a response that allows the actual POST request to proceed
+  return ContentService
+    .createTextOutput('')
+    .setMimeType(ContentService.MimeType.TEXT);
+}
+
+/**
  * Save a new quote response
  */
 function handleSaveQuote(data) {
@@ -294,6 +305,8 @@ function addCorsHeaders(output) {
   // Note: In Apps Script, we can't modify headers directly on TextOutput
   // However, when deployed as a web app, Apps Script automatically handles CORS
   // by allowing requests from any origin when "Who has access" is set to "Anyone"
+  // The doOptions() function handles CORS preflight (OPTIONS) requests, which is
+  // required for POST requests with custom headers (Content-Type: application/json)
   // This function is kept for documentation and future enhancements
   return output;
 }

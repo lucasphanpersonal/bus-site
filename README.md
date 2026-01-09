@@ -456,9 +456,10 @@ The following features could be added in future updates:
 For issues or questions:
 
 ### Common Issues
-1. **Status updates not saving?** See [QUICK_FIX_STATUS_UPDATES.md](QUICK_FIX_STATUS_UPDATES.md) for immediate help
-2. **Apps Script setup issues?** Check [APPS_SCRIPT_SETUP.md](APPS_SCRIPT_SETUP.md)
-3. **Detailed troubleshooting**: [TROUBLESHOOTING_STATUS_UPDATES.md](TROUBLESHOOTING_STATUS_UPDATES.md)
+1. **CORS policy error in admin dashboard?** See [CORS_FIX_GUIDE.md](CORS_FIX_GUIDE.md) for the fix
+2. **Status updates not saving?** See [QUICK_FIX_STATUS_UPDATES.md](QUICK_FIX_STATUS_UPDATES.md) for immediate help
+3. **Apps Script setup issues?** Check [APPS_SCRIPT_SETUP.md](APPS_SCRIPT_SETUP.md)
+4. **Detailed troubleshooting**: [TROUBLESHOOTING_STATUS_UPDATES.md](TROUBLESHOOTING_STATUS_UPDATES.md)
 
 ### Debugging Steps
 1. Check the browser console (F12) for error messages
@@ -468,6 +469,7 @@ For issues or questions:
 5. Check Apps Script execution logs (Extensions → Apps Script → Executions)
 
 ### Additional Resources
+- [CORS_FIX_GUIDE.md](CORS_FIX_GUIDE.md) - Fix CORS policy errors in admin dashboard
 - [SECURITY_SETUP.md](SECURITY_SETUP.md) - Security and API key configuration
 - [GOOGLE_SHEETS_SETUP.md](GOOGLE_SHEETS_SETUP.md) - Google Sheets integration setup
 - [EMAIL_INTEGRATION_GUIDE.md](EMAIL_INTEGRATION_GUIDE.md) - Email setup guide
