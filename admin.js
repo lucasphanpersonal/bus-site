@@ -368,10 +368,11 @@ function generateQuoteDetailHTML(quote) {
         const dayDrivingMinutes = dayInfo ? Math.floor((dayInfo.totals.duration % 3600) / 60) : 0;
         const dayBookingHours = dayInfo ? dayInfo.bookingHours : 0;
         const dayBookingMinutes = dayInfo ? dayInfo.bookingMinutes : 0;
+        const overnightBadge = day.endsNextDay ? ' <span style="background: #fbbf24; color: #78350f; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">OVERNIGHT</span>' : '';
         
         html += `
             <div class="trip-day-card">
-                <h4>Day ${index + 1} - ${day.date}</h4>
+                <h4>Day ${index + 1} - ${day.date}${overnightBadge}</h4>
                 <div class="detail-grid">
                     <div class="detail-item">
                         <div class="detail-item-label">Start Time</div>
@@ -379,7 +380,7 @@ function generateQuoteDetailHTML(quote) {
                     </div>
                     <div class="detail-item">
                         <div class="detail-item-label">End Time</div>
-                        <div class="detail-item-value">${day.endTime}</div>
+                        <div class="detail-item-value">${day.endTime}${day.endsNextDay ? ' <small>(next day)</small>' : ''}</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-item-label">Booking Duration</div>

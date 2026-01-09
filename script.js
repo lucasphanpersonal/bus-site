@@ -150,6 +150,11 @@ function addDateTimeGroup() {
                 <div class="form-group">
                     <label for="end_time_${index}">End Time *</label>
                     <input type="time" id="end_time_${index}" name="end_time_${index}" required>
+                    <div class="checkbox-inline">
+                        <input type="checkbox" id="next_day_${index}" name="next_day_${index}">
+                        <label for="next_day_${index}" class="checkbox-label">Ends next day</label>
+                    </div>
+                    <small>Check "Ends next day" if the trip continues past midnight (e.g., 11 PM to 1 AM)</small>
                 </div>
             </div>
             
@@ -251,7 +256,7 @@ function removeDropoffLocation(dayIndex, dropoffIndex) {
 /**
  * Calculate booking hours from start and end time
  */
-function calculateBookingHours(startTime, endTime) {
+function calculateBookingHours(startTime, endTime, endsNextDay = false) {
     const [startHour, startMinute] = startTime.split(':').map(Number);
     const [endHour, endMinute] = endTime.split(':').map(Number);
     
@@ -259,7 +264,13 @@ function calculateBookingHours(startTime, endTime) {
     const endMinutes = endHour * 60 + endMinute;
     
     let totalMinutes = endMinutes - startMinutes;
-    if (totalMinutes < 0) {
+    
+    // If explicitly marked as next day, always add 24 hours
+    if (endsNextDay) {
+        totalMinutes += 24 * 60;
+    }
+    // Otherwise, handle implicit overnight (when end is before start and not explicitly marked)
+    else if (totalMinutes < 0) {
         totalMinutes += 24 * 60; // Handle overnight trips
     }
     
@@ -290,13 +301,14 @@ async function computeRouteInformation(tripDays) {
 
     for (let i = 0; i < tripDays.length; i++) {
         const day = tripDays[i];
-        const bookingTime = calculateBookingHours(day.startTime, day.endTime);
+        const bookingTime = calculateBookingHours(day.startTime, day.endTime, day.endsNextDay);
         
         const dayInfo = {
             dayNumber: i + 1,
             date: day.date,
             startTime: day.startTime,
             endTime: day.endTime,
+            endsNextDay: day.endsNextDay || false,
             bookingHours: bookingTime.hours,
             bookingMinutes: bookingTime.minutes,
             legs: [],
@@ -450,11 +462,12 @@ async function showRouteSummary(formData) {
             const dayMiles = (day.totals.distance / METERS_PER_MILE).toFixed(1);
             const dayHours = Math.floor(day.totals.duration / 3600);
             const dayMinutes = Math.floor((day.totals.duration % 3600) / 60);
+            const overnightIndicator = day.endsNextDay ? ' (overnight)' : '';
             
             summaryHTML += `
                 <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <h4 style="margin-bottom: 10px; color: #1e293b;">Day ${day.dayNumber} - ${day.date}</h4>
-                    <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${day.startTime} - ${day.endTime} (${day.bookingHours}h ${day.bookingMinutes}m booking)</p>
+                    <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${day.startTime} - ${day.endTime}${overnightIndicator} (${day.bookingHours}h ${day.bookingMinutes}m booking)</p>
                     <p style="margin: 5px 0; font-size: 14px;"><strong>Distance:</strong> ${dayMiles} miles</p>
                     <p style="margin: 5px 0; font-size: 14px;"><strong>Driving Time:</strong> ${dayHours}h ${dayMinutes}m</p>
                     <p style="margin: 5px 0; font-size: 14px;"><strong>Stops:</strong> ${day.totals.stops}</p>
@@ -547,9 +560,10 @@ Number of Passengers: ${passengers}
         const dayMiles = (day.totals.distance / METERS_PER_MILE).toFixed(1);
         const dayHours = Math.floor(day.totals.duration / 3600);
         const dayMinutes = Math.floor((day.totals.duration % 3600) / 60);
+        const overnightIndicator = day.endsNextDay ? ' (overnight)' : '';
         
         formatted += `Day ${day.dayNumber} (${day.date}):
-  Time: ${day.startTime} - ${day.endTime} (${day.bookingHours}h ${day.bookingMinutes}m booking)
+  Time: ${day.startTime} - ${day.endTime}${overnightIndicator} (${day.bookingHours}h ${day.bookingMinutes}m booking)
   Distance: ${dayMiles} miles
   Driving Time: ${dayHours}h ${dayMinutes}m
   Stops: ${day.totals.stops}
@@ -670,12 +684,14 @@ function collectFormData() {
         const startTime = group.querySelector(`#start_time_${index}`);
         const endTime = group.querySelector(`#end_time_${index}`);
         const pickupInput = group.querySelector(`#pickup_${index}`);
+        const endsNextDay = group.querySelector(`#next_day_${index}`);
 
         if (dateInput && startTime && endTime && pickupInput) {
             const tripDay = {
                 date: dateInput.value,
                 startTime: startTime.value,
                 endTime: endTime.value,
+                endsNextDay: endsNextDay ? endsNextDay.checked : false,
                 pickup: pickupInput.value.trim(),
                 dropoffs: []
             };
@@ -754,7 +770,8 @@ async function submitToGoogleForms(formData) {
     // Format trip days with dates and locations for submission
     const tripDaysFormatted = formData.tripDays.map((day, i) => {
         const dropoffsText = day.dropoffs.map((d, idx) => `  Drop-off ${idx + 1}: ${d}`).join('\n');
-        return `Day ${i + 1}: ${day.date} from ${day.startTime} to ${day.endTime}
+        const overnightIndicator = day.endsNextDay ? ' (overnight)' : '';
+        return `Day ${i + 1}: ${day.date} from ${day.startTime} to ${day.endTime}${overnightIndicator}
   Pick-up: ${day.pickup}
 ${dropoffsText}`;
     }).join('\n\n');
