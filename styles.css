@@ -1181,28 +1181,87 @@ body.landing-page {
     position: relative;
     width: 100%;
     height: 120px;
-    overflow: hidden;
+    overflow: visible;
     margin-top: 40px;
     pointer-events: none;
 }
 
 .animated-bus {
     position: absolute;
-    left: 50%;
     top: 50%;
     font-size: 4rem;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
-    animation: busSuspensionBounce 10s ease-in-out infinite;
+    animation: busDriveAcrossWithBounce 15s linear infinite;
     will-change: transform;
-    transform: translate(-50%, -50%) scaleX(-1); /* Center and flip horizontally to face right */
+    transform: translateY(-50%) scaleX(-1); /* Face right */
 }
 
-@keyframes busSuspensionBounce {
-    0%, 100% {
-        transform: translate(-50%, -50%) scaleX(-1);
+@keyframes busDriveAcrossWithBounce {
+    0% {
+        left: -5%;
+        transform: translateY(-50%) scaleX(-1);
+    }
+    5% {
+        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+    }
+    10% {
+        transform: translateY(-50%) scaleX(-1);
+    }
+    15% {
+        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+    }
+    20% {
+        transform: translateY(-50%) scaleX(-1);
+    }
+    25% {
+        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+    }
+    30% {
+        transform: translateY(-50%) scaleX(-1);
+    }
+    35% {
+        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+    }
+    40% {
+        transform: translateY(-50%) scaleX(-1);
+    }
+    45% {
+        transform: translateY(calc(-50% - 6px)) scaleX(-1);
     }
     50% {
-        transform: translate(-50%, calc(-50% - 8px)) scaleX(-1);
+        left: 50%;
+        transform: translateY(-50%) scaleX(-1);
+    }
+    55% {
+        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+    }
+    60% {
+        transform: translateY(-50%) scaleX(-1);
+    }
+    65% {
+        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+    }
+    70% {
+        transform: translateY(-50%) scaleX(-1);
+    }
+    75% {
+        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+    }
+    80% {
+        transform: translateY(-50%) scaleX(-1);
+    }
+    85% {
+        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+    }
+    90% {
+        transform: translateY(-50%) scaleX(-1);
+    }
+    95% {
+        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+    }
+    100% {
+        left: 105%;
+        transform: translateY(-50%) scaleX(-1);
     }
 }
 
@@ -1211,8 +1270,8 @@ body.landing-page {
     content: '';
     position: absolute;
     bottom: 40px;
-    left: 0;
-    right: 0;
+    left: -100%;
+    width: 300%;
     height: 2px;
     background: repeating-linear-gradient(
         to right,
@@ -1222,15 +1281,15 @@ body.landing-page {
         transparent 40px
     );
     opacity: 0.3;
-    animation: roadScroll 10s linear infinite;
+    animation: roadScroll 8s linear infinite;
 }
 
 @keyframes roadScroll {
     0% {
-        background-position: 0 0;
+        transform: translateX(0);
     }
     100% {
-        background-position: 40px 0;
+        transform: translateX(-40px);
     }
 }
 
