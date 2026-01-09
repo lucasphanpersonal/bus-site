@@ -256,6 +256,9 @@ function removeDropoffLocation(dayIndex, dropoffIndex) {
 /**
  * Calculate booking hours from start and end time
  */
+/**
+ * Calculate booking hours from start and end time
+ */
 function calculateBookingHours(startTime, endTime, endsNextDay = false) {
     const [startHour, startMinute] = startTime.split(':').map(Number);
     const [endHour, endMinute] = endTime.split(':').map(Number);
@@ -265,13 +268,9 @@ function calculateBookingHours(startTime, endTime, endsNextDay = false) {
     
     let totalMinutes = endMinutes - startMinutes;
     
-    // If explicitly marked as next day, always add 24 hours
-    if (endsNextDay) {
+    // If explicitly marked as next day OR if end time is before start time, add 24 hours
+    if (endsNextDay || totalMinutes < 0) {
         totalMinutes += 24 * 60;
-    }
-    // Otherwise, handle implicit overnight (when end is before start and not explicitly marked)
-    else if (totalMinutes < 0) {
-        totalMinutes += 24 * 60; // Handle overnight trips
     }
     
     const hours = Math.floor(totalMinutes / 60);
