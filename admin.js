@@ -1135,5 +1135,4 @@ window.onclick = function(event) {
 }
 
 // Make functions available globally
-window.saveQuoteToAdmin = saveQuote;
 window.sendQuoteEmail = sendQuoteEmail;
