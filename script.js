@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
 });
 
+// Constants
+const METERS_PER_MILE = 1609.34;
+const API_CALL_DELAY_MS = 200; // Delay between Distance Matrix API calls to avoid rate limiting
+
 // Counter for date/time groups
 let dateTimeCounter = 1;
 
@@ -245,6 +249,291 @@ function removeDropoffLocation(dayIndex, dropoffIndex) {
 }
 
 /**
+ * Compute route information for all trip days
+ */
+async function computeRouteInformation(tripDays) {
+    if (!window.google || !window.google.maps || !window.google.maps.DistanceMatrixService) {
+        throw new Error('Google Maps Distance Matrix service not available');
+    }
+
+    const service = new google.maps.DistanceMatrixService();
+    const routeInfo = {
+        tripDays: [],
+        totals: {
+            distance: 0,
+            duration: 0,
+            stops: 0
+        }
+    };
+
+    for (let i = 0; i < tripDays.length; i++) {
+        const day = tripDays[i];
+        const dayInfo = {
+            dayNumber: i + 1,
+            date: day.date,
+            legs: [],
+            totals: {
+                distance: 0,
+                duration: 0,
+                stops: day.dropoffs.length
+            }
+        };
+
+        // Build array of all locations in order: pickup, then all dropoffs
+        const locations = [day.pickup, ...day.dropoffs];
+
+        // Calculate distance/time for each leg of the journey
+        for (let j = 0; j < locations.length - 1; j++) {
+            const origin = locations[j];
+            const destination = locations[j + 1];
+            
+            // Validate locations before API call
+            if (!origin || typeof origin !== 'string' || !origin.trim() || 
+                !destination || typeof destination !== 'string' || !destination.trim()) {
+                console.warn(`Skipping invalid location pair at day ${i}, leg ${j}`);
+                continue;
+            }
+            
+            try {
+                const result = await getDistanceAndTime(service, origin, destination);
+                if (result) {
+                    dayInfo.legs.push({
+                        from: origin,
+                        to: destination,
+                        distance: result.distance,
+                        duration: result.duration
+                    });
+                    dayInfo.totals.distance += result.distance.value;
+                    dayInfo.totals.duration += result.duration.value;
+                }
+                
+                // Add delay between API calls to avoid rate limiting (except after the very last call)
+                if (!(i === tripDays.length - 1 && j === locations.length - 2)) {
+                    await new Promise(resolve => setTimeout(resolve, API_CALL_DELAY_MS));
+                }
+            } catch (error) {
+                console.error(`Error computing leg ${j} for day ${i}:`, error);
+            }
+        }
+
+        routeInfo.tripDays.push(dayInfo);
+        routeInfo.totals.distance += dayInfo.totals.distance;
+        routeInfo.totals.duration += dayInfo.totals.duration;
+        routeInfo.totals.stops += dayInfo.totals.stops;
+    }
+
+    return routeInfo;
+}
+
+/**
+ * Get distance and time between two locations using Distance Matrix API
+ */
+function getDistanceAndTime(service, origin, destination) {
+    return new Promise((resolve, reject) => {
+        service.getDistanceMatrix(
+            {
+                origins: [origin],
+                destinations: [destination],
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.IMPERIAL,
+                avoidHighways: false,
+                avoidTolls: false
+            },
+            (response, status) => {
+                if (status === google.maps.DistanceMatrixStatus.OK) {
+                    const result = response.rows[0]?.elements[0];
+                    if (result && result.status === 'OK') {
+                        resolve({
+                            distance: result.distance,
+                            duration: result.duration
+                        });
+                    } else {
+                        reject(new Error(`No route found: ${result?.status || 'Unknown error'}`));
+                    }
+                } else {
+                    reject(new Error(`Distance Matrix request failed: ${status}`));
+                }
+            }
+        );
+    });
+}
+
+/**
+ * Show route summary modal for user confirmation
+ */
+async function showRouteSummary(formData) {
+    return new Promise((resolve) => {
+        const routeInfo = formData.routeInfo;
+        if (!routeInfo) {
+            resolve(true);
+            return;
+        }
+
+        // Create modal overlay
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        `;
+
+        // Create modal content
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        `;
+
+        // Format route summary
+        const totalMiles = (routeInfo.totals.distance / METERS_PER_MILE).toFixed(1);
+        const totalHours = Math.floor(routeInfo.totals.duration / 3600);
+        const totalMinutes = Math.floor((routeInfo.totals.duration % 3600) / 60);
+        
+        let summaryHTML = `
+            <h2 style="margin-bottom: 20px; color: #1e293b;">🗺️ Route Summary</h2>
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; color: #2563eb;">Total Trip Overview</h3>
+                <p style="margin: 8px 0;"><strong>Total Distance:</strong> ${totalMiles} miles</p>
+                <p style="margin: 8px 0;"><strong>Total Driving Time:</strong> ${totalHours}h ${totalMinutes}m</p>
+                <p style="margin: 8px 0;"><strong>Total Stops:</strong> ${routeInfo.totals.stops}</p>
+                <p style="margin: 8px 0;"><strong>Number of Passengers:</strong> ${formData.passengers}</p>
+            </div>
+        `;
+
+        // Add details for each trip day
+        routeInfo.tripDays.forEach((day) => {
+            const dayMiles = (day.totals.distance / METERS_PER_MILE).toFixed(1);
+            const dayHours = Math.floor(day.totals.duration / 3600);
+            const dayMinutes = Math.floor((day.totals.duration % 3600) / 60);
+            
+            summaryHTML += `
+                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h4 style="margin-bottom: 10px; color: #1e293b;">Day ${day.dayNumber} - ${day.date}</h4>
+                    <p style="margin: 5px 0; font-size: 14px;"><strong>Distance:</strong> ${dayMiles} miles</p>
+                    <p style="margin: 5px 0; font-size: 14px;"><strong>Driving Time:</strong> ${dayHours}h ${dayMinutes}m</p>
+                    <p style="margin: 5px 0; font-size: 14px;"><strong>Stops:</strong> ${day.totals.stops}</p>
+                </div>
+            `;
+        });
+
+        summaryHTML += `
+            <div style="margin-top: 20px; padding: 15px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                <p style="margin: 0; font-size: 14px; color: #92400e;">
+                    <strong>Note:</strong> This is an estimated calculation based on driving directions. 
+                    Actual time and distance may vary based on traffic, route, and stops.
+                </p>
+            </div>
+            <div style="margin-top: 25px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="cancelSubmit" style="
+                    padding: 12px 24px;
+                    background: #e2e8f0;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: 500;
+                    color: #475569;
+                ">Cancel</button>
+                <button id="confirmSubmit" style="
+                    padding: 12px 24px;
+                    background: #2563eb;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: 500;
+                    color: white;
+                ">Confirm & Submit</button>
+            </div>
+        `;
+
+        modal.innerHTML = summaryHTML;
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // Add button event listeners
+        document.getElementById('confirmSubmit').addEventListener('click', () => {
+            if (document.body.contains(overlay)) {
+                document.body.removeChild(overlay);
+            }
+            resolve(true);
+        });
+
+        document.getElementById('cancelSubmit').addEventListener('click', () => {
+            if (document.body.contains(overlay)) {
+                document.body.removeChild(overlay);
+            }
+            resolve(false);
+        });
+
+        // Close on overlay click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay && document.body.contains(overlay)) {
+                document.body.removeChild(overlay);
+                resolve(false);
+            }
+        });
+    });
+}
+
+/**
+ * Format route information for Google Forms submission
+ */
+function formatRouteInformation(routeInfo, passengers) {
+    if (!routeInfo) return '';
+    
+    const totalMiles = (routeInfo.totals.distance / METERS_PER_MILE).toFixed(1);
+    const totalHours = Math.floor(routeInfo.totals.duration / 3600);
+    const totalMinutes = Math.floor((routeInfo.totals.duration % 3600) / 60);
+    
+    let formatted = `ROUTE INFORMATION (Computed):
+Total Distance: ${totalMiles} miles
+Total Driving Time: ${totalHours}h ${totalMinutes}m
+Total Stops: ${routeInfo.totals.stops}
+Number of Passengers: ${passengers}
+
+`;
+    
+    routeInfo.tripDays.forEach((day) => {
+        const dayMiles = (day.totals.distance / METERS_PER_MILE).toFixed(1);
+        const dayHours = Math.floor(day.totals.duration / 3600);
+        const dayMinutes = Math.floor((day.totals.duration % 3600) / 60);
+        
+        formatted += `Day ${day.dayNumber} (${day.date}):
+  Distance: ${dayMiles} miles
+  Driving Time: ${dayHours}h ${dayMinutes}m
+  Stops: ${day.totals.stops}
+`;
+        
+        day.legs.forEach((leg, idx) => {
+            // Add null checks and value validation for leg data
+            if (leg && leg.distance && leg.distance.value && typeof leg.distance.value === 'number' && leg.distance.value > 0 &&
+                leg.duration && leg.duration.value && typeof leg.duration.value === 'number' && leg.duration.value > 0) {
+                const legMiles = (leg.distance.value / METERS_PER_MILE).toFixed(1);
+                const legMinutes = Math.floor(leg.duration.value / 60);
+                formatted += `  Leg ${idx + 1}: ${legMiles} mi, ${legMinutes} min\n`;
+            }
+        });
+        
+        formatted += '\n';
+    });
+    
+    return formatted;
+}
+
+/**
  * Handle form submission
  */
 async function handleFormSubmit(event) {
@@ -269,6 +558,28 @@ async function handleFormSubmit(event) {
         if (!validateFormData(formData)) {
             throw new Error('Please fill out all required fields correctly.');
         }
+
+        // Compute route information if enabled
+        if (CONFIG.routeComputation?.enabled && window.google && window.google.maps && window.google.maps.DistanceMatrixService) {
+            btnLoader.innerHTML = '<span class="spinner"></span> Computing route information...';
+            try {
+                formData.routeInfo = await computeRouteInformation(formData.tripDays);
+            } catch (error) {
+                console.error('Route computation error:', error);
+                // Continue with submission even if route computation fails
+                formData.routeInfo = null;
+            }
+        }
+
+        // Show route summary if enabled and available
+        if (CONFIG.routeComputation?.showSummary && formData.routeInfo) {
+            const confirmed = await showRouteSummary(formData);
+            if (!confirmed) {
+                throw new Error('Submission cancelled by user');
+            }
+        }
+
+        btnLoader.innerHTML = '<span class="spinner"></span> Submitting...';
 
         // Submit to Google Forms
         await submitToGoogleForms(formData);
@@ -301,12 +612,15 @@ async function handleFormSubmit(event) {
 
     } catch (error) {
         console.error('Form submission error:', error);
-        showStatusMessage('error', '✗ ' + (error.message || 'Failed to submit form. Please try again or contact us directly.'));
+        if (error.message !== 'Submission cancelled by user') {
+            showStatusMessage('error', '✗ ' + (error.message || 'Failed to submit form. Please try again or contact us directly.'));
+        }
     } finally {
         // Reset button state
         submitBtn.disabled = false;
         btnText.style.display = 'inline';
         btnLoader.style.display = 'none';
+        btnLoader.innerHTML = '<span class="spinner"></span> Submitting...';
     }
 }
 
@@ -423,6 +737,9 @@ async function submitToGoogleForms(formData) {
 ${dropoffsText}`;
     }).join('\n\n');
 
+    // Format route information if available
+    const routeInfoFormatted = formatRouteInformation(formData.routeInfo, formData.passengers);
+
     // Prepare form data for Google Forms
     const googleFormData = new URLSearchParams();
     
@@ -448,8 +765,16 @@ ${dropoffsText}`;
     if (CONFIG.googleForm.fields.description) {
         googleFormData.append(CONFIG.googleForm.fields.description, formData.description);
     }
+    // Append route info to notes field if route info is available
+    const notesWithRouteInfo = routeInfoFormatted ? 
+        `${routeInfoFormatted}\n---\nUSER NOTES:\n${formData.notes}` : 
+        formData.notes;
     if (CONFIG.googleForm.fields.notes) {
-        googleFormData.append(CONFIG.googleForm.fields.notes, formData.notes);
+        googleFormData.append(CONFIG.googleForm.fields.notes, notesWithRouteInfo);
+    }
+    // If a separate route info field is configured, use it
+    if (CONFIG.googleForm.fields.routeInfo && routeInfoFormatted) {
+        googleFormData.append(CONFIG.googleForm.fields.routeInfo, routeInfoFormatted);
     }
 
     // Submit to Google Forms using no-cors mode

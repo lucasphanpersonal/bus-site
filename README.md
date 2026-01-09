@@ -9,6 +9,7 @@ A modern, responsive website for requesting charter bus booking quotes. The site
 - 📍 **Smart Location Input** - Google Maps autocomplete for pickup and dropoff locations
 - 🗺️ **Multiple Locations Per Day** - Each trip day can have one pickup and multiple dropoff locations
 - 🎯 **Final Destination Tracking** - The last dropoff location automatically becomes the final destination
+- 📏 **Automatic Route Calculation** - Computes distance, travel time, and stop count for accurate quotes
 - 👥 **Passenger Management** - Specify number of passengers
 - 📧 **Contact Information** - Collect all necessary contact details
 - 📝 **Trip Description** - Detailed description and special notes sections
@@ -58,6 +59,7 @@ cd bus-site
 3. Enable the following APIs:
    - Google Maps JavaScript API
    - Places API
+   - Distance Matrix API (required for automatic route calculation)
 4. Create an API key:
    - Go to "Credentials" → "Create Credentials" → "API Key"
    - Copy your API key
@@ -142,6 +144,49 @@ bus-site/
 - ✅ Firefox (latest)
 - ✅ Safari (latest)
 - ✅ Mobile browsers (iOS Safari, Chrome Mobile)
+
+## Route Calculation Feature
+
+The website automatically calculates route information for each trip to help with quote estimation:
+
+### What Gets Calculated
+
+- **Total Distance** - Sum of all driving distances in miles
+- **Total Driving Time** - Estimated time based on Google Maps routing
+- **Number of Stops** - Count of all dropoff locations across all days
+- **Per-Day Breakdown** - Individual distance, time, and stops for each trip day
+- **Leg-by-Leg Details** - Distance and time for each segment of the journey
+
+### How It Works
+
+1. When a customer submits the form, the system uses Google's Distance Matrix API to calculate driving routes
+2. It computes the route from pickup → first dropoff → second dropoff → ... → final dropoff for each day
+3. A summary modal appears showing all calculated route information
+4. The customer can review and confirm before final submission
+5. Route data is automatically included in the Google Forms submission for the site owner
+
+### Configuring Route Calculation
+
+In `config.js`, you can control route calculation behavior:
+
+```javascript
+routeComputation: {
+    enabled: true,      // Set to false to disable route calculation
+    showSummary: true   // Set to false to skip showing the summary modal
+}
+```
+
+### Route Data in Google Forms
+
+The computed route information is automatically appended to the "Special Notes" field in your Google Form submission. It includes:
+- Total distance and driving time
+- Number of stops and passengers
+- Per-day breakdown with distances and times
+- Individual leg distances and times
+
+This helps you quickly understand the scope of each quote request and provide accurate pricing.
+
+**Note:** Route calculations require the Google Distance Matrix API to be enabled in your Google Cloud Console.
 
 ## Customization
 

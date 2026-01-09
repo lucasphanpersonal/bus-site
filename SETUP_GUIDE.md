@@ -56,7 +56,7 @@ Add the following questions to your form in order:
 - **Type**: Paragraph (Long answer text)
 - **Question**: "Special Notes or Requirements"
 - **Required**: No
-- **Description**: "Any additional information or special requests"
+- **Description**: "Any additional information or special requests. Route information (distance, time, stops) will be automatically included here."
 
 ## Step 3: Get Your Form ID
 
