@@ -1309,10 +1309,9 @@ function showMarkersOnly(map, tripDay) {
 /**
  * Helper function to format Apps Script response error message
  * @param {Response} response - The fetch response object
- * @param {string} responseText - The response body as text
  * @returns {string} Formatted error message
  */
-function formatAppsScriptErrorMessage(response, responseText) {
+function formatAppsScriptErrorMessage(response) {
     return `HTTP ${response.status}: ${response.statusText}. The Apps Script may not be deployed correctly or the URL may be wrong. Check console for details.`;
 }
 
@@ -1333,7 +1332,7 @@ async function handleAppsScriptResponse(response, operationType = 'save') {
     // Check if the HTTP response was successful
     if (!response.ok) {
         console.error('Apps Script HTTP error response:', responseText);
-        throw new Error(formatAppsScriptErrorMessage(response, responseText));
+        throw new Error(formatAppsScriptErrorMessage(response));
     }
     
     // Parse the text as JSON
@@ -1618,13 +1617,13 @@ ${signature}`;
         await new Promise(resolve => setTimeout(resolve, WARNING_DISPLAY_DELAY_MS));
     } else {
         // Validate Apps Script configuration before attempting to save
-        if (!CONFIG.appsScript.webAppUrl || CONFIG.appsScript.webAppUrl.includes('YOUR_') || CONFIG.appsScript.webAppUrl === '') {
+        if (!CONFIG.appsScript.webAppUrl || CONFIG.appsScript.webAppUrl.includes('YOUR_')) {
             console.error('❌ Apps Script web app URL is not configured properly');
             showTemporaryMessage('❌ Apps Script web app URL is not configured. Please deploy your Apps Script and add the URL to config.js. See APPS_SCRIPT_SETUP.md', 'error');
             return; // Don't proceed
         }
         
-        if (!CONFIG.appsScript.sharedSecret || CONFIG.appsScript.sharedSecret === '' || CONFIG.appsScript.sharedSecret.length < MIN_SHARED_SECRET_LENGTH) {
+        if (!CONFIG.appsScript.sharedSecret || CONFIG.appsScript.sharedSecret.length < MIN_SHARED_SECRET_LENGTH) {
             console.error('❌ Apps Script shared secret is not configured properly');
             showTemporaryMessage(`❌ Apps Script shared secret is not configured or too short (minimum ${MIN_SHARED_SECRET_LENGTH} characters). Please update config.js. See APPS_SCRIPT_SETUP.md`, 'error');
             return; // Don't proceed
