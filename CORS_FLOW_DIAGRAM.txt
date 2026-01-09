@@ -1,0 +1,104 @@
+# CORS Request Flow - Before and After Fix
+
+## BEFORE FIX (CORS Error) ❌
+
+```
+Admin Dashboard                    Google Apps Script
+(GitHub Pages)                     (script.google.com)
+     |                                    |
+     |  1. OPTIONS /exec (preflight)     |
+     |---------------------------------->|
+     |                                    |
+     |                          ❌ No doOptions()
+     |                             function exists
+     |                                    |
+     |  ❌ 405 Method Not Allowed         |
+     |<----------------------------------|
+     |                                    |
+     | ❌ BLOCKED by browser              |
+     | POST request never sent            |
+     | Error: CORS policy violation       |
+```
+
+## AFTER FIX (Working) ✅
+
+```
+Admin Dashboard                    Google Apps Script
+(GitHub Pages)                     (script.google.com)
+     |                                    |
+     |  1. OPTIONS /exec (preflight)     |
+     |---------------------------------->|
+     |                                    |
+     |                          ✅ doOptions()
+     |                             handles request
+     |                                    |
+     |  ✅ 200 OK + CORS headers          |
+     |<----------------------------------|
+     |                                    |
+     |  2. POST /exec (actual request)   |
+     |     with quote data                |
+     |---------------------------------->|
+     |                                    |
+     |                          ✅ doPost()
+     |                             handles request
+     |                             validates secret
+     |                             saves to Sheets
+     |                                    |
+     |  ✅ 200 OK + success JSON          |
+     |<----------------------------------|
+     |                                    |
+     | ✅ Quote saved successfully!       |
+```
+
+## Key Differences
+
+### Before Fix
+1. Browser sends OPTIONS preflight
+2. Apps Script returns 405 error (method not allowed)
+3. Browser blocks POST request
+4. User sees CORS error
+
+### After Fix
+1. Browser sends OPTIONS preflight
+2. doOptions() responds with 200 OK
+3. Browser allows POST request
+4. doPost() saves quote successfully
+5. User sees success message
+
+## Why "Anyone" Access is Required
+
+When deployed with "Anyone" access, Google Apps Script automatically adds:
+- Access-Control-Allow-Origin: *
+- Access-Control-Allow-Methods: GET, POST, OPTIONS
+- Access-Control-Allow-Headers: Content-Type
+
+These headers tell the browser: "Yes, cross-origin requests are allowed"
+
+## Security is Maintained
+
+Even with "Anyone" access:
+```
+POST /exec
+Content-Type: application/json
+
+{
+  "action": "saveQuote",
+  "secret": "your-shared-secret",  ← Still validated!
+  "data": { ... }
+}
+```
+
+Requests without correct secret are rejected:
+```
+{
+  "success": false,
+  "message": "Authentication failed"
+}
+```
+
+## Summary
+
+The doOptions() function is like a gatekeeper that says:
+"Yes, cross-origin requests from this domain are welcome!"
+
+Without it, the browser acts as security guard and blocks everything.
