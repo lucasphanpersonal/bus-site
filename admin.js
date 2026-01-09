@@ -111,6 +111,88 @@ function updateDataSourceBanner() {
 }
 
 /**
+ * Load saved quote responses from Google Sheets
+ */
+async function loadSavedQuoteResponses() {
+    const sheetsConfig = CONFIG.googleSheets;
+    const apiKey = sheetsConfig.apiKey || CONFIG.googleMaps.apiKey;
+    
+    if (!apiKey) {
+        throw new Error('API key not found');
+    }
+    
+    // Build the Sheets API URL for Quote Responses sheet
+    const sheetName = encodeURIComponent('Quote Responses');
+    const spreadsheetId = sheetsConfig.spreadsheetId;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?key=${apiKey}`;
+    
+    try {
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            // Sheet may not exist yet, which is fine
+            if (response.status === 400) {
+                console.log('Quote Responses sheet does not exist yet - will be created on first save');
+                return [];
+            }
+            throw new Error('Failed to load saved quotes: ' + response.status);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.values || data.values.length <= 1) {
+            // No saved quotes yet
+            return [];
+        }
+        
+        // Parse the rows into saved quote objects
+        // Column structure: Timestamp, Quote Request ID, Customer Name, Customer Email, Quote Amount, 
+        //                   Additional Details, Status, Admin Name, Sent Date, Trip Summary, Total Miles, Total Passengers, Trip Days
+        const savedQuotes = [];
+        for (let i = 1; i < data.values.length; i++) {
+            const row = data.values[i];
+            savedQuotes.push({
+                timestamp: row[0] || '',
+                quoteRequestId: row[1] || '',
+                customerName: row[2] || '',
+                customerEmail: row[3] || '',
+                quoteAmount: row[4] || '',
+                additionalDetails: row[5] || '',
+                status: row[6] || '',
+                adminName: row[7] || '',
+                sentDate: row[8] || '',
+                tripSummary: row[9] || '',
+                totalMiles: row[10] || '',
+                totalPassengers: row[11] || '',
+                tripDays: row[12] || ''
+            });
+        }
+        
+        return savedQuotes;
+    } catch (error) {
+        console.error('Error loading saved quote responses:', error);
+        throw error;
+    }
+}
+
+/**
+ * Merge quote requests with saved responses
+ */
+function mergeQuotesWithResponses(quotes, savedQuotes) {
+    return quotes.map(quote => {
+        // Find matching saved quote by quoteRequestId (which is the submittedAt timestamp)
+        const savedQuote = savedQuotes.find(sq => sq.quoteRequestId === quote.submittedAt);
+        
+        if (savedQuote) {
+            // Add saved quote data to the quote object
+            quote.savedQuote = savedQuote;
+        }
+        
+        return quote;
+    });
+}
+
+/**
  * Load quotes - from Google Sheets only
  */
 async function loadQuotes() {
@@ -121,6 +203,18 @@ async function loadQuotes() {
         if (CONFIG.googleSheets && CONFIG.googleSheets.enabled) {
             showLoadingState();
             quotes = await getQuotesFromGoogleSheets();
+            
+            // Also load saved quote responses if Apps Script is enabled
+            if (CONFIG.appsScript && CONFIG.appsScript.enabled) {
+                try {
+                    const savedQuotes = await loadSavedQuoteResponses();
+                    // Merge saved quotes with quote requests
+                    quotes = mergeQuotesWithResponses(quotes, savedQuotes);
+                } catch (error) {
+                    console.warn('Could not load saved quote responses:', error);
+                    // Continue without saved quotes - not a fatal error
+                }
+            }
         } else {
             throw new Error('Google Sheets integration is not enabled. Please set googleSheets.enabled to true and configure your spreadsheet ID in config.js. See GOOGLE_SHEETS_SETUP.md for detailed setup instructions.');
         }
@@ -573,10 +667,16 @@ function displayQuotes(quotes) {
         const totalBookingHours = quote.routeInfo && quote.routeInfo.totals.bookingHours ?
             `${Math.floor(quote.routeInfo.totals.bookingHours / 60)}h ${quote.routeInfo.totals.bookingHours % 60}m` : 'N/A';
         
+        // Check if quote has been responded to
+        const hasResponse = quote.savedQuote;
+        const statusBadge = hasResponse ? 
+            `<span style="background: ${getStatusColor(quote.savedQuote.status).bg}; color: ${getStatusColor(quote.savedQuote.status).text}; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 10px;">${quote.savedQuote.status}</span>` : 
+            `<span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 10px;">⏳ Pending</span>`;
+        
         return `
             <div class="quote-card" onclick="showQuoteDetail(${quote.id})">
                 <div class="quote-header-row">
-                    <div class="quote-name">${quote.name}</div>
+                    <div class="quote-name">${quote.name}${statusBadge}</div>
                     <div class="quote-date">${formattedDate}</div>
                 </div>
                 <div class="quote-summary">
@@ -601,8 +701,8 @@ function displayQuotes(quotes) {
                         <span class="quote-detail-value">${totalMiles} mi</span>
                     </div>
                     <div class="quote-detail">
-                        <span class="quote-detail-label">Booking Hours</span>
-                        <span class="quote-detail-value">${totalBookingHours}</span>
+                        <span class="quote-detail-label">${hasResponse ? 'Quote Amount' : 'Booking Hours'}</span>
+                        <span class="quote-detail-value">${hasResponse ? '$' + quote.savedQuote.quoteAmount : totalBookingHours}</span>
                     </div>
                 </div>
             </div>
@@ -610,6 +710,19 @@ function displayQuotes(quotes) {
     }).join('');
     
     quotesList.innerHTML = quotesHTML;
+}
+
+/**
+ * Get status color configuration
+ */
+function getStatusColor(status) {
+    const colors = {
+        'Sent': { bg: '#d1fae5', text: '#065f46', border: '#10b981' },
+        'Draft': { bg: '#fef3c7', text: '#92400e', border: '#f59e0b' },
+        'Accepted': { bg: '#dbeafe', text: '#1e40af', border: '#3b82f6' },
+        'Declined': { bg: '#fee2e2', text: '#991b1b', border: '#ef4444' }
+    };
+    return colors[status] || colors['Sent'];
 }
 
 /**
@@ -896,51 +1009,93 @@ function generateQuoteResponseSection(quote) {
     const fromEmail = emailConfig.fromEmail || 'your-business@example.com';
     const businessName = emailConfig.businessName || 'Bus Charter Services';
     
-    // Generate trip summary for email
-    const tripSummary = quote.tripDays.map((day, idx) => {
-        const routeInfo = quote.routeInfo?.tripDays[idx];
-        const distance = routeInfo ? (routeInfo.totals.distance / METERS_PER_MILE).toFixed(1) : 'N/A';
-        const duration = routeInfo ? `${routeInfo.bookingHours}h ${routeInfo.bookingMinutes}m` : 'N/A';
-        
-        return `Day ${idx + 1}: ${day.date}
-  Time: ${day.startTime} - ${day.endTime}${day.endsNextDay ? ' (overnight)' : ''}
-  Distance: ${distance} miles
-  Duration: ${duration}
-  Pickup: ${day.pickup}
-  Dropoffs: ${day.dropoffs.join(', ')}`;
-    }).join('\n\n');
-    
-    const totalMiles = quote.routeInfo ? (quote.routeInfo.totals.distance / METERS_PER_MILE).toFixed(1) : 'N/A';
-    const totalBookingHours = quote.routeInfo ? Math.floor(quote.routeInfo.totals.bookingHours / 60) : 'N/A';
-    const totalBookingMinutes = quote.routeInfo ? quote.routeInfo.totals.bookingHours % 60 : 0;
+    // Check if there's a saved quote
+    const hasSavedQuote = quote.savedQuote;
     
     let html = `
         <div class="detail-section" style="border-top: 2px solid var(--border-color); padding-top: 30px; margin-top: 30px;">
-            <h3>✉️ Send Quote Response</h3>
+            <h3>✉️ ${hasSavedQuote ? 'Saved Quote Response' : 'Send Quote Response'}</h3>
+    `;
+    
+    // If there's a saved quote, show it first
+    if (hasSavedQuote) {
+        const sq = quote.savedQuote;
+        const statusColors = {
+            'Sent': { bg: '#d1fae5', text: '#065f46', border: '#10b981' },
+            'Draft': { bg: '#fef3c7', text: '#92400e', border: '#f59e0b' },
+            'Accepted': { bg: '#dbeafe', text: '#1e40af', border: '#3b82f6' },
+            'Declined': { bg: '#fee2e2', text: '#991b1b', border: '#ef4444' }
+        };
+        const statusColor = statusColors[sq.status] || statusColors['Sent'];
+        
+        html += `
+            <div style="background: ${statusColor.bg}; border-left: 4px solid ${statusColor.border}; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                    <div>
+                        <div style="font-weight: 700; font-size: 1.1rem; color: ${statusColor.text}; margin-bottom: 5px;">
+                            Quote Amount: $${sq.quoteAmount}
+                        </div>
+                        <div style="color: ${statusColor.text}; font-size: 0.9rem;">
+                            Status: <strong>${sq.status}</strong> • Sent by ${sq.adminName} on ${new Date(sq.sentDate).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <button onclick="editSavedQuote()" 
+                            style="background: white; color: ${statusColor.text}; border: 2px solid ${statusColor.border}; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
+                        ✏️ Edit Quote
+                    </button>
+                </div>
+                ${sq.additionalDetails ? `
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid ${statusColor.border};">
+                    <div style="font-weight: 600; color: ${statusColor.text}; margin-bottom: 5px;">Additional Details:</div>
+                    <div style="color: ${statusColor.text}; white-space: pre-wrap;">${sq.additionalDetails}</div>
+                </div>
+                ` : ''}
+            </div>
+        `;
+    }
+    
+    html += `
             <p style="color: var(--text-secondary); margin-bottom: 20px;">
-                Compose and send a quote response to ${quote.name} at ${quote.email}
+                ${hasSavedQuote ? 'Update and resend quote to' : 'Compose and send a quote response to'} ${quote.name} at ${quote.email}
             </p>
             
-            <div style="background: var(--background); padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+            <div id="quoteFormContainer" style="background: var(--background); padding: 20px; border-radius: 8px; margin-bottom: 15px;">
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">Quote Amount ($)</label>
-                    <input type="number" id="quoteAmount" placeholder="e.g., 1500" 
+                    <input type="number" id="quoteAmount" placeholder="e.g., 1500" value="${hasSavedQuote ? quote.savedQuote.quoteAmount : ''}"
                            style="width: 200px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem;">
                 </div>
                 
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">Additional Details (optional)</label>
                     <textarea id="quoteDetails" rows="4" placeholder="Any additional information, terms, or conditions..."
-                              style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; font-family: inherit; resize: vertical;"></textarea>
+                              style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; font-family: inherit; resize: vertical;">${hasSavedQuote ? quote.savedQuote.additionalDetails : ''}</textarea>
                 </div>
                 
-                <button onclick="sendQuoteEmail()" 
-                        style="background: var(--primary-color); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600;">
-                    📧 Compose Email
-                </button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="sendQuoteEmail()" 
+                            style="background: var(--primary-color); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600;">
+                        📧 ${hasSavedQuote ? 'Update & ' : ''}Compose Email
+                    </button>
+                    
+                    ${hasSavedQuote ? `
+                    <select id="quoteStatus" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.95rem; font-weight: 600;">
+                        <option value="Sent" ${quote.savedQuote.status === 'Sent' ? 'selected' : ''}>Sent</option>
+                        <option value="Draft" ${quote.savedQuote.status === 'Draft' ? 'selected' : ''}>Draft</option>
+                        <option value="Accepted" ${quote.savedQuote.status === 'Accepted' ? 'selected' : ''}>Accepted</option>
+                        <option value="Declined" ${quote.savedQuote.status === 'Declined' ? 'selected' : ''}>Declined</option>
+                    </select>
+                    <button onclick="updateQuoteStatus()" 
+                            style="background: var(--background); color: var(--text-primary); border: 2px solid var(--border-color); padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                        💾 Update Status
+                    </button>
+                    ` : ''}
+                </div>
                 
                 <p style="margin-top: 12px; font-size: 0.85rem; color: var(--text-secondary);">
-                    This will open your email client with a pre-filled message. You can edit before sending.
+                    ${CONFIG.appsScript && CONFIG.appsScript.enabled ? 
+                        '✅ This quote will be saved to Google Sheets when you compose the email.' : 
+                        '⚠️ Quote saving is disabled. Enable Apps Script in config.js to save quotes.'}
                 </p>
             </div>
         </div>
@@ -1205,27 +1360,32 @@ ${signature}`;
             saveButton.innerHTML = '💾 Saving quote...';
             saveButton.disabled = true;
             
-            const saved = await saveQuoteToSheets({
+            const quoteDataToSave = {
                 quoteRequestId: quote.submittedAt, // Use timestamp as unique ID
                 customerName: quote.name,
                 customerEmail: quote.email,
                 quoteAmount: quoteAmount,
                 additionalDetails: quoteDetails,
-                status: 'Sent',
+                status: document.getElementById('quoteStatus')?.value || 'Sent',
                 adminName: 'Admin', // Could be enhanced to track actual admin name
                 sentDate: new Date().toISOString(),
                 tripSummary: tripSummary,
                 totalMiles: totalMiles,
                 totalPassengers: quote.passengers,
                 tripDays: quote.tripDays.length
-            });
+            };
+            
+            // Use update if quote already exists, otherwise save new
+            const saved = quote.savedQuote ? 
+                await updateQuoteInSheets(quoteDataToSave) : 
+                await saveQuoteToSheets(quoteDataToSave);
             
             saveButton.innerHTML = originalText;
             saveButton.disabled = false;
             
             if (saved) {
                 // Show success message
-                showTemporaryMessage('✅ Quote saved to Google Sheets!', 'success');
+                showTemporaryMessage(`✅ Quote ${quote.savedQuote ? 'updated' : 'saved'} to Google Sheets!`, 'success');
             }
         } catch (error) {
             console.error('Error saving quote:', error);
@@ -1246,6 +1406,113 @@ ${signature}`;
     window.location.href = mailtoLink;
 }
 
+/**
+ * Update quote status only (without sending email)
+ */
+async function updateQuoteStatus() {
+    const quote = window.currentQuote;
+    
+    if (!quote || !quote.savedQuote) {
+        alert('No saved quote found to update');
+        return;
+    }
+    
+    const newStatus = document.getElementById('quoteStatus')?.value;
+    
+    if (!newStatus) {
+        alert('Please select a status');
+        return;
+    }
+    
+    if (!CONFIG.appsScript || !CONFIG.appsScript.enabled) {
+        alert('Apps Script is not enabled. Cannot update quote status.');
+        return;
+    }
+    
+    try {
+        const updateButton = document.querySelector('button[onclick="updateQuoteStatus()"]');
+        const originalText = updateButton.innerHTML;
+        updateButton.innerHTML = '⏳ Updating...';
+        updateButton.disabled = true;
+        
+        const updated = await updateQuoteInSheets({
+            quoteRequestId: quote.submittedAt,
+            customerEmail: quote.email,
+            quoteAmount: document.getElementById('quoteAmount')?.value || quote.savedQuote.quoteAmount,
+            additionalDetails: document.getElementById('quoteDetails')?.value || quote.savedQuote.additionalDetails,
+            status: newStatus
+        });
+        
+        updateButton.innerHTML = originalText;
+        updateButton.disabled = false;
+        
+        if (updated) {
+            showTemporaryMessage('✅ Quote status updated successfully!', 'success');
+            // Reload quotes to show updated status
+            setTimeout(() => {
+                closeModal();
+                loadQuotes();
+            }, 1500);
+        }
+    } catch (error) {
+        console.error('Error updating quote status:', error);
+        showTemporaryMessage('❌ Failed to update quote status', 'error');
+    }
+}
+
+/**
+ * Edit a saved quote (just focuses the input fields)
+ */
+function editSavedQuote() {
+    // Scroll to the form
+    document.getElementById('quoteFormContainer').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    
+    // Focus the quote amount field
+    const amountField = document.getElementById('quoteAmount');
+    if (amountField) {
+        amountField.focus();
+        amountField.select();
+    }
+    
+    showTemporaryMessage('💡 Edit the quote details and click "Update & Compose Email" to save changes', 'info');
+}
+
+/**
+ * Update quote in Google Sheets
+ */
+async function updateQuoteInSheets(quoteData) {
+    if (!CONFIG.appsScript || !CONFIG.appsScript.enabled) {
+        console.warn('Apps Script is not enabled');
+        return false;
+    }
+    
+    if (!CONFIG.appsScript.webAppUrl) {
+        throw new Error('Apps Script web app URL not configured');
+    }
+    
+    try {
+        const response = await fetch(CONFIG.appsScript.webAppUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'updateQuote',
+                secret: CONFIG.appsScript.sharedSecret,
+                data: quoteData
+            })
+        });
+        
+        console.log('Quote update request sent successfully');
+        return true;
+        
+    } catch (error) {
+        console.error('Error updating quote in Sheets:', error);
+        throw error;
+    }
+}
+
 // Close modal when clicking outside
 window.onclick = function(event) {
     const modal = document.getElementById('quoteModal');
@@ -1256,3 +1523,5 @@ window.onclick = function(event) {
 
 // Make functions available globally
 window.sendQuoteEmail = sendQuoteEmail;
+window.updateQuoteStatus = updateQuoteStatus;
+window.editSavedQuote = editSavedQuote;
