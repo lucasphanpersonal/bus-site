@@ -162,20 +162,28 @@ Website: lucasphanpersonal.github.io/bus-site
         sheetName: 'Form Responses 1',  // Default sheet name when linking Google Form
         // Column mapping (adjust if your sheet has different column order)
         // IMPORTANT: This must match the actual column order in your Google Sheet
-        // Current order in "Form Responses 1" sheet:
-        // A: Timestamp, B: Trip Days, C: Passengers, D: Name, E: Email, 
-        // F: Phone, G: Company, H: Description, I: Notes, J: Quote ID
+        // RECOMMENDED order in "Form Responses 1" sheet (Quote ID first):
+        // A: Quote ID, B: Timestamp, C: Trip Days, D: Passengers, E: Name, F: Email, 
+        // G: Phone, H: Company, I: Description, J: Notes
+        // 
+        // TO REORDER YOUR GOOGLE FORM:
+        // 1. Open your Google Form
+        // 2. Drag the "Quote ID" question to be the FIRST question (before all others)
+        // 3. The form order should be: Quote ID, Trip Days, Passengers, Name, Email, Phone, Company, Description, Notes
+        // 4. After reordering, new submissions will follow this column order
+        // 5. Note: Timestamp is automatically added by Google Forms as the first column by default,
+        //    but when you make Quote ID the first question, Quote ID becomes Column A and Timestamp becomes Column B
         columns: {
-            timestamp: 0,      // Column A - Timestamp
-            tripDays: 1,       // Column B - Trip Days (Dates, Times & Locations)
-            passengers: 2,     // Column C - Number of Passengers
-            name: 3,           // Column D - Full Name
-            email: 4,          // Column E - Email Address
-            phone: 5,          // Column F - Phone Number
-            company: 6,        // Column G - Company/Organization
-            description: 7,    // Column H - Trip Description
-            notes: 8,          // Column I - Special Notes or Instructions
-            quoteId: 9         // Column J - Quote ID
+            quoteId: 0,        // Column A - Quote ID (PRIMARY IDENTIFIER - should be first question in form)
+            timestamp: 1,      // Column B - Timestamp
+            tripDays: 2,       // Column C - Trip Days (Dates, Times & Locations)
+            passengers: 3,     // Column D - Number of Passengers
+            name: 4,           // Column E - Full Name
+            email: 5,          // Column F - Email Address
+            phone: 6,          // Column G - Phone Number
+            company: 7,        // Column H - Company/Organization
+            description: 8,    // Column I - Trip Description
+            notes: 9           // Column J - Special Notes or Instructions
         }
     },
 
