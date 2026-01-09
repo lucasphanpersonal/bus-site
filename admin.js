@@ -1335,8 +1335,24 @@ async function saveQuoteToSheets(quoteData) {
             body: formData.toString()
         });
         
+        console.log('Apps Script HTTP response status:', response.status, response.statusText);
+        
+        // Check if the HTTP response was successful
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Apps Script HTTP error response:', errorText);
+            throw new Error(`HTTP ${response.status}: ${response.statusText}. The Apps Script may not be deployed correctly or the URL may be wrong. Check console for details.`);
+        }
+        
         // Parse the JSON response
-        const result = await response.json();
+        let result;
+        try {
+            result = await response.json();
+        } catch (parseError) {
+            const responseText = await response.text();
+            console.error('Failed to parse Apps Script response as JSON:', responseText);
+            throw new Error('Invalid response from Apps Script. Expected JSON but got: ' + responseText.substring(0, 200));
+        }
         
         console.log('Apps Script response:', result);
         
@@ -1564,7 +1580,27 @@ ${signature}`;
     }
     
     // Save quote to Google Sheets if Apps Script is enabled
-    if (CONFIG.appsScript && CONFIG.appsScript.enabled) {
+    if (!CONFIG.appsScript || !CONFIG.appsScript.enabled) {
+        // Apps Script is not enabled - warn user
+        console.warn('⚠️ Apps Script is disabled. Quote will NOT be saved to Google Sheets!');
+        showTemporaryMessage('⚠️ Warning: Apps Script is disabled. Quote will NOT be saved to Google Sheets! Only the email will be opened. Enable Apps Script in config.js to save quotes.', 'warning');
+        
+        // Give user time to see the warning before opening email
+        await new Promise(resolve => setTimeout(resolve, 3000));
+    } else {
+        // Validate Apps Script configuration before attempting to save
+        if (!CONFIG.appsScript.webAppUrl || CONFIG.appsScript.webAppUrl.includes('YOUR_') || CONFIG.appsScript.webAppUrl === '') {
+            console.error('❌ Apps Script web app URL is not configured properly');
+            showTemporaryMessage('❌ Apps Script web app URL is not configured. Please deploy your Apps Script and add the URL to config.js. See APPS_SCRIPT_SETUP.md', 'error');
+            return; // Don't proceed
+        }
+        
+        if (!CONFIG.appsScript.sharedSecret || CONFIG.appsScript.sharedSecret === '' || CONFIG.appsScript.sharedSecret.length < 8) {
+            console.error('❌ Apps Script shared secret is not configured properly');
+            showTemporaryMessage('❌ Apps Script shared secret is not configured or too short. Please update config.js. See APPS_SCRIPT_SETUP.md', 'error');
+            return; // Don't proceed
+        }
+        
         try {
             // Show saving status
             showTemporaryMessage('💾 Saving quote...', 'info');
@@ -1573,7 +1609,9 @@ ${signature}`;
                 emailType,
                 newStatus,
                 hasSavedQuote: !!quote.savedQuote,
-                willUpdate: !!quote.savedQuote
+                willUpdate: !!quote.savedQuote,
+                webAppUrl: CONFIG.appsScript.webAppUrl,
+                hasSharedSecret: !!CONFIG.appsScript.sharedSecret
             });
             
             const quoteDataToSave = {
@@ -1713,8 +1751,24 @@ async function updateQuoteInSheets(quoteData) {
             body: formData.toString()
         });
         
+        console.log('Apps Script HTTP response status:', response.status, response.statusText);
+        
+        // Check if the HTTP response was successful
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Apps Script HTTP error response:', errorText);
+            throw new Error(`HTTP ${response.status}: ${response.statusText}. The Apps Script may not be deployed correctly or the URL may be wrong. Check console for details.`);
+        }
+        
         // Parse the JSON response
-        const result = await response.json();
+        let result;
+        try {
+            result = await response.json();
+        } catch (parseError) {
+            const responseText = await response.text();
+            console.error('Failed to parse Apps Script response as JSON:', responseText);
+            throw new Error('Invalid response from Apps Script. Expected JSON but got: ' + responseText.substring(0, 200));
+        }
         
         console.log('Apps Script response:', result);
         
