@@ -1299,16 +1299,20 @@ async function saveQuoteToSheets(quoteData) {
     try {
         console.log('Saving quote to Sheets:', quoteData);
         
+        // Use application/x-www-form-urlencoded to avoid CORS preflight
+        // This is a "simple" content type that doesn't trigger OPTIONS request
+        const formData = new URLSearchParams({
+            action: 'saveQuote',
+            secret: CONFIG.appsScript.sharedSecret,
+            data: JSON.stringify(quoteData)
+        });
+        
         const response = await fetch(CONFIG.appsScript.webAppUrl, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: JSON.stringify({
-                action: 'saveQuote',
-                secret: CONFIG.appsScript.sharedSecret,
-                data: quoteData
-            })
+            body: formData.toString()
         });
         
         // Parse the JSON response
@@ -1644,16 +1648,20 @@ async function updateQuoteInSheets(quoteData) {
     try {
         console.log('Updating quote in Sheets:', quoteData);
         
+        // Use application/x-www-form-urlencoded to avoid CORS preflight
+        // This is a "simple" content type that doesn't trigger OPTIONS request
+        const formData = new URLSearchParams({
+            action: 'updateQuote',
+            secret: CONFIG.appsScript.sharedSecret,
+            data: JSON.stringify(quoteData)
+        });
+        
         const response = await fetch(CONFIG.appsScript.webAppUrl, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: JSON.stringify({
-                action: 'updateQuote',
-                secret: CONFIG.appsScript.sharedSecret,
-                data: quoteData
-            })
+            body: formData.toString()
         });
         
         // Parse the JSON response

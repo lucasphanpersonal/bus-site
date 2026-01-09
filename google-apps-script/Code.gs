@@ -29,79 +29,91 @@ const CONFIG = {
   FORM_RESPONSES_SHEET: 'Form Responses 1',
   
   // Simple shared secret for authentication
-  // ⚠️ IMPORTANT: Change this to a unique value before deploying!
-  // This should match the value in your config.js
-  // DO NOT use the default value in production!
-  SHARED_SECRET: 'CHANGE_THIS_SECRET_BEFORE_DEPLOYING',
+  // ⚠️ IMPORTANT: This MUST match sharedSecret in config.js!
+  // Current value: 'lp-test-9994' - For production, change to a longer random string
+  // After changing, update config.js to match
+  SHARED_SECRET: 'lp-test-9994',
   
   // Enable logging for debugging
   DEBUG_MODE: true
 };
 
 /**
- * Handle POST requests from the admin dashboard
+ * Handle POST requests with form-encoded data (avoids CORS preflight)
+ * 
+ * CRITICAL: We use Content-Type: application/x-www-form-urlencoded instead of application/json
+ * to avoid CORS preflight issues.
+ * 
+ * Why this approach:
+ * - application/json triggers CORS preflight (OPTIONS request)
+ * - Google Apps Script does NOT support OPTIONS requests for Web Apps
+ * - doOptions() function is IGNORED by Google Apps Script
+ * - Browser blocks the request before doPost() ever runs
+ * 
+ * application/x-www-form-urlencoded is a "simple content type" that:
+ * - Does NOT trigger CORS preflight
+ * - Gets automatic CORS headers from Google Apps Script (when deployed with "Anyone" access)
+ * - Works reliably across all browsers
+ * 
+ * Data is passed as form parameters, with the 'data' field containing JSON string.
+ * Note: e.parameter works for form-encoded POST data, but NOT for JSON POST data.
  */
 function doPost(e) {
+  return handleRequest(e.parameter);
+}
+
+/**
+ * Handle GET requests (for testing and backwards compatibility)
+ */
+function doGet(e) {
+  return handleRequest(e.parameter);
+}
+
+/**
+ * Common request handler for both GET and POST
+ * Extracted to avoid code duplication
+ */
+function handleRequest(params) {
   try {
-    // Parse request
-    const requestData = JSON.parse(e.postData.contents);
+    // If no action parameter, return API info (for testing)
+    if (!params.action) {
+      return createResponse(true, 'Bus Charter Quote Management API is running', {
+        timestamp: new Date().toISOString(),
+        note: 'Send POST requests with Content-Type: application/x-www-form-urlencoded',
+        parameters: 'action, secret, data (JSON string)',
+        corsNote: 'Form-encoded POST requests avoid CORS preflight issues'
+      });
+    }
     
     // Validate authentication
-    if (requestData.secret !== CONFIG.SHARED_SECRET) {
+    if (params.secret !== CONFIG.SHARED_SECRET) {
       return createResponse(false, 'Authentication failed');
     }
     
+    // Parse data parameter (JSON string)
+    let data;
+    try {
+      data = JSON.parse(params.data);
+    } catch (parseError) {
+      return createResponse(false, 'Invalid data parameter: ' + parseError.message);
+    }
+    
     // Route to appropriate handler
-    switch (requestData.action) {
+    switch (params.action) {
       case 'saveQuote':
-        return handleSaveQuote(requestData.data);
+        return handleSaveQuote(data);
       case 'updateQuote':
-        return handleUpdateQuote(requestData.data);
+        return handleUpdateQuote(data);
       case 'deleteQuote':
-        return handleDeleteQuote(requestData.data);
+        return handleDeleteQuote(data);
       default:
-        return createResponse(false, 'Unknown action: ' + requestData.action);
+        return createResponse(false, 'Unknown action: ' + params.action);
     }
     
   } catch (error) {
-    logError('doPost error', error);
+    logError('handleRequest error', error);
     return createResponse(false, 'Server error: ' + error.message);
   }
-}
-
-/**
- * Handle GET requests (for testing)
- */
-function doGet(e) {
-  const response = {
-    status: 'ok',
-    message: 'Bus Charter Quote Management API is running',
-    timestamp: new Date().toISOString()
-  };
-  
-  return ContentService
-    .createTextOutput(JSON.stringify(response))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-/**
- * Handle OPTIONS requests (CORS preflight)
- * This is required for cross-origin POST requests from the admin dashboard
- * 
- * IMPORTANT: When deployed with "Who has access" = "Anyone", Google Apps Script
- * automatically adds CORS headers to responses. However, we must return JSON
- * format for the headers to be added correctly.
- */
-function doOptions(e) {
-  // Return a JSON response to ensure CORS headers are added by Google Apps Script
-  const response = {
-    status: 'ok',
-    message: 'CORS preflight successful'
-  };
-  
-  return ContentService
-    .createTextOutput(JSON.stringify(response))
-    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
