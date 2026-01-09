@@ -36,7 +36,7 @@ const CONFIG = {
     // 5. Restrict the key to your domain for security
     
     googleMaps: {
-        apiKey: 'AIzaSyDYXGdDhcVtvRHre4dhaKaGf_a8nfjzmL4'  // Replace with actual API key
+        apiKey: 'AIzaSyBug8nyirxDx8cbgOET9qtPViJyhS6DnOc'  // Replace with actual API key
     },
 
     // Route computation settings
