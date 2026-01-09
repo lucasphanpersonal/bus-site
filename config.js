@@ -58,6 +58,29 @@ const CONFIG = {
         showSummary: true  // Show route summary to user before submission
     },
 
+    // Landing Page Configuration
+    // Configure the stats shown on the landing page
+    landingPage: {
+        // Stats Section - set enabled to false to hide stats completely
+        stats: {
+            enabled: false,  // Set to true to show stats on landing page
+            items: [
+                {
+                    number: '15+',
+                    label: 'Years Experience'
+                },
+                {
+                    number: '1000+',
+                    label: 'Happy Clients'
+                },
+                {
+                    number: '50+',
+                    label: 'Modern Buses'
+                }
+            ]
+        }
+    },
+
     // Email Configuration (for Admin Dashboard)
     // Configure how admins send quote responses to customers
     email: {
