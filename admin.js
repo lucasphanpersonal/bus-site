@@ -1023,12 +1023,13 @@ function generateQuoteResponseSection(quote) {
     const fromEmail = emailConfig.fromEmail || 'your-business@example.com';
     const businessName = emailConfig.businessName || 'Bus Charter Services';
     
-    // Check if there's a saved quote
+    // Check if there's a saved quote and determine status
     const hasSavedQuote = quote.savedQuote;
+    const currentStatus = hasSavedQuote ? quote.savedQuote.status : 'Pending';
     
     let html = `
         <div class="detail-section" style="border-top: 2px solid var(--border-color); padding-top: 30px; margin-top: 30px;">
-            <h3>✉️ ${hasSavedQuote ? 'Saved Quote Response' : 'Send Quote Response'}</h3>
+            <h3>✉️ ${hasSavedQuote ? 'Quote Response Management' : 'Send Quote Response'}</h3>
     `;
     
     // If there's a saved quote, show it first
@@ -1053,10 +1054,6 @@ function generateQuoteResponseSection(quote) {
                             Status: <strong>${sq.status}</strong> • Sent by ${sq.adminName} on ${new Date(sq.sentDate).toLocaleDateString()}
                         </div>
                     </div>
-                    <button onclick="editSavedQuote()" 
-                            style="background: white; color: ${statusColor.text}; border: 2px solid ${statusColor.border}; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
-                        ✏️ Edit Quote
-                    </button>
                 </div>
                 ${sq.additionalDetails ? `
                 <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid ${statusColor.border};">
@@ -1068,50 +1065,111 @@ function generateQuoteResponseSection(quote) {
         `;
     }
     
-    html += `
+    // Generate form based on current status
+    if (currentStatus === 'Pending') {
+        // Pending quotes: Show Send Quote form
+        html += `
             <p style="color: var(--text-secondary); margin-bottom: 20px;">
-                ${hasSavedQuote ? 'Update and resend quote to' : 'Compose and send a quote response to'} ${quote.name} at ${quote.email}
+                Compose and send a quote response to ${quote.name} at ${quote.email}
             </p>
             
             <div id="quoteFormContainer" style="background: var(--background); padding: 20px; border-radius: 8px; margin-bottom: 15px;">
                 <div style="margin-bottom: 15px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">Quote Amount ($)</label>
-                    <input type="number" id="quoteAmount" placeholder="e.g., 1500" value="${hasSavedQuote ? quote.savedQuote.quoteAmount : ''}"
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">Quote Amount ($) *</label>
+                    <input type="number" id="quoteAmount" placeholder="e.g., 1500" value=""
                            style="width: 200px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem;">
                 </div>
                 
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">Additional Details (optional)</label>
                     <textarea id="quoteDetails" rows="4" placeholder="Any additional information, terms, or conditions..."
-                              style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; font-family: inherit; resize: vertical;">${hasSavedQuote ? quote.savedQuote.additionalDetails : ''}</textarea>
+                              style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; font-family: inherit; resize: vertical;"></textarea>
                 </div>
                 
                 <div style="display: flex; gap: 10px; align-items: center;">
-                    <button onclick="sendQuoteEmail()" 
+                    <button onclick="handleSendQuote()" 
                             style="background: var(--primary-color); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600;">
-                        📧 ${hasSavedQuote ? 'Update & ' : ''}Compose Email
+                        📧 Send Quote
                     </button>
-                    
-                    ${hasSavedQuote ? `
-                    <select id="quoteStatus" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.95rem; font-weight: 600;">
-                        <option value="Sent" ${quote.savedQuote.status === 'Sent' ? 'selected' : ''}>Sent</option>
-                        <option value="Draft" ${quote.savedQuote.status === 'Draft' ? 'selected' : ''}>Draft</option>
-                        <option value="Accepted" ${quote.savedQuote.status === 'Accepted' ? 'selected' : ''}>Accepted</option>
-                        <option value="Declined" ${quote.savedQuote.status === 'Declined' ? 'selected' : ''}>Declined</option>
-                    </select>
-                    <button onclick="updateQuoteStatus()" 
-                            style="background: var(--background); color: var(--text-primary); border: 2px solid var(--border-color); padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                        💾 Update Status
-                    </button>
-                    ` : ''}
                 </div>
                 
                 <p style="margin-top: 12px; font-size: 0.85rem; color: var(--text-secondary);">
                     ${CONFIG.appsScript && CONFIG.appsScript.enabled ? 
-                        '✅ This quote will be saved to Google Sheets when you compose the email.' : 
+                        '✅ This quote will be saved to Google Sheets when you send the email.' : 
                         '⚠️ Quote saving is disabled. Enable Apps Script in config.js to save quotes.'}
                 </p>
             </div>
+        `;
+    } else if (currentStatus === 'Sent') {
+        // Sent quotes: Show Accept and Deny options
+        html += `
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                The quote has been sent to ${quote.name}. Choose an action based on the client's response:
+            </p>
+            
+            <div id="quoteFormContainer" style="background: var(--background); padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+                <!-- Accept Section -->
+                <div id="acceptSection" style="border: 2px solid #10b981; border-radius: 8px; padding: 15px; margin-bottom: 20px; background: #f0fdf4;">
+                    <h4 style="color: #065f46; margin-top: 0; margin-bottom: 15px;">✅ Accept Quote</h4>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">Agreed Price ($) *</label>
+                        <input type="number" id="agreedPrice" placeholder="e.g., 1500" value="${hasSavedQuote ? quote.savedQuote.quoteAmount : ''}"
+                               style="width: 200px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem;">
+                        <p style="margin-top: 5px; font-size: 0.85rem; color: var(--text-secondary);">Enter the final agreed price (may differ from original quote if negotiated)</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">Additional Notes (optional)</label>
+                        <textarea id="acceptDetails" rows="3" placeholder="Payment terms, pickup details, any final notes..."
+                                  style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; font-family: inherit; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <button onclick="handleAcceptQuote()" 
+                            style="background: #10b981; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600;">
+                        ✅ Accept & Compose Confirmation Email
+                    </button>
+                </div>
+                
+                <!-- Deny Section -->
+                <div id="denySection" style="border: 2px solid #ef4444; border-radius: 8px; padding: 15px; background: #fef2f2;">
+                    <h4 style="color: #991b1b; margin-top: 0; margin-bottom: 15px;">❌ Decline Quote</h4>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">Reason (optional)</label>
+                        <textarea id="declineReason" rows="3" placeholder="Optional reason for declining (e.g., dates unavailable, out of service area)..."
+                                  style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; font-family: inherit; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <button onclick="handleDeclineQuote()" 
+                            style="background: #ef4444; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600;">
+                        ❌ Decline & Compose Email
+                    </button>
+                </div>
+                
+                <p style="margin-top: 15px; font-size: 0.85rem; color: var(--text-secondary);">
+                    ${CONFIG.appsScript && CONFIG.appsScript.enabled ? 
+                        '✅ The status will be updated in Google Sheets when you compose the email.' : 
+                        '⚠️ Quote saving is disabled. Enable Apps Script in config.js to save quotes.'}
+                </p>
+            </div>
+        `;
+    } else {
+        // Accepted or Declined: Show final status
+        html += `
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                This quote has been ${currentStatus.toLowerCase()}. ${currentStatus === 'Accepted' ? 'The booking is confirmed.' : 'No further action needed.'}
+            </p>
+            
+            ${currentStatus === 'Accepted' ? `
+            <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <p style="color: #1e40af; margin: 0; font-weight: 600;">
+                    ℹ️ If you need to modify this booking, you can edit the quote amount and details above and resend.
+                </p>
+            </div>
+            ` : ''}
+        `;
+    }
+    
+    html += `
         </div>
     `;
     
@@ -1302,9 +1360,73 @@ function closeModal() {
 }
 
 /**
- * Send quote email - opens email client with pre-filled content and saves to Google Sheets
+ * Handle Send Quote action (for Pending quotes)
  */
-async function sendQuoteEmail() {
+async function handleSendQuote() {
+    const quote = window.currentQuote;
+    
+    if (!quote) {
+        alert('Error: Quote data not found. Please close and reopen the quote detail.');
+        return;
+    }
+    
+    const quoteAmount = document.getElementById('quoteAmount')?.value || '';
+    const quoteDetails = document.getElementById('quoteDetails')?.value || '';
+    
+    if (!quoteAmount) {
+        alert('Please enter a quote amount before sending.');
+        return;
+    }
+    
+    await sendQuoteEmail('Sent', quoteAmount, quoteDetails, 'initial');
+}
+
+/**
+ * Handle Accept Quote action (for Sent quotes)
+ */
+async function handleAcceptQuote() {
+    const quote = window.currentQuote;
+    
+    if (!quote) {
+        alert('Error: Quote data not found. Please close and reopen the quote detail.');
+        return;
+    }
+    
+    const agreedPrice = document.getElementById('agreedPrice')?.value || '';
+    const acceptDetails = document.getElementById('acceptDetails')?.value || '';
+    
+    if (!agreedPrice) {
+        alert('Please enter the agreed price before accepting.');
+        return;
+    }
+    
+    await sendQuoteEmail('Accepted', agreedPrice, acceptDetails, 'accept');
+}
+
+/**
+ * Handle Decline Quote action (for Sent quotes)
+ */
+async function handleDeclineQuote() {
+    const quote = window.currentQuote;
+    
+    if (!quote) {
+        alert('Error: Quote data not found. Please close and reopen the quote detail.');
+        return;
+    }
+    
+    const declineReason = document.getElementById('declineReason')?.value || '';
+    
+    await sendQuoteEmail('Declined', '', declineReason, 'decline');
+}
+
+/**
+ * Send quote email - opens email client with pre-filled content and saves to Google Sheets
+ * @param {string} newStatus - The new status for the quote (Sent, Accepted, Declined)
+ * @param {string} amount - The quote/agreed amount
+ * @param {string} details - Additional details or decline reason
+ * @param {string} emailType - Type of email: 'initial', 'accept', or 'decline'
+ */
+async function sendQuoteEmail(newStatus, amount, details, emailType) {
     const quote = window.currentQuote;
     
     if (!quote) {
@@ -1316,17 +1438,7 @@ async function sendQuoteEmail() {
     const fromEmail = emailConfig.fromEmail || 'your-business@example.com';
     const businessName = emailConfig.businessName || 'Bus Charter Services';
     const signature = emailConfig.templates?.signature || 'Best regards,\n' + businessName;
-    const subjectTemplate = emailConfig.templates?.subject || 'Your Bus Charter Quote Request';
     const bccEmail = emailConfig.bccEmail || '';
-    
-    // Get values from form
-    const quoteAmount = document.getElementById('quoteAmount')?.value || '';
-    const quoteDetails = document.getElementById('quoteDetails')?.value || '';
-    
-    if (!quoteAmount) {
-        alert('Please enter a quote amount before sending.');
-        return;
-    }
     
     // Build trip summary
     const tripSummary = quote.tripDays.map((day, idx) => {
@@ -1346,12 +1458,16 @@ async function sendQuoteEmail() {
     const totalBookingHours = quote.routeInfo ? Math.floor(quote.routeInfo.totals.bookingHours / 60) : 0;
     const totalBookingMinutes = quote.routeInfo ? quote.routeInfo.totals.bookingHours % 60 : 0;
     
-    // Build email body
-    const emailBody = `Dear ${quote.name},
+    // Generate email subject and body based on type
+    let subject, emailBody;
+    
+    if (emailType === 'initial') {
+        subject = 'Your Bus Charter Quote Request';
+        emailBody = `Dear ${quote.name},
 
 Thank you for your bus charter quote request. We're pleased to provide you with the following quote:
 
-QUOTE AMOUNT: $${quoteAmount}
+QUOTE AMOUNT: $${amount}
 
 TRIP SUMMARY:
 ${tripSummary}
@@ -1362,26 +1478,60 @@ TOTALS:
 - Number of Passengers: ${quote.passengers}
 - Trip Days: ${quote.tripDays.length}
 
-${quoteDetails ? '\nADDITIONAL DETAILS:\n' + quoteDetails + '\n' : ''}
+${details ? '\nADDITIONAL DETAILS:\n' + details + '\n' : ''}
 This quote is valid for 30 days. Please let us know if you have any questions or would like to proceed with booking.
 
 ${signature}`;
+    } else if (emailType === 'accept') {
+        subject = 'Booking Confirmation - Your Bus Charter is Confirmed!';
+        emailBody = `Dear ${quote.name},
+
+Great news! We're pleased to confirm your bus charter booking.
+
+BOOKING CONFIRMATION:
+Final Agreed Price: $${amount}
+
+TRIP DETAILS:
+${tripSummary}
+
+TOTALS:
+- Total Distance: ${totalMiles} miles
+- Total Booking Time: ${totalBookingHours}h ${totalBookingMinutes}m
+- Number of Passengers: ${quote.passengers}
+- Trip Days: ${quote.tripDays.length}
+
+${details ? '\nADDITIONAL INFORMATION:\n' + details + '\n' : ''}
+We look forward to providing you with excellent service. If you have any questions or need to make changes, please don't hesitate to contact us.
+
+${signature}`;
+    } else if (emailType === 'decline') {
+        subject = 'Regarding Your Bus Charter Quote Request';
+        emailBody = `Dear ${quote.name},
+
+Thank you for your interest in our bus charter services. Unfortunately, we are unable to accommodate your request at this time.
+
+${details ? 'REASON:\n' + details + '\n\n' : ''}
+We appreciate your understanding and hope we can serve you in the future. Please feel free to reach out if your plans change or if you have another trip in mind.
+
+${signature}`;
+    }
     
     // Save quote to Google Sheets if Apps Script is enabled
     if (CONFIG.appsScript && CONFIG.appsScript.enabled) {
         try {
-            const saveButton = document.querySelector('button[onclick="sendQuoteEmail()"]');
-            const originalText = saveButton.innerHTML;
-            saveButton.innerHTML = '💾 Saving quote...';
-            saveButton.disabled = true;
+            // Find the button that was clicked
+            const activeButton = document.activeElement;
+            const originalText = activeButton.innerHTML;
+            activeButton.innerHTML = '💾 Saving...';
+            activeButton.disabled = true;
             
             const quoteDataToSave = {
                 quoteRequestId: quote.submittedAt, // Use timestamp as unique ID
                 customerName: quote.name,
                 customerEmail: quote.email,
-                quoteAmount: quoteAmount,
-                additionalDetails: quoteDetails,
-                status: document.getElementById('quoteStatus')?.value || 'Sent',
+                quoteAmount: amount || 'N/A',
+                additionalDetails: details,
+                status: newStatus,
                 adminName: 'Admin', // Could be enhanced to track actual admin name
                 sentDate: new Date().toISOString(),
                 tripSummary: tripSummary,
@@ -1395,12 +1545,17 @@ ${signature}`;
                 await updateQuoteInSheets(quoteDataToSave) : 
                 await saveQuoteToSheets(quoteDataToSave);
             
-            saveButton.innerHTML = originalText;
-            saveButton.disabled = false;
+            activeButton.innerHTML = originalText;
+            activeButton.disabled = false;
             
             if (saved) {
                 // Show success message
-                showTemporaryMessage(`✅ Quote ${quote.savedQuote ? 'updated' : 'saved'} to Google Sheets!`, 'success');
+                showTemporaryMessage(`✅ Quote ${quote.savedQuote ? 'updated' : 'saved'} with status: ${newStatus}`, 'success');
+                
+                // Reload quotes after a delay
+                setTimeout(() => {
+                    loadQuotes();
+                }, 2000);
             }
         } catch (error) {
             console.error('Error saving quote:', error);
@@ -1410,86 +1565,15 @@ ${signature}`;
     }
     
     // Build mailto link
-    const subject = encodeURIComponent(subjectTemplate);
+    const subjectEncoded = encodeURIComponent(subject);
     const body = encodeURIComponent(emailBody);
     const to = encodeURIComponent(quote.email);
     const bcc = bccEmail ? `&bcc=${encodeURIComponent(bccEmail)}` : '';
     
-    const mailtoLink = `mailto:${to}?subject=${subject}&body=${body}${bcc}`;
+    const mailtoLink = `mailto:${to}?subject=${subjectEncoded}&body=${body}${bcc}`;
     
     // Open email client
     window.location.href = mailtoLink;
-}
-
-/**
- * Update quote status only (without sending email)
- */
-async function updateQuoteStatus() {
-    const quote = window.currentQuote;
-    
-    if (!quote || !quote.savedQuote) {
-        alert('No saved quote found to update');
-        return;
-    }
-    
-    const newStatus = document.getElementById('quoteStatus')?.value;
-    
-    if (!newStatus) {
-        alert('Please select a status');
-        return;
-    }
-    
-    if (!CONFIG.appsScript || !CONFIG.appsScript.enabled) {
-        alert('Apps Script is not enabled. Cannot update quote status.');
-        return;
-    }
-    
-    try {
-        const updateButton = document.querySelector('button[onclick="updateQuoteStatus()"]');
-        const originalText = updateButton.innerHTML;
-        updateButton.innerHTML = '⏳ Updating...';
-        updateButton.disabled = true;
-        
-        const updated = await updateQuoteInSheets({
-            quoteRequestId: quote.submittedAt,
-            customerEmail: quote.email,
-            quoteAmount: document.getElementById('quoteAmount')?.value || quote.savedQuote.quoteAmount,
-            additionalDetails: document.getElementById('quoteDetails')?.value || quote.savedQuote.additionalDetails,
-            status: newStatus
-        });
-        
-        updateButton.innerHTML = originalText;
-        updateButton.disabled = false;
-        
-        if (updated) {
-            showTemporaryMessage('✅ Quote status updated successfully!', 'success');
-            // Reload quotes to show updated status
-            setTimeout(() => {
-                closeModal();
-                loadQuotes();
-            }, 1500);
-        }
-    } catch (error) {
-        console.error('Error updating quote status:', error);
-        showTemporaryMessage('❌ Failed to update quote status', 'error');
-    }
-}
-
-/**
- * Edit a saved quote (just focuses the input fields)
- */
-function editSavedQuote() {
-    // Scroll to the form
-    document.getElementById('quoteFormContainer').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    
-    // Focus the quote amount field
-    const amountField = document.getElementById('quoteAmount');
-    if (amountField) {
-        amountField.focus();
-        amountField.select();
-    }
-    
-    showTemporaryMessage('💡 Edit the quote details and click "Update & Compose Email" to save changes', 'info');
 }
 
 /**
@@ -1540,6 +1624,6 @@ window.onclick = function(event) {
 }
 
 // Make functions available globally
-window.sendQuoteEmail = sendQuoteEmail;
-window.updateQuoteStatus = updateQuoteStatus;
-window.editSavedQuote = editSavedQuote;
+window.handleSendQuote = handleSendQuote;
+window.handleAcceptQuote = handleAcceptQuote;
+window.handleDeclineQuote = handleDeclineQuote;
