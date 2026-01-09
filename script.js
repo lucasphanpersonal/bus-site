@@ -444,6 +444,11 @@ async function showRouteSummary(formData) {
         const totalBookingHours = Math.floor(routeInfo.totals.bookingHours / 60);
         const totalBookingMinutes = routeInfo.totals.bookingHours % 60;
         
+        // Check if driving time exceeds booking hours (convert to minutes for comparison)
+        const totalDrivingMinutes = totalHours * 60 + totalMinutes;
+        const totalBookingMinutesTotal = routeInfo.totals.bookingHours;
+        const drivingExceedsBooking = totalDrivingMinutes > totalBookingMinutesTotal;
+        
         let summaryHTML = `
             <h2 style="margin-bottom: 20px; color: #1e293b;">🗺️ Route Summary</h2>
             <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
@@ -455,6 +460,18 @@ async function showRouteSummary(formData) {
                 <p style="margin: 8px 0;"><strong>Number of Passengers:</strong> ${formData.passengers}</p>
             </div>
         `;
+        
+        // Add warning if driving time exceeds booking hours
+        if (drivingExceedsBooking) {
+            summaryHTML += `
+            <div style="margin-bottom: 20px; padding: 15px; background: #fef2f2; border-radius: 8px; border-left: 4px solid #dc2626;">
+                <p style="margin: 0; font-size: 14px; color: #991b1b;">
+                    <strong>⚠️ Warning:</strong> Your estimated driving time (${totalHours}h ${totalMinutes}m) exceeds your booked hours (${totalBookingHours}h ${totalBookingMinutes}m). 
+                    This trip may not be feasible as scheduled. Consider extending your booking hours or adjusting your itinerary.
+                </p>
+            </div>
+            `;
+        }
 
         // Add details for each trip day
         routeInfo.tripDays.forEach((day) => {
@@ -463,13 +480,19 @@ async function showRouteSummary(formData) {
             const dayMinutes = Math.floor((day.totals.duration % 3600) / 60);
             const overnightIndicator = day.endsNextDay ? ' (overnight)' : '';
             
+            // Check if this day's driving time exceeds booking time
+            const dayDrivingMinutes = dayHours * 60 + dayMinutes;
+            const dayBookingMinutes = day.totals.bookingMinutes;
+            const dayWarning = dayDrivingMinutes > dayBookingMinutes;
+            
             summaryHTML += `
-                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid ${dayWarning ? '#dc2626' : '#e2e8f0'}; border-radius: 8px; ${dayWarning ? 'background: #fef2f2;' : ''}">
                     <h4 style="margin-bottom: 10px; color: #1e293b;">Day ${day.dayNumber} - ${day.date}</h4>
                     <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${day.startTime} - ${day.endTime}${overnightIndicator} (${day.bookingHours}h ${day.bookingMinutes}m booking)</p>
                     <p style="margin: 5px 0; font-size: 14px;"><strong>Distance:</strong> ${dayMiles} miles</p>
                     <p style="margin: 5px 0; font-size: 14px;"><strong>Driving Time:</strong> ${dayHours}h ${dayMinutes}m</p>
                     <p style="margin: 5px 0; font-size: 14px;"><strong>Stops:</strong> ${day.totals.stops}</p>
+                    ${dayWarning ? `<p style="margin: 10px 0 0 0; font-size: 13px; color: #991b1b;"><strong>⚠️ Warning:</strong> Driving time exceeds booked hours for this day!</p>` : ''}
                 </div>
             `;
         });

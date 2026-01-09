@@ -108,7 +108,7 @@ Website: lucasphanpersonal.github.io/bus-site
         // Admin Notification Configuration
         // Send notification to admin email when a new quote is received
         adminNotification: {
-            enabled: false,  // Set to true to enable admin notifications
+            enabled: true,  // Set to true to enable admin notifications
             adminEmail: 'huabaohuang622@gmail.com',  // Admin email to receive notifications
             adminTemplateId: '',  // Your EmailJS Template ID for admin notifications
             // TODO: Replace hardcoded admin email with environment variables or secret management services
