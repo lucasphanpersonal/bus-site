@@ -3,7 +3,6 @@
 // This is client-side authentication suitable for personal use only.
 // For production, implement proper backend authentication.
 const ADMIN_PASSWORD = 'admin123'; // TODO: Change this to a secure password!
-const STORAGE_KEY = 'busCharterQuotes';
 const AUTH_KEY = 'busCharterAuth';
 const METERS_PER_MILE = 1609.34; // Conversion constant
 
@@ -109,18 +108,18 @@ function updateDataSourceBanner() {
 }
 
 /**
- * Load quotes - from Google Sheets or localStorage depending on configuration
+ * Load quotes - from Google Sheets only
  */
 async function loadQuotes() {
     try {
         let quotes;
         
-        // Check if Google Sheets integration is enabled
+        // Load from Google Sheets
         if (CONFIG.googleSheets && CONFIG.googleSheets.enabled) {
             showLoadingState();
             quotes = await getQuotesFromGoogleSheets();
         } else {
-            quotes = getQuotesFromLocalStorage();
+            throw new Error('Google Sheets integration is not enabled. Please configure it in config.js');
         }
         
         if (quotes.length === 0) {
@@ -412,34 +411,6 @@ function parseRouteInfoText(text) {
     return routeInfo;
 }
 
-/**
- * Get quotes from localStorage (legacy method)
- */
-function getQuotesFromLocalStorage() {
-    const quotesJson = localStorage.getItem(STORAGE_KEY);
-    return quotesJson ? JSON.parse(quotesJson) : [];
-}
-
-/**
- * Get quotes - backward compatible wrapper
- */
-function getQuotes() {
-    // This is kept for backward compatibility with saveQuote function
-    return getQuotesFromLocalStorage();
-}
-
-/**
- * Save quote to localStorage
- */
-function saveQuote(quoteData) {
-    const quotes = getQuotes();
-    quotes.push({
-        id: Date.now(),
-        ...quoteData,
-        submittedAt: new Date().toISOString()
-    });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(quotes));
-}
 
 /**
  * Display quotes in the list

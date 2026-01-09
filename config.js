@@ -85,7 +85,7 @@ Website: lucasphanpersonal.github.io/bus-site
     // See GOOGLE_SHEETS_SETUP.md for detailed instructions
     
     googleSheets: {
-        enabled: true,  // Set to true to use Google Sheets instead of localStorage
+        enabled: true,  // Must be enabled for admin dashboard to work
         spreadsheetId: '180fD_bqLFvRc0WjS8fXeXsomc_feqd2R_Nz5HSpLi8k',  // The ID from your Google Sheets URL
         apiKey: '',  // Leave empty to use the same Maps API key, or provide a different key
         sheetName: 'Form Responses 1',  // Default sheet name when linking Google Form

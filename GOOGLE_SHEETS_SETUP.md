@@ -220,17 +220,17 @@ Even though data comes from Google Sheets, you still get:
 - ✅ Beautiful card-based layout
 - ✅ Detailed modal views
 
-## Advantages Over localStorage
+## Advantages of Google Sheets
 
-| Feature | localStorage | Google Sheets |
-|---------|-------------|---------------|
-| See customer quotes | ❌ No | ✅ Yes |
-| Access from any device | ❌ No | ✅ Yes |
-| Access from any browser | ❌ No | ✅ Yes |
-| Permanent storage | ⚠️ Until cleared | ✅ Yes |
-| Backup | ❌ No | ✅ Yes |
-| Team access | ❌ No | ✅ Yes |
-| Setup complexity | ✅ None | ⚠️ Moderate |
+| Feature | Google Sheets |
+|---------|---------------|
+| See customer quotes | ✅ Yes |
+| Access from any device | ✅ Yes |
+| Access from any browser | ✅ Yes |
+| Permanent storage | ✅ Yes |
+| Backup | ✅ Yes |
+| Team access | ✅ Yes |
+| Setup complexity | ⚠️ 5-10 minutes |
 
 ## Cost
 
@@ -258,22 +258,13 @@ If you need more security:
 
 For most charter bus businesses, the current public setup is adequate, as the Spreadsheet ID is not published anywhere visible and would need to be guessed or discovered.
 
-## Switching Between localStorage and Google Sheets
+## Configuration
 
-You can easily switch between the two:
+The admin dashboard is configured to use Google Sheets as the data source. In `config.js`:
 
-**To use Google Sheets:**
 ```javascript
 googleSheets: {
-    enabled: true,  // ← Change this
-    // ... rest of config
-}
-```
-
-**To use localStorage:**
-```javascript
-googleSheets: {
-    enabled: false,  // ← Change this
+    enabled: true,  // Must be true for admin dashboard to work
     // ... rest of config
 }
 ```

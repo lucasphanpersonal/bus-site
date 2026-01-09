@@ -635,9 +635,6 @@ async function handleFormSubmit(event) {
         // Submit to Google Forms
         await submitToGoogleForms(formData);
 
-        // Save to localStorage for admin dashboard
-        saveQuoteToLocalStorage(formData);
-
         // Redirect to success page with query parameters
         const params = new URLSearchParams({
             name: formData.name,
@@ -832,33 +829,13 @@ ${dropoffsText}`;
         return;
     } catch (error) {
         console.error('Google Forms submission error:', error);
-        // Don't throw error - allow submission to continue to localStorage
-        console.warn('Google Forms submission failed, but quote saved locally for admin dashboard');
+        // Don't throw error - allow submission to continue
+        console.warn('Google Forms submission failed');
         return;
     }
 }
 
-/**
- * Save quote to localStorage for admin dashboard
- */
-function saveQuoteToLocalStorage(formData) {
-    const STORAGE_KEY = 'busCharterQuotes';
-    
-    try {
-        const quotes = localStorage.getItem(STORAGE_KEY);
-        const quotesArray = quotes ? JSON.parse(quotes) : [];
-        
-        quotesArray.push({
-            id: Date.now(),
-            ...formData,
-            submittedAt: new Date().toISOString()
-        });
-        
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(quotesArray));
-    } catch (error) {
-        console.error('Error saving quote to localStorage:', error);
-    }
-}
+
 
 /**
  * Show status message
