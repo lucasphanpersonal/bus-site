@@ -1,7 +1,20 @@
 // Admin Dashboard JavaScript
-const ADMIN_PASSWORD = 'admin123'; // Change this in production!
+// SECURITY WARNING: Change this password before deploying to production!
+// This is client-side authentication suitable for personal use only.
+// For production, implement proper backend authentication.
+const ADMIN_PASSWORD = 'admin123'; // TODO: Change this to a secure password!
 const STORAGE_KEY = 'busCharterQuotes';
 const AUTH_KEY = 'busCharterAuth';
+const METERS_PER_MILE = 1609.34; // Conversion constant
+
+// State abbreviations for interstate detection
+const US_STATE_ABBREVIATIONS = [
+    'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+    'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+    'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+    'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+    'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
+];
 
 // Check authentication on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -141,7 +154,7 @@ function displayQuotes(quotes) {
         });
         
         const totalMiles = quote.routeInfo ? 
-            (quote.routeInfo.totals.distance / 1609.34).toFixed(1) : 'N/A';
+            (quote.routeInfo.totals.distance / METERS_PER_MILE).toFixed(1) : 'N/A';
         const totalBookingHours = quote.routeInfo && quote.routeInfo.totals.bookingHours ?
             `${Math.floor(quote.routeInfo.totals.bookingHours / 60)}h ${quote.routeInfo.totals.bookingHours % 60}m` : 'N/A';
         
@@ -204,7 +217,7 @@ function updateStats(quotes) {
     // Calculate total miles
     const totalMiles = quotes.reduce((sum, q) => {
         if (q.routeInfo && q.routeInfo.totals && q.routeInfo.totals.distance) {
-            return sum + (q.routeInfo.totals.distance / 1609.34);
+            return sum + (q.routeInfo.totals.distance / METERS_PER_MILE);
         }
         return sum;
     }, 0);
@@ -310,7 +323,7 @@ function generateQuoteDetailHTML(quote) {
     
     // Route Information
     if (quote.routeInfo) {
-        const totalMiles = (quote.routeInfo.totals.distance / 1609.34).toFixed(1);
+        const totalMiles = (quote.routeInfo.totals.distance / METERS_PER_MILE).toFixed(1);
         const totalDrivingHours = Math.floor(quote.routeInfo.totals.duration / 3600);
         const totalDrivingMinutes = Math.floor((quote.routeInfo.totals.duration % 3600) / 60);
         const totalBookingHours = Math.floor(quote.routeInfo.totals.bookingHours / 60);
@@ -350,7 +363,7 @@ function generateQuoteDetailHTML(quote) {
     
     quote.tripDays.forEach((day, index) => {
         const dayInfo = quote.routeInfo?.tripDays[index];
-        const dayMiles = dayInfo ? (dayInfo.totals.distance / 1609.34).toFixed(1) : 'N/A';
+        const dayMiles = dayInfo ? (dayInfo.totals.distance / METERS_PER_MILE).toFixed(1) : 'N/A';
         const dayDrivingHours = dayInfo ? Math.floor(dayInfo.totals.duration / 3600) : 0;
         const dayDrivingMinutes = dayInfo ? Math.floor((dayInfo.totals.duration % 3600) / 60) : 0;
         const dayBookingHours = dayInfo ? dayInfo.bookingHours : 0;
@@ -416,8 +429,8 @@ function generateNotableInfo(quote) {
     }
     
     // Check for long distances
-    if (quote.routeInfo && (quote.routeInfo.totals.distance / 1609.34) > 200) {
-        notableItems.push(`Long distance trip (${(quote.routeInfo.totals.distance / 1609.34).toFixed(0)} miles)`);
+    if (quote.routeInfo && (quote.routeInfo.totals.distance / METERS_PER_MILE) > 200) {
+        notableItems.push(`Long distance trip (${(quote.routeInfo.totals.distance / METERS_PER_MILE).toFixed(0)} miles)`);
     }
     
     // Check for overnight trips (booking hours > 12)
@@ -456,24 +469,19 @@ function generateNotableInfo(quote) {
 
 /**
  * Check if locations span multiple states (basic heuristic)
+ * Uses regex for efficient state detection
  */
 function checkMultipleStates(locations) {
-    // This is a simple heuristic - in production, you'd use geocoding
-    const stateAbbreviations = [
-        'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
-        'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
-        'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
-        'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
-        'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
-    ];
-    
     const foundStates = new Set();
+    
+    // Create regex pattern to match state abbreviations with proper boundaries
+    const statePattern = new RegExp(`,\\s*(${US_STATE_ABBREVIATIONS.join('|')})\\s*[,\\s]`, 'g');
+    
     locations.forEach(location => {
-        stateAbbreviations.forEach(state => {
-            if (location.includes(`, ${state} `) || location.includes(`, ${state},`)) {
-                foundStates.add(state);
-            }
-        });
+        const matches = location.matchAll(statePattern);
+        for (const match of matches) {
+            foundStates.add(match[1]);
+        }
     });
     
     return foundStates.size > 1;

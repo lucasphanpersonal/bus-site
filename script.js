@@ -817,7 +817,7 @@ ${dropoffsText}`;
     } catch (error) {
         console.error('Google Forms submission error:', error);
         // Don't throw error - allow submission to continue to localStorage
-        console.warn('Continuing with local storage despite Google Forms error');
+        console.warn('Google Forms submission failed, but quote saved locally for admin dashboard');
         return;
     }
 }
