@@ -289,7 +289,8 @@ async function computeRouteInformation(tripDays) {
             const destination = locations[j + 1];
             
             // Validate locations before API call
-            if (!origin || !origin.trim() || !destination || !destination.trim()) {
+            if (!origin || typeof origin !== 'string' || !origin.trim() || 
+                !destination || typeof destination !== 'string' || !destination.trim()) {
                 console.warn(`Skipping invalid location pair at day ${i}, leg ${j}`);
                 continue;
             }
@@ -308,7 +309,7 @@ async function computeRouteInformation(tripDays) {
                 }
                 
                 // Add delay between API calls to avoid rate limiting
-                if (j < locations.length - 2) {
+                if (j < locations.length - 2 || i < tripDays.length - 1) {
                     await new Promise(resolve => setTimeout(resolve, API_CALL_DELAY_MS));
                 }
             } catch (error) {
@@ -465,23 +466,71 @@ async function showRouteSummary(formData) {
 
         // Add button event listeners
         document.getElementById('confirmSubmit').addEventListener('click', () => {
-            document.body.removeChild(overlay);
+            if (document.body.contains(overlay)) {
+                document.body.removeChild(overlay);
+            }
             resolve(true);
         });
 
         document.getElementById('cancelSubmit').addEventListener('click', () => {
-            document.body.removeChild(overlay);
+            if (document.body.contains(overlay)) {
+                document.body.removeChild(overlay);
+            }
             resolve(false);
         });
 
         // Close on overlay click
         overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
+            if (e.target === overlay && document.body.contains(overlay)) {
                 document.body.removeChild(overlay);
                 resolve(false);
             }
         });
     });
+}
+
+/**
+ * Format route information for Google Forms submission
+ */
+function formatRouteInformation(routeInfo, passengers) {
+    if (!routeInfo) return '';
+    
+    const totalMiles = (routeInfo.totals.distance / METERS_TO_MILES).toFixed(1);
+    const totalHours = Math.floor(routeInfo.totals.duration / 3600);
+    const totalMinutes = Math.floor((routeInfo.totals.duration % 3600) / 60);
+    
+    let formatted = `ROUTE INFORMATION (Computed):
+Total Distance: ${totalMiles} miles
+Total Driving Time: ${totalHours}h ${totalMinutes}m
+Total Stops: ${routeInfo.totals.stops}
+Number of Passengers: ${passengers}
+
+`;
+    
+    routeInfo.tripDays.forEach((day) => {
+        const dayMiles = (day.totals.distance / METERS_TO_MILES).toFixed(1);
+        const dayHours = Math.floor(day.totals.duration / 3600);
+        const dayMinutes = Math.floor((day.totals.duration % 3600) / 60);
+        
+        formatted += `Day ${day.dayNumber} (${day.date}):
+  Distance: ${dayMiles} miles
+  Driving Time: ${dayHours}h ${dayMinutes}m
+  Stops: ${day.totals.stops}
+`;
+        
+        day.legs.forEach((leg, idx) => {
+            // Add null checks for leg data
+            if (leg && leg.distance && leg.distance.value && leg.duration && leg.duration.value) {
+                const legMiles = (leg.distance.value / METERS_TO_MILES).toFixed(1);
+                const legMinutes = Math.floor(leg.duration.value / 60);
+                formatted += `  Leg ${idx + 1}: ${legMiles} mi, ${legMinutes} min\n`;
+            }
+        });
+        
+        formatted += '\n';
+    });
+    
+    return formatted;
 }
 
 /**
@@ -689,40 +738,7 @@ ${dropoffsText}`;
     }).join('\n\n');
 
     // Format route information if available
-    let routeInfoFormatted = '';
-    if (formData.routeInfo) {
-        const totalMiles = (formData.routeInfo.totals.distance / METERS_TO_MILES).toFixed(1);
-        const totalHours = Math.floor(formData.routeInfo.totals.duration / 3600);
-        const totalMinutes = Math.floor((formData.routeInfo.totals.duration % 3600) / 60);
-        
-        routeInfoFormatted = `ROUTE INFORMATION (Computed):
-Total Distance: ${totalMiles} miles
-Total Driving Time: ${totalHours}h ${totalMinutes}m
-Total Stops: ${formData.routeInfo.totals.stops}
-Number of Passengers: ${formData.passengers}
-
-`;
-        
-        formData.routeInfo.tripDays.forEach((day) => {
-            const dayMiles = (day.totals.distance / METERS_TO_MILES).toFixed(1);
-            const dayHours = Math.floor(day.totals.duration / 3600);
-            const dayMinutes = Math.floor((day.totals.duration % 3600) / 60);
-            
-            routeInfoFormatted += `Day ${day.dayNumber} (${day.date}):
-  Distance: ${dayMiles} miles
-  Driving Time: ${dayHours}h ${dayMinutes}m
-  Stops: ${day.totals.stops}
-`;
-            
-            day.legs.forEach((leg, idx) => {
-                const legMiles = (leg.distance.value / METERS_TO_MILES).toFixed(1);
-                const legMinutes = Math.floor(leg.duration.value / 60);
-                routeInfoFormatted += `  Leg ${idx + 1}: ${legMiles} mi, ${legMinutes} min\n`;
-            });
-            
-            routeInfoFormatted += '\n';
-        });
-    }
+    const routeInfoFormatted = formatRouteInformation(formData.routeInfo, formData.passengers);
 
     // Prepare form data for Google Forms
     const googleFormData = new URLSearchParams();
