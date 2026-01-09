@@ -1113,9 +1113,9 @@ function generateQuoteResponseSection(quote) {
                     <h4 style="color: #065f46; margin-top: 0; margin-bottom: 15px;">✅ Accept Quote</h4>
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">Agreed Price ($) *</label>
-                        <input type="number" id="agreedPrice" placeholder="e.g., 1500" value="${hasSavedQuote ? quote.savedQuote.quoteAmount : ''}"
+                        <input type="number" id="agreedPrice" placeholder="e.g., 1500" value=""
                                style="width: 200px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem;">
-                        <p style="margin-top: 5px; font-size: 0.85rem; color: var(--text-secondary);">Enter the final agreed price (may differ from original quote if negotiated)</p>
+                        <p style="margin-top: 5px; font-size: 0.85rem; color: var(--text-secondary);">Enter the final agreed price (original quote: $${hasSavedQuote ? quote.savedQuote.quoteAmount : 'N/A'})</p>
                     </div>
                     
                     <div style="margin-bottom: 15px;">
@@ -1158,14 +1158,6 @@ function generateQuoteResponseSection(quote) {
             <p style="color: var(--text-secondary); margin-bottom: 20px;">
                 This quote has been ${currentStatus.toLowerCase()}. ${currentStatus === 'Accepted' ? 'The booking is confirmed.' : 'No further action needed.'}
             </p>
-            
-            ${currentStatus === 'Accepted' ? `
-            <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <p style="color: #1e40af; margin: 0; font-weight: 600;">
-                    ℹ️ If you need to modify this booking, you can edit the quote amount and details above and resend.
-                </p>
-            </div>
-            ` : ''}
         `;
     }
     
@@ -1415,8 +1407,9 @@ async function handleDeclineQuote() {
     }
     
     const declineReason = document.getElementById('declineReason')?.value || '';
+    const originalAmount = quote.savedQuote?.quoteAmount || '';
     
-    await sendQuoteEmail('Declined', '', declineReason, 'decline');
+    await sendQuoteEmail('Declined', originalAmount, declineReason, 'decline');
 }
 
 /**
@@ -1519,11 +1512,12 @@ ${signature}`;
     // Save quote to Google Sheets if Apps Script is enabled
     if (CONFIG.appsScript && CONFIG.appsScript.enabled) {
         try {
-            // Find the button that was clicked
-            const activeButton = document.activeElement;
-            const originalText = activeButton.innerHTML;
-            activeButton.innerHTML = '💾 Saving...';
-            activeButton.disabled = true;
+            // Show saving message in UI (using a temporary element since we don't have direct button reference)
+            const messageDiv = document.getElementById('tempMessage');
+            if (messageDiv) {
+                messageDiv.textContent = '💾 Saving quote...';
+                messageDiv.style.display = 'block';
+            }
             
             const quoteDataToSave = {
                 quoteRequestId: quote.submittedAt, // Use timestamp as unique ID
@@ -1544,9 +1538,6 @@ ${signature}`;
             const saved = quote.savedQuote ? 
                 await updateQuoteInSheets(quoteDataToSave) : 
                 await saveQuoteToSheets(quoteDataToSave);
-            
-            activeButton.innerHTML = originalText;
-            activeButton.disabled = false;
             
             if (saved) {
                 // Show success message
