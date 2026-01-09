@@ -39,28 +39,52 @@ const CONFIG = {
 };
 
 /**
- * Handle POST requests from the admin dashboard
+ * Handle POST requests with form-encoded data (avoids CORS preflight)
+ * 
+ * CRITICAL: We use Content-Type: application/x-www-form-urlencoded instead of application/json
+ * to avoid CORS preflight issues.
+ * 
+ * Why this approach:
+ * - application/json triggers CORS preflight (OPTIONS request)
+ * - Google Apps Script does NOT support OPTIONS requests for Web Apps
+ * - doOptions() function is IGNORED by Google Apps Script
+ * - Browser blocks the request before doPost() ever runs
+ * 
+ * application/x-www-form-urlencoded is a "simple content type" that:
+ * - Does NOT trigger CORS preflight
+ * - Gets automatic CORS headers from Google Apps Script (when deployed with "Anyone" access)
+ * - Works reliably across all browsers
+ * 
+ * Data is passed as form parameters, with the 'data' field containing JSON string.
  */
 function doPost(e) {
   try {
-    // Parse request
-    const requestData = JSON.parse(e.postData.contents);
+    // Get parameters from form data (e.parameter works for both GET and POST form data)
+    const params = e.parameter;
     
     // Validate authentication
-    if (requestData.secret !== CONFIG.SHARED_SECRET) {
+    if (params.secret !== CONFIG.SHARED_SECRET) {
       return createResponse(false, 'Authentication failed');
     }
     
+    // Parse data parameter (JSON string)
+    let data;
+    try {
+      data = JSON.parse(params.data);
+    } catch (parseError) {
+      return createResponse(false, 'Invalid data parameter: ' + parseError.message);
+    }
+    
     // Route to appropriate handler
-    switch (requestData.action) {
+    switch (params.action) {
       case 'saveQuote':
-        return handleSaveQuote(requestData.data);
+        return handleSaveQuote(data);
       case 'updateQuote':
-        return handleUpdateQuote(requestData.data);
+        return handleUpdateQuote(data);
       case 'deleteQuote':
-        return handleDeleteQuote(requestData.data);
+        return handleDeleteQuote(data);
       default:
-        return createResponse(false, 'Unknown action: ' + requestData.action);
+        return createResponse(false, 'Unknown action: ' + params.action);
     }
     
   } catch (error) {
@@ -70,45 +94,51 @@ function doPost(e) {
 }
 
 /**
- * Handle GET requests (for testing)
- * Test this endpoint by opening the web app URL in your browser
- * You should see: {"status":"ok","message":"...","timestamp":"...","corsEnabled":true}
+ * Handle GET requests (for testing and backwards compatibility)
  */
 function doGet(e) {
-  const response = {
-    status: 'ok',
-    message: 'Bus Charter Quote Management API is running',
-    timestamp: new Date().toISOString(),
-    corsEnabled: true,
-    deploymentInfo: {
-      note: 'If you can see this response, the API is accessible',
-      corsNote: 'CORS headers are automatically added by Google Apps Script when deployed with "Anyone" access'
+  try {
+    const params = e.parameter;
+    
+    // If no action parameter, return API info (for testing)
+    if (!params.action) {
+      return createResponse(true, 'Bus Charter Quote Management API is running', {
+        timestamp: new Date().toISOString(),
+        note: 'Send POST requests with Content-Type: application/x-www-form-urlencoded',
+        parameters: 'action, secret, data (JSON string)',
+        corsNote: 'Form-encoded POST requests avoid CORS preflight issues'
+      });
     }
-  };
-  
-  return ContentService
-    .createTextOutput(JSON.stringify(response))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-/**
- * Handle OPTIONS requests (CORS preflight)
- * This is required for cross-origin POST requests from the admin dashboard
- * 
- * IMPORTANT: When deployed with "Who has access" = "Anyone", Google Apps Script
- * automatically adds CORS headers to responses. However, we must return JSON
- * format for the headers to be added correctly.
- */
-function doOptions(e) {
-  // Return a JSON response to ensure CORS headers are added by Google Apps Script
-  const response = {
-    status: 'ok',
-    message: 'CORS preflight successful'
-  };
-  
-  return ContentService
-    .createTextOutput(JSON.stringify(response))
-    .setMimeType(ContentService.MimeType.JSON);
+    
+    // Validate authentication
+    if (params.secret !== CONFIG.SHARED_SECRET) {
+      return createResponse(false, 'Authentication failed');
+    }
+    
+    // Parse data parameter (JSON string)
+    let data;
+    try {
+      data = JSON.parse(params.data);
+    } catch (parseError) {
+      return createResponse(false, 'Invalid data parameter: ' + parseError.message);
+    }
+    
+    // Route to appropriate handler
+    switch (params.action) {
+      case 'saveQuote':
+        return handleSaveQuote(data);
+      case 'updateQuote':
+        return handleUpdateQuote(data);
+      case 'deleteQuote':
+        return handleDeleteQuote(data);
+      default:
+        return createResponse(false, 'Unknown action: ' + params.action);
+    }
+    
+  } catch (error) {
+    logError('doGet error', error);
+    return createResponse(false, 'Server error: ' + error.message);
+  }
 }
 
 /**
