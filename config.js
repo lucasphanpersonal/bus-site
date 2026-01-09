@@ -43,6 +43,34 @@ const CONFIG = {
     routeComputation: {
         enabled: true,  // Set to false to disable route computation
         showSummary: true  // Show route summary to user before submission
+    },
+
+    // Google Sheets API Configuration (for Admin Dashboard)
+    // To set this up:
+    // 1. Your Google Form should be linked to a Google Sheet (Responses tab → Create Spreadsheet)
+    // 2. Get the Spreadsheet ID from the URL: https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit
+    // 3. Enable Google Sheets API in Google Cloud Console (same project as your Maps API)
+    // 4. Use the same API key or create a new one (recommended: same key for simplicity)
+    // 5. Make the spreadsheet publicly readable: Share → Anyone with link can view
+    // See GOOGLE_SHEETS_SETUP.md for detailed instructions
+    
+    googleSheets: {
+        enabled: false,  // Set to true to use Google Sheets instead of localStorage
+        spreadsheetId: 'YOUR_SPREADSHEET_ID_HERE',  // The ID from your Google Sheets URL
+        apiKey: '',  // Leave empty to use the same Maps API key, or provide a different key
+        sheetName: 'Form Responses 1',  // Default sheet name when linking Google Form
+        // Column mapping (adjust if your sheet has different column order)
+        columns: {
+            timestamp: 0,      // Column A (0-indexed)
+            tripDays: 1,       // Column B
+            passengers: 2,     // Column C
+            name: 3,           // Column D
+            email: 4,          // Column E
+            phone: 5,          // Column F
+            company: 6,        // Column G
+            description: 7,    // Column H
+            notes: 8           // Column I (includes route info)
+        }
     }
 };
 

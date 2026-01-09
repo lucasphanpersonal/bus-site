@@ -88,41 +88,344 @@ function showLogin() {
 function showDashboard() {
     document.getElementById('loginContainer').style.display = 'none';
     document.getElementById('adminDashboard').style.display = 'block';
+    updateDataSourceBanner();
 }
 
 /**
- * Load quotes from localStorage
+ * Update the data source banner based on configuration
  */
-function loadQuotes() {
-    const quotes = getQuotes();
+function updateDataSourceBanner() {
+    const bannerText = document.getElementById('dataSourceText');
+    if (!bannerText) return;
     
-    if (quotes.length === 0) {
-        // Show empty state
-        document.getElementById('quotesList').innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">📋</div>
-                <p>No quote requests yet.</p>
-                <p style="margin-top: 10px; font-size: 0.9rem;">Quotes submitted from <strong>this browser</strong> will appear here.</p>
-            </div>
-        `;
-        updateStats([]);
-        return;
+    if (CONFIG.googleSheets && CONFIG.googleSheets.enabled) {
+        bannerText.innerHTML = 'Reading quotes from <strong>Google Sheets</strong>. All quotes submitted by customers will appear here, accessible from any device.';
+        document.getElementById('dataBanner').style.background = '#d1fae5';
+        document.getElementById('dataBanner').style.borderColor = '#10b981';
+        document.getElementById('dataBannerContent').style.color = '#065f46';
+    } else {
+        bannerText.innerHTML = 'Quote data is stored <strong>locally in this browser only</strong>. To see submitted quotes here, they must be submitted from this same browser on this same device. Data is not synced across browsers, devices, or deployments. <a href="https://github.com/lucasphanpersonal/bus-site/blob/main/DATA_STORAGE_GUIDE.md" target="_blank" style="color: #1e3a8a; text-decoration: underline;">Learn more</a> or enable Google Sheets integration in config.js.';
+    }
+}
+
+/**
+ * Load quotes - from Google Sheets or localStorage depending on configuration
+ */
+async function loadQuotes() {
+    try {
+        let quotes;
+        
+        // Check if Google Sheets integration is enabled
+        if (CONFIG.googleSheets && CONFIG.googleSheets.enabled) {
+            showLoadingState();
+            quotes = await getQuotesFromGoogleSheets();
+        } else {
+            quotes = getQuotesFromLocalStorage();
+        }
+        
+        if (quotes.length === 0) {
+            showEmptyState();
+            updateStats([]);
+            return;
+        }
+        
+        // Sort by date (newest first)
+        quotes.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+        
+        // Display quotes
+        displayQuotes(quotes);
+        updateStats(quotes);
+    } catch (error) {
+        console.error('Error loading quotes:', error);
+        showErrorState(error.message);
+    }
+}
+
+/**
+ * Show loading state
+ */
+function showLoadingState() {
+    document.getElementById('quotesList').innerHTML = `
+        <div class="empty-state">
+            <div class="empty-state-icon">⏳</div>
+            <p>Loading quotes from Google Sheets...</p>
+        </div>
+    `;
+}
+
+/**
+ * Show empty state
+ */
+function showEmptyState() {
+    const dataSource = CONFIG.googleSheets?.enabled ? 'Google Sheets' : 'this browser';
+    document.getElementById('quotesList').innerHTML = `
+        <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <p>No quote requests yet.</p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">Quotes will appear here once submitted${CONFIG.googleSheets?.enabled ? '' : ' from <strong>' + dataSource + '</strong>'}.</p>
+        </div>
+    `;
+}
+
+/**
+ * Show error state
+ */
+function showErrorState(errorMessage) {
+    document.getElementById('quotesList').innerHTML = `
+        <div class="empty-state">
+            <div class="empty-state-icon" style="color: #ef4444;">⚠️</div>
+            <p style="color: #dc2626; font-weight: 600;">Error loading quotes</p>
+            <p style="margin-top: 10px; font-size: 0.9rem; color: #991b1b;">${errorMessage}</p>
+            <button onclick="loadQuotes()" style="margin-top: 15px; padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">Retry</button>
+        </div>
+    `;
+}
+
+/**
+ * Get quotes from Google Sheets API
+ */
+async function getQuotesFromGoogleSheets() {
+    const sheetsConfig = CONFIG.googleSheets;
+    const apiKey = sheetsConfig.apiKey || CONFIG.googleMaps.apiKey;
+    
+    if (!sheetsConfig.spreadsheetId || sheetsConfig.spreadsheetId === 'YOUR_SPREADSHEET_ID_HERE') {
+        throw new Error('Google Sheets Spreadsheet ID not configured. Please update config.js');
     }
     
-    // Sort by date (newest first)
-    quotes.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+    if (!apiKey) {
+        throw new Error('API key not found. Please configure in config.js');
+    }
     
-    // Display quotes
-    displayQuotes(quotes);
-    updateStats(quotes);
+    // Build the Sheets API URL
+    const sheetName = encodeURIComponent(sheetsConfig.sheetName || 'Form Responses 1');
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsConfig.spreadsheetId}/values/${sheetName}?key=${apiKey}`;
+    
+    try {
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            if (response.status === 403) {
+                throw new Error('API access denied. Make sure Google Sheets API is enabled and the spreadsheet is publicly readable.');
+            } else if (response.status === 404) {
+                throw new Error('Spreadsheet not found. Check the Spreadsheet ID in config.js');
+            }
+            throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.values || data.values.length <= 1) {
+            // No data rows (only header or empty)
+            return [];
+        }
+        
+        // Parse the rows into quote objects
+        return parseGoogleSheetsData(data.values);
+    } catch (error) {
+        console.error('Google Sheets API error:', error);
+        throw error;
+    }
 }
 
 /**
- * Get quotes from localStorage
+ * Parse Google Sheets data into quote objects
  */
-function getQuotes() {
+function parseGoogleSheetsData(rows) {
+    const quotes = [];
+    const cols = CONFIG.googleSheets.columns;
+    
+    // Skip header row (index 0)
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        
+        try {
+            // Parse the trip days text format back into structured data
+            const tripDays = parseTripDaysText(row[cols.tripDays] || '');
+            
+            // Extract route info from notes if present
+            const notesText = row[cols.notes] || '';
+            const { routeInfo, userNotes } = extractRouteInfoFromNotes(notesText);
+            
+            const quote = {
+                id: i, // Use row index as ID
+                submittedAt: row[cols.timestamp] || new Date().toISOString(),
+                tripDays: tripDays,
+                passengers: row[cols.passengers] || '',
+                name: row[cols.name] || '',
+                email: row[cols.email] || '',
+                phone: row[cols.phone] || '',
+                company: row[cols.company] || 'N/A',
+                description: row[cols.description] || '',
+                notes: userNotes,
+                routeInfo: routeInfo
+            };
+            
+            quotes.push(quote);
+        } catch (error) {
+            console.error(`Error parsing row ${i}:`, error);
+            // Skip malformed rows
+        }
+    }
+    
+    return quotes;
+}
+
+/**
+ * Parse trip days text format back into structured data
+ * Input format: "Day 1: 2026-02-15 from 09:00 to 17:00\n  Pick-up: Address\n  Drop-off 1: Address"
+ */
+function parseTripDaysText(text) {
+    if (!text || typeof text !== 'string') return [];
+    
+    const tripDays = [];
+    const dayBlocks = text.split(/Day \d+:/g).filter(b => b.trim());
+    
+    for (const block of dayBlocks) {
+        const lines = block.split('\n').map(l => l.trim()).filter(l => l);
+        if (lines.length === 0) continue;
+        
+        try {
+            // Parse first line: "2026-02-15 from 09:00 to 17:00" or "2026-02-15 from 09:00 to 17:00 (overnight)"
+            const firstLine = lines[0];
+            const dateMatch = firstLine.match(/(\d{4}-\d{2}-\d{2})/);
+            const timeMatch = firstLine.match(/from (\d{2}:\d{2}) to (\d{2}:\d{2})/);
+            const overnightMatch = firstLine.includes('(overnight)');
+            
+            if (!dateMatch || !timeMatch) continue;
+            
+            const tripDay = {
+                date: dateMatch[1],
+                startTime: timeMatch[1],
+                endTime: timeMatch[2],
+                endsNextDay: overnightMatch,
+                pickup: '',
+                dropoffs: []
+            };
+            
+            // Parse location lines
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (line.startsWith('Pick-up:')) {
+                    tripDay.pickup = line.replace('Pick-up:', '').trim();
+                } else if (line.match(/Drop-off \d+:/)) {
+                    const dropoff = line.replace(/Drop-off \d+:/, '').trim();
+                    if (dropoff) tripDay.dropoffs.push(dropoff);
+                }
+            }
+            
+            if (tripDay.pickup && tripDay.dropoffs.length > 0) {
+                tripDays.push(tripDay);
+            }
+        } catch (error) {
+            console.error('Error parsing trip day block:', error);
+        }
+    }
+    
+    return tripDays;
+}
+
+/**
+ * Extract route info from notes text
+ * Notes contain both route info and user notes separated by "---\nUSER NOTES:"
+ */
+function extractRouteInfoFromNotes(notesText) {
+    if (!notesText || !notesText.includes('ROUTE INFORMATION')) {
+        return { routeInfo: null, userNotes: notesText };
+    }
+    
+    try {
+        const parts = notesText.split('---\nUSER NOTES:\n');
+        const routeInfoText = parts[0];
+        const userNotes = parts[1] || '';
+        
+        // Parse route information back into object format
+        const routeInfo = parseRouteInfoText(routeInfoText);
+        
+        return { routeInfo, userNotes };
+    } catch (error) {
+        console.error('Error extracting route info:', error);
+        return { routeInfo: null, userNotes: notesText };
+    }
+}
+
+/**
+ * Parse route information text back into object
+ */
+function parseRouteInfoText(text) {
+    const routeInfo = {
+        totals: {
+            distance: 0,
+            duration: 0,
+            stops: 0,
+            bookingHours: 0
+        },
+        tripDays: []
+    };
+    
+    try {
+        // Extract totals
+        const distanceMatch = text.match(/Total Distance: ([\d.]+) miles/);
+        const drivingTimeMatch = text.match(/Total Driving Time: (\d+)h (\d+)m/);
+        const bookingHoursMatch = text.match(/Total Booking Hours: (\d+)h (\d+)m/);
+        const stopsMatch = text.match(/Total Stops: (\d+)/);
+        
+        if (distanceMatch) {
+            routeInfo.totals.distance = parseFloat(distanceMatch[1]) * METERS_PER_MILE;
+        }
+        if (drivingTimeMatch) {
+            routeInfo.totals.duration = parseInt(drivingTimeMatch[1]) * 3600 + parseInt(drivingTimeMatch[2]) * 60;
+        }
+        if (bookingHoursMatch) {
+            routeInfo.totals.bookingHours = parseInt(bookingHoursMatch[1]) * 60 + parseInt(bookingHoursMatch[2]);
+        }
+        if (stopsMatch) {
+            routeInfo.totals.stops = parseInt(stopsMatch[1]);
+        }
+        
+        // Parse individual days
+        const dayMatches = text.matchAll(/Day (\d+) \(([^)]+)\):\s+Time: ([\d:]+) - ([\d:]+)([^)]*)\((\d+)h (\d+)m booking\)\s+Distance: ([\d.]+) miles\s+Driving Time: (\d+)h (\d+)m\s+Stops: (\d+)/g);
+        
+        for (const match of dayMatches) {
+            const dayInfo = {
+                dayNumber: parseInt(match[1]),
+                date: match[2],
+                startTime: match[3],
+                endTime: match[4],
+                endsNextDay: match[5].includes('(overnight)'),
+                bookingHours: parseInt(match[6]),
+                bookingMinutes: parseInt(match[7]),
+                totals: {
+                    distance: parseFloat(match[8]) * METERS_PER_MILE,
+                    duration: parseInt(match[9]) * 3600 + parseInt(match[10]) * 60,
+                    stops: parseInt(match[11]),
+                    bookingMinutes: parseInt(match[6]) * 60 + parseInt(match[7])
+                },
+                legs: []
+            };
+            
+            routeInfo.tripDays.push(dayInfo);
+        }
+    } catch (error) {
+        console.error('Error parsing route info text:', error);
+    }
+    
+    return routeInfo;
+}
+
+/**
+ * Get quotes from localStorage (legacy method)
+ */
+function getQuotesFromLocalStorage() {
     const quotesJson = localStorage.getItem(STORAGE_KEY);
     return quotesJson ? JSON.parse(quotesJson) : [];
+}
+
+/**
+ * Get quotes - backward compatible wrapper
+ */
+function getQuotes() {
+    // This is kept for backward compatibility with saveQuote function
+    return getQuotesFromLocalStorage();
 }
 
 /**

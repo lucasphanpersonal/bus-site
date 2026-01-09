@@ -185,22 +185,45 @@ const ADMIN_PASSWORD = 'your-secure-password-here';
 
 **Note**: This is a client-side implementation suitable for personal use or small businesses. For production use with sensitive data, implement proper backend authentication.
 
-### Data Storage
+### Data Storage Options
 
-⚠️ **IMPORTANT**: Quote data is stored in the browser's localStorage which has the following limitations:
+The admin dashboard supports two data storage methods:
+
+#### Option 1: localStorage (Default - Limited)
+
+⚠️ **IMPORTANT**: localStorage has significant limitations:
 
 - **Browser-specific**: Data stored in Chrome cannot be accessed in Firefox (even on the same device)
 - **Device-specific**: Data stored on your desktop cannot be accessed on your phone
 - **Not synced**: Data is NOT synced across browsers, devices, or deployments
 - **Same browser requirement**: To see submitted quotes in the admin dashboard, they must be submitted from the **same browser on the same device**
+- **Not suitable for production**: Cannot see customer quotes submitted from their devices
 
-**For Testing**: When testing locally, make sure to submit quotes and view the admin dashboard in the same browser session.
+**Use case**: Testing and development only
 
-**For Production**: All quotes are also submitted to Google Forms (if configured), which serves as a permanent backup accessible from anywhere.
+#### Option 2: Google Sheets Integration (Recommended for Production)
 
-**For Enterprise Use**: Consider implementing a backend database for centralized data storage.
+✅ **Connect the admin dashboard to Google Sheets for centralized data storage:**
 
-📖 **See [DATA_STORAGE_GUIDE.md](DATA_STORAGE_GUIDE.md) for detailed information about data storage, deployment considerations, and recommendations.**
+- **Accessible from anywhere**: View quotes from any device, any browser
+- **See customer quotes**: All quotes submitted by customers appear in the dashboard
+- **Same beautiful UI**: Maps, formatted data, and all features preserved
+- **Free**: No hosting or database costs
+- **Easy setup**: 5-minute configuration
+
+📖 **See [GOOGLE_SHEETS_SETUP.md](GOOGLE_SHEETS_SETUP.md) for step-by-step setup instructions.**
+
+**Comparison:**
+
+| Feature | localStorage | Google Sheets |
+|---------|-------------|---------------|
+| See customer quotes | ❌ No | ✅ Yes |
+| Access from any device | ❌ No | ✅ Yes |
+| Setup complexity | ✅ None | ⚠️ 5 minutes |
+
+**For Enterprise Use**: For advanced needs, consider implementing a custom backend database with proper authentication.
+
+📖 **See [DATA_STORAGE_GUIDE.md](DATA_STORAGE_GUIDE.md) for detailed information about data storage options.**
 
 ## Route Calculation Feature
 
