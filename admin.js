@@ -1537,6 +1537,13 @@ ${signature}`;
             // Show saving status
             showTemporaryMessage('💾 Saving quote...', 'info');
             
+            console.log('Preparing to save quote:', {
+                emailType,
+                newStatus,
+                hasSavedQuote: !!quote.savedQuote,
+                willUpdate: !!quote.savedQuote
+            });
+            
             const quoteDataToSave = {
                 quoteRequestId: quote.submittedAt, // Use timestamp as unique ID
                 customerName: quote.name,
@@ -1552,6 +1559,8 @@ ${signature}`;
                 tripDays: quote.tripDays.length,
                 agreedPrice: emailType === 'accept' ? amount : (quote.savedQuote?.agreedPrice || '') // Save agreed price when accepting, preserve existing otherwise
             };
+            
+            console.log('Quote data to save:', quoteDataToSave);
             
             // Use update if quote already exists, otherwise save new
             const saved = quote.savedQuote ? 
@@ -1600,6 +1609,8 @@ async function updateQuoteInSheets(quoteData) {
     }
     
     try {
+        console.log('Updating quote in Sheets:', quoteData);
+        
         const response = await fetch(CONFIG.appsScript.webAppUrl, {
             method: 'POST',
             mode: 'no-cors', // Required for cross-origin requests to Apps Script. Response body cannot be read with this mode.
