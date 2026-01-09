@@ -1192,7 +1192,7 @@ body.landing-page {
     top: 50%;
     font-size: 4rem;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
-    animation: busSuspensionBounce 2s ease-in-out infinite;
+    animation: busSuspensionBounce 10s ease-in-out infinite;
     will-change: transform;
     transform: translate(-50%, -50%) scaleX(-1); /* Center and flip horizontally to face right */
 }
@@ -1222,7 +1222,7 @@ body.landing-page {
         transparent 40px
     );
     opacity: 0.3;
-    animation: roadScroll 2s linear infinite;
+    animation: roadScroll 10s linear infinite;
 }
 
 @keyframes roadScroll {
@@ -1267,7 +1267,7 @@ body.landing-page {
     top: 10%;
     font-size: 2rem;
     opacity: 0.6;
-    animation: moveCloudRightToLeft 30s linear infinite;
+    animation: moveCloudRightToLeft 150s linear infinite;
 }
 
 .cloud-1 {
@@ -1301,14 +1301,14 @@ body.landing-page {
     bottom: 35px;
     font-size: 2rem;
     opacity: 0.7;
-    animation: moveTreeBackgroundRightToLeft 12s linear infinite;
+    animation: moveTreeBackgroundRightToLeft 60s linear infinite;
 }
 
 /* Foreground trees move faster (in front of the bus) */
 .scenery-foreground .tree {
     bottom: 35px;
     font-size: 2.5rem;
-    animation: moveTreeForegroundRightToLeft 8s linear infinite;
+    animation: moveTreeForegroundRightToLeft 40s linear infinite;
 }
 
 .tree-1 {
