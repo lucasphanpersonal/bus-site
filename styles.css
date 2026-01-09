@@ -836,6 +836,7 @@ body.landing-page {
 
 .title-line {
     display: block;
+    color: var(--primary-dark); /* Fallback color for older browsers */
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -1003,6 +1004,7 @@ body.landing-page {
 .stat-number {
     font-size: 3rem;
     font-weight: 800;
+    color: var(--primary-dark); /* Fallback color for older browsers */
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

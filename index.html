@@ -95,37 +95,25 @@
     </div>
 
     <script>
-        // Add subtle parallax effect on mouse move
+        // Add subtle parallax effect on mouse move with throttling for better performance
+        let rafId = null;
         document.addEventListener('mousemove', (e) => {
-            const orbs = document.querySelectorAll('.gradient-orb');
-            const x = e.clientX / window.innerWidth;
-            const y = e.clientY / window.innerHeight;
+            if (rafId) return;
             
-            orbs.forEach((orb, index) => {
-                const speed = (index + 1) * 10;
-                const xMove = (x - 0.5) * speed;
-                const yMove = (y - 0.5) * speed;
-                orb.style.transform = `translate(${xMove}px, ${yMove}px)`;
+            rafId = requestAnimationFrame(() => {
+                const orbs = document.querySelectorAll('.gradient-orb');
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                
+                orbs.forEach((orb, index) => {
+                    const speed = (index + 1) * 10;
+                    const xMove = (x - 0.5) * speed;
+                    const yMove = (y - 0.5) * speed;
+                    orb.style.transform = `translate(${xMove}px, ${yMove}px)`;
+                });
+                
+                rafId = null;
             });
-        });
-
-        // Add scroll animation trigger for stats
-        const observerOptions = {
-            threshold: 0.3,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, observerOptions);
-
-        // Observe all animated elements
-        document.querySelectorAll('.animate-fade-in, .animate-fade-in-up, .animate-slide-in-bottom').forEach(el => {
-            observer.observe(el);
         });
     </script>
 </body>
