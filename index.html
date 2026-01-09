@@ -149,16 +149,57 @@
         </footer>
     </div>
 
+    <!-- Load local config first (git-ignored, contains API keys) -->
+    <script src="config-local.js" onerror="console.log('ℹ️ No local config found, using environment defaults')"></script>
+    
+    <!-- Load base config -->
     <script src="config.js"></script>
+    
+    <!-- Merge local config with base config -->
     <script>
+        // Merge CONFIG_LOCAL into CONFIG if it exists
+        if (typeof CONFIG_LOCAL !== 'undefined') {
+            console.log('🔧 Merging local configuration...');
+            
+            // Deep merge function
+            function deepMerge(target, source) {
+                for (const key in source) {
+                    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                        target[key] = target[key] || {};
+                        deepMerge(target[key], source[key]);
+                    } else {
+                        target[key] = source[key];
+                    }
+                }
+                return target;
+            }
+            
+            // Merge configurations
+            if (CONFIG_LOCAL.googleMaps) {
+                CONFIG.googleMaps = { ...CONFIG.googleMaps, ...CONFIG_LOCAL.googleMaps };
+            }
+            if (CONFIG_LOCAL.emailjs) {
+                CONFIG.emailjs = deepMerge({ ...CONFIG.emailjs }, CONFIG_LOCAL.emailjs);
+            }
+            
+            console.log('✅ Local configuration loaded successfully');
+            console.log('🔑 API Keys loaded:', {
+                googleMaps: CONFIG.googleMaps.apiKey ? '✅' : '❌',
+                emailjs: CONFIG.emailjs.publicKey ? '✅' : '❌'
+            });
+        } else {
+            console.log('ℹ️ Using default configuration (no local overrides)');
+            console.log('💡 To add API keys securely, see SECURITY_SETUP.md');
+        }
+        
         // Initialize EmailJS if configured
         try {
             if (typeof emailjs !== 'undefined' && CONFIG.emailjs && CONFIG.emailjs.enabled && CONFIG.emailjs.publicKey) {
                 emailjs.init(CONFIG.emailjs.publicKey);
-                console.log('EmailJS initialized successfully');
+                console.log('✅ EmailJS initialized successfully');
             }
         } catch (error) {
-            console.warn('Failed to initialize EmailJS:', error);
+            console.warn('⚠️ Failed to initialize EmailJS:', error);
             // Site will continue to work without email functionality
         }
     </script>

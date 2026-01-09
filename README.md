@@ -80,9 +80,42 @@ cd bus-site
    - Copy your API key
    - (Recommended) Restrict the key to your domain for security
 
-### 4. Update Configuration
+⚠️ **IMPORTANT**: Never commit API keys to the repository! See [SECURITY_SETUP.md](SECURITY_SETUP.md) for secure configuration.
 
-Edit `config.js` and replace the placeholder values:
+### 4. Secure API Key Configuration
+
+**🔐 Your API keys must be kept secret.** Follow these steps to configure them securely:
+
+#### For Local Development:
+
+1. Copy the example config file:
+   ```bash
+   cp config-local.js.example config-local.js
+   ```
+
+2. Edit `config-local.js` and add your real API keys:
+   ```javascript
+   const CONFIG_LOCAL = {
+       googleMaps: {
+           apiKey: 'YOUR_ACTUAL_API_KEY'
+       }
+   };
+   ```
+
+3. The file is already in `.gitignore` and won't be committed.
+
+#### For Production Deployment:
+
+Use environment variables or your platform's secret management:
+- **Netlify**: Use Environment Variables in site settings
+- **Vercel**: Use Environment Variables in project settings  
+- **GitHub Pages**: Use GitHub Secrets with GitHub Actions
+
+📖 **See [SECURITY_SETUP.md](SECURITY_SETUP.md) for complete setup instructions for all deployment methods.**
+
+### 5. Update Configuration (Google Forms)
+
+Edit `config.js` and update the Google Forms configuration (API keys should go in `config-local.js`):
 
 ```javascript
 const CONFIG = {
@@ -98,12 +131,11 @@ const CONFIG = {
             description: 'entry.XXXXXXXXX',
             notes: 'entry.XXXXXXXXX'
         }
-    },
-    googleMaps: {
-        apiKey: 'YOUR_GOOGLE_MAPS_API_KEY'
     }
 };
 ```
+
+**Note**: Do NOT put API keys in `config.js`. Use `config-local.js` as described in step 4.
 
 ### 5. (Optional) Configure Email Confirmations and Admin Notifications
 
@@ -327,12 +359,27 @@ This allows you to test the website before setting up the APIs.
 
 ## Security Notes
 
-- ⚠️ **Never commit API keys to public repositories**
+### 🔐 Critical Security Practices
+
+- ⚠️ **NEVER commit API keys to the repository** - Use `config-local.js` (already git-ignored)
+- ⚠️ **API key exposed?** Revoke it immediately and generate a new one
 - ⚠️ **Change the default admin password (`admin123`) before deploying**
-- Consider using environment variables or server-side configuration for API keys
-- Restrict your Google Maps API key to your domain
-- Enable CORS restrictions on your APIs where possible
-- For production use, implement proper backend authentication for the admin dashboard
+- ✅ **Use [SECURITY_SETUP.md](SECURITY_SETUP.md)** for proper API key configuration
+- ✅ **Restrict your Google Maps API key** to your domain in Google Cloud Console
+- ✅ **Set up billing alerts** in Google Cloud Console to prevent unexpected charges
+- ✅ **For production**, use environment variables or platform-specific secrets (Netlify, Vercel, etc.)
+- ✅ **Enable CORS restrictions** on your APIs where possible
+- ✅ **For production use**, implement proper backend authentication for the admin dashboard
+
+### If Your API Key Was Compromised:
+
+1. **Immediately revoke the exposed API key** in Google Cloud Console
+2. **Generate a new API key** with proper domain restrictions
+3. **Update your local config** in `config-local.js` (not `config.js`)
+4. **Never commit the new key** to the repository
+5. **Consider removing from git history** - see [SECURITY_SETUP.md](SECURITY_SETUP.md)
+
+📖 **Full security guide**: [SECURITY_SETUP.md](SECURITY_SETUP.md)
 
 ## Future Enhancements
 
