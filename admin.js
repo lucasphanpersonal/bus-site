@@ -121,10 +121,23 @@ function updateDataSourceBanner() {
  * @param {string} sheetName - The name of the sheet/tab
  * @param {string} apiKey - The Google API key
  * @returns {string} The complete API URL with cache-busting parameter
+ * @throws {Error} If any parameter is missing or empty
  */
 function buildSheetsApiUrl(spreadsheetId, sheetName, apiKey) {
+    // Validate input parameters
+    if (!spreadsheetId || typeof spreadsheetId !== 'string' || !spreadsheetId.trim()) {
+        throw new Error('Invalid spreadsheetId: must be a non-empty string');
+    }
+    if (!sheetName || typeof sheetName !== 'string' || !sheetName.trim()) {
+        throw new Error('Invalid sheetName: must be a non-empty string');
+    }
+    if (!apiKey || typeof apiKey !== 'string' || !apiKey.trim()) {
+        throw new Error('Invalid apiKey: must be a non-empty string');
+    }
+    
     const encodedSheetName = encodeURIComponent(sheetName);
     const timestamp = Date.now(); // Use Date.now() for better performance
+    // Note: API key is in URL per Google Sheets API design for public spreadsheet access
     return `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodedSheetName}?key=${apiKey}&_=${timestamp}`;
 }
 
