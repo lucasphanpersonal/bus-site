@@ -57,13 +57,15 @@ The script uses a shared secret for basic authentication. You should change this
 
 ### Step 6: Deploy as Web App
 
+**IMPORTANT**: The web app must be deployed with "Anyone" access to allow the admin dashboard to read responses from the Apps Script. Google Apps Script automatically handles CORS (Cross-Origin Resource Sharing) for web apps deployed with "Anyone" access, which enables the admin dashboard to receive and process responses from the script.
+
 1. Click **Deploy** → **New deployment**
 2. Click the gear icon (⚙️) next to "Select type"
 3. Choose **Web app**
 4. Configure the deployment:
    - **Description**: "Quote Management API v1" (or any description)
    - **Execute as**: **Me** (this allows the script to write to your sheet)
-   - **Who has access**: **Anyone** (don't worry, the script validates requests with the shared secret)
+   - **Who has access**: **Anyone** ⚠️ **CRITICAL**: Must be set to "Anyone" to enable CORS
 5. Click **Deploy**
 6. You may need to authorize again - follow the prompts
 7. Copy the **Web app URL** - it will look like:
@@ -71,6 +73,8 @@ The script uses a shared secret for basic authentication. You should change this
    https://script.google.com/macros/s/AKfycby.../exec
    ```
 8. Save this URL - you'll need it for the next step
+
+**Security Note**: Even though the web app is accessible to "Anyone", it's protected by the shared secret. All requests without the correct secret will be rejected.
 
 ### Step 7: Update config.js
 
