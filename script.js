@@ -249,6 +249,27 @@ function removeDropoffLocation(dayIndex, dropoffIndex) {
 }
 
 /**
+ * Calculate booking hours from start and end time
+ */
+function calculateBookingHours(startTime, endTime) {
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+    
+    const startMinutes = startHour * 60 + startMinute;
+    const endMinutes = endHour * 60 + endMinute;
+    
+    let totalMinutes = endMinutes - startMinutes;
+    if (totalMinutes < 0) {
+        totalMinutes += 24 * 60; // Handle overnight trips
+    }
+    
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
+    return { hours, minutes, totalMinutes };
+}
+
+/**
  * Compute route information for all trip days
  */
 async function computeRouteInformation(tripDays) {
@@ -262,20 +283,28 @@ async function computeRouteInformation(tripDays) {
         totals: {
             distance: 0,
             duration: 0,
-            stops: 0
+            stops: 0,
+            bookingHours: 0
         }
     };
 
     for (let i = 0; i < tripDays.length; i++) {
         const day = tripDays[i];
+        const bookingTime = calculateBookingHours(day.startTime, day.endTime);
+        
         const dayInfo = {
             dayNumber: i + 1,
             date: day.date,
+            startTime: day.startTime,
+            endTime: day.endTime,
+            bookingHours: bookingTime.hours,
+            bookingMinutes: bookingTime.minutes,
             legs: [],
             totals: {
                 distance: 0,
                 duration: 0,
-                stops: day.dropoffs.length
+                stops: day.dropoffs.length,
+                bookingMinutes: bookingTime.totalMinutes
             }
         };
 
@@ -320,6 +349,7 @@ async function computeRouteInformation(tripDays) {
         routeInfo.totals.distance += dayInfo.totals.distance;
         routeInfo.totals.duration += dayInfo.totals.duration;
         routeInfo.totals.stops += dayInfo.totals.stops;
+        routeInfo.totals.bookingHours += bookingTime.totalMinutes;
     }
 
     return routeInfo;
@@ -400,6 +430,8 @@ async function showRouteSummary(formData) {
         const totalMiles = (routeInfo.totals.distance / METERS_PER_MILE).toFixed(1);
         const totalHours = Math.floor(routeInfo.totals.duration / 3600);
         const totalMinutes = Math.floor((routeInfo.totals.duration % 3600) / 60);
+        const totalBookingHours = Math.floor(routeInfo.totals.bookingHours / 60);
+        const totalBookingMinutes = routeInfo.totals.bookingHours % 60;
         
         let summaryHTML = `
             <h2 style="margin-bottom: 20px; color: #1e293b;">🗺️ Route Summary</h2>
@@ -407,6 +439,7 @@ async function showRouteSummary(formData) {
                 <h3 style="margin-bottom: 15px; color: #2563eb;">Total Trip Overview</h3>
                 <p style="margin: 8px 0;"><strong>Total Distance:</strong> ${totalMiles} miles</p>
                 <p style="margin: 8px 0;"><strong>Total Driving Time:</strong> ${totalHours}h ${totalMinutes}m</p>
+                <p style="margin: 8px 0;"><strong>Total Booking Hours:</strong> ${totalBookingHours}h ${totalBookingMinutes}m</p>
                 <p style="margin: 8px 0;"><strong>Total Stops:</strong> ${routeInfo.totals.stops}</p>
                 <p style="margin: 8px 0;"><strong>Number of Passengers:</strong> ${formData.passengers}</p>
             </div>
@@ -421,6 +454,7 @@ async function showRouteSummary(formData) {
             summaryHTML += `
                 <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <h4 style="margin-bottom: 10px; color: #1e293b;">Day ${day.dayNumber} - ${day.date}</h4>
+                    <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${day.startTime} - ${day.endTime} (${day.bookingHours}h ${day.bookingMinutes}m booking)</p>
                     <p style="margin: 5px 0; font-size: 14px;"><strong>Distance:</strong> ${dayMiles} miles</p>
                     <p style="margin: 5px 0; font-size: 14px;"><strong>Driving Time:</strong> ${dayHours}h ${dayMinutes}m</p>
                     <p style="margin: 5px 0; font-size: 14px;"><strong>Stops:</strong> ${day.totals.stops}</p>
@@ -497,10 +531,13 @@ function formatRouteInformation(routeInfo, passengers) {
     const totalMiles = (routeInfo.totals.distance / METERS_PER_MILE).toFixed(1);
     const totalHours = Math.floor(routeInfo.totals.duration / 3600);
     const totalMinutes = Math.floor((routeInfo.totals.duration % 3600) / 60);
+    const totalBookingHours = Math.floor(routeInfo.totals.bookingHours / 60);
+    const totalBookingMinutes = routeInfo.totals.bookingHours % 60;
     
     let formatted = `ROUTE INFORMATION (Computed):
 Total Distance: ${totalMiles} miles
 Total Driving Time: ${totalHours}h ${totalMinutes}m
+Total Booking Hours: ${totalBookingHours}h ${totalBookingMinutes}m
 Total Stops: ${routeInfo.totals.stops}
 Number of Passengers: ${passengers}
 
@@ -512,6 +549,7 @@ Number of Passengers: ${passengers}
         const dayMinutes = Math.floor((day.totals.duration % 3600) / 60);
         
         formatted += `Day ${day.dayNumber} (${day.date}):
+  Time: ${day.startTime} - ${day.endTime} (${day.bookingHours}h ${day.bookingMinutes}m booking)
   Distance: ${dayMiles} miles
   Driving Time: ${dayHours}h ${dayMinutes}m
   Stops: ${day.totals.stops}
@@ -584,31 +622,15 @@ async function handleFormSubmit(event) {
         // Submit to Google Forms
         await submitToGoogleForms(formData);
 
-        // Show success message
-        showStatusMessage('success', '✓ Quote request submitted successfully! We\'ll get back to you soon.');
+        // Save to localStorage for admin dashboard
+        saveQuoteToLocalStorage(formData);
 
-        // Reset form after short delay
-        setTimeout(() => {
-            document.getElementById('bookingForm').reset();
-            // Remove extra date/time groups
-            const groups = document.querySelectorAll('.date-time-group');
-            groups.forEach((group, idx) => {
-                if (idx > 0) {
-                    group.remove();
-                } else {
-                    // For the first group, remove extra dropoff locations
-                    const dropoffContainer = group.querySelector('.dropoff-container');
-                    if (dropoffContainer) {
-                        const dropoffGroups = dropoffContainer.querySelectorAll('.dropoff-group');
-                        dropoffGroups.forEach((dropoffGroup, dropoffIdx) => {
-                            if (dropoffIdx > 0) dropoffGroup.remove();
-                        });
-                    }
-                }
-            });
-            dateTimeCounter = 1;
-            dropoffCounters = { 0: 1 };
-        }, 2000);
+        // Redirect to success page with query parameters
+        const params = new URLSearchParams({
+            name: formData.name,
+            email: formData.email
+        });
+        window.location.href = `success.html?${params.toString()}`;
 
     } catch (error) {
         console.error('Form submission error:', error);
@@ -795,6 +817,28 @@ ${dropoffsText}`;
     } catch (error) {
         console.error('Google Forms submission error:', error);
         throw new Error('Failed to submit to Google Forms');
+    }
+}
+
+/**
+ * Save quote to localStorage for admin dashboard
+ */
+function saveQuoteToLocalStorage(formData) {
+    const STORAGE_KEY = 'busCharterQuotes';
+    
+    try {
+        const quotes = localStorage.getItem(STORAGE_KEY);
+        const quotesArray = quotes ? JSON.parse(quotes) : [];
+        
+        quotesArray.push({
+            id: Date.now(),
+            ...formData,
+            submittedAt: new Date().toISOString()
+        });
+        
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(quotesArray));
+    } catch (error) {
+        console.error('Error saving quote to localStorage:', error);
     }
 }
 
