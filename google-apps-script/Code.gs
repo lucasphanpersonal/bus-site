@@ -87,12 +87,21 @@ function doGet(e) {
 /**
  * Handle OPTIONS requests (CORS preflight)
  * This is required for cross-origin POST requests from the admin dashboard
+ * 
+ * IMPORTANT: When deployed with "Who has access" = "Anyone", Google Apps Script
+ * automatically adds CORS headers to responses. However, we must return JSON
+ * format for the headers to be added correctly.
  */
 function doOptions(e) {
-  // Return a response that allows the actual POST request to proceed
+  // Return a JSON response to ensure CORS headers are added by Google Apps Script
+  const response = {
+    status: 'ok',
+    message: 'CORS preflight successful'
+  };
+  
   return ContentService
-    .createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT);
+    .createTextOutput(JSON.stringify(response))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
@@ -300,14 +309,27 @@ function createResponse(success, message, data) {
 
 /**
  * Add CORS headers to enable cross-origin requests
+ * 
+ * Note: In Apps Script, we can't modify HTTP headers directly on TextOutput.
+ * However, when the web app is deployed with these settings:
+ *   - Execute as: "Me"
+ *   - Who has access: "Anyone"
+ * 
+ * Google Apps Script automatically adds these CORS headers:
+ *   - Access-Control-Allow-Origin: *
+ *   - Access-Control-Allow-Methods: GET, POST, OPTIONS
+ *   - Access-Control-Allow-Headers: Content-Type
+ * 
+ * CRITICAL: The web app MUST be deployed with "Who has access" set to "Anyone"
+ * for CORS to work. If set to "Only myself" or "Anyone within organization",
+ * CORS headers will NOT be added and cross-origin requests will fail.
+ * 
+ * The doOptions() function handles CORS preflight (OPTIONS) requests by returning
+ * a JSON response, which ensures that Google Apps Script adds the CORS headers.
+ * 
+ * This function is kept for documentation purposes.
  */
 function addCorsHeaders(output) {
-  // Note: In Apps Script, we can't modify headers directly on TextOutput
-  // However, when deployed as a web app, Apps Script automatically handles CORS
-  // by allowing requests from any origin when "Who has access" is set to "Anyone"
-  // The doOptions() function handles CORS preflight (OPTIONS) requests, which is
-  // required for POST requests with custom headers (Content-Type: application/json)
-  // This function is kept for documentation and future enhancements
   return output;
 }
 
