@@ -171,6 +171,18 @@ Website: lucasphanpersonal.github.io/bus-site
             description: 7,    // Column H
             notes: 8           // Column I (includes route info)
         }
+    },
+
+    // Google Apps Script Configuration (for saving quotes from admin dashboard)
+    // This enables admins to save quote responses directly to Google Sheets
+    // See google-apps-script/README.md for setup instructions
+    
+    appsScript: {
+        enabled: false,  // Set to true after deploying the Apps Script
+        webAppUrl: '',   // Your Apps Script web app URL (e.g., 'https://script.google.com/macros/s/AKfycby.../exec')
+        sharedSecret: 'CHANGE_THIS_SECRET_BEFORE_DEPLOYING',  // Must match SHARED_SECRET in Code.gs. Change to a unique value!
+        // SECURITY: This secret protects your Google Sheet from unauthorized writes.
+        // Choose a long, random string that's different from this placeholder.
     }
 };
 
