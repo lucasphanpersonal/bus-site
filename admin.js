@@ -115,6 +115,20 @@ function updateDataSourceBanner() {
 }
 
 /**
+ * Build Google Sheets API URL with cache-busting
+ * Adds a timestamp parameter to prevent browser caching of old spreadsheet data
+ * @param {string} spreadsheetId - The Google Sheets spreadsheet ID
+ * @param {string} sheetName - The name of the sheet/tab
+ * @param {string} apiKey - The Google API key
+ * @returns {string} The complete API URL with cache-busting parameter
+ */
+function buildSheetsApiUrl(spreadsheetId, sheetName, apiKey) {
+    const encodedSheetName = encodeURIComponent(sheetName);
+    const timestamp = Date.now(); // Use Date.now() for better performance
+    return `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodedSheetName}?key=${apiKey}&_=${timestamp}`;
+}
+
+/**
  * Load saved quote responses from Google Sheets
  */
 async function loadSavedQuoteResponses() {
@@ -125,12 +139,8 @@ async function loadSavedQuoteResponses() {
         throw new Error('API key not found');
     }
     
-    // Build the Sheets API URL for Quote Responses sheet
-    const sheetName = encodeURIComponent('Quote Responses');
-    const spreadsheetId = sheetsConfig.spreadsheetId;
-    // Add timestamp parameter to prevent browser caching of old spreadsheet data
-    const timestamp = new Date().getTime();
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?key=${apiKey}&_=${timestamp}`;
+    // Build the Sheets API URL for Quote Responses sheet with cache-busting
+    const url = buildSheetsApiUrl(sheetsConfig.spreadsheetId, 'Quote Responses', apiKey);
     
     try {
         // Use cache: 'no-store' to prevent browser from caching the response
@@ -382,11 +392,9 @@ async function getQuotesFromGoogleSheets() {
         throw new Error('API key not found. Please configure in config.js');
     }
     
-    // Build the Sheets API URL
-    const sheetName = encodeURIComponent(sheetsConfig.sheetName || 'Form Responses 1');
-    // Add timestamp parameter to prevent browser caching of old spreadsheet data
-    const timestamp = new Date().getTime();
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsConfig.spreadsheetId}/values/${sheetName}?key=${apiKey}&_=${timestamp}`;
+    // Build the Sheets API URL with cache-busting
+    const sheetName = sheetsConfig.sheetName || 'Form Responses 1';
+    const url = buildSheetsApiUrl(sheetsConfig.spreadsheetId, sheetName, apiKey);
     
     try {
         // Use cache: 'no-store' to prevent browser from caching the response
