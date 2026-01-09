@@ -43,7 +43,7 @@ The script uses a shared secret for basic authentication. **You must change this
 
 1. In the Apps Script editor, find this line near the top of the code (around line 29):
    ```javascript
-   SHARED_SECRET: 'bus-charter-secret-2024',
+   SHARED_SECRET: 'CHANGE_THIS_SECRET_BEFORE_DEPLOYING',
    ```
 
 2. **Change it to your own unique secret**. For example:
@@ -51,11 +51,11 @@ The script uses a shared secret for basic authentication. **You must change this
    SHARED_SECRET: 'my-unique-secret-2024-xyz789',
    ```
    
-   > **Important**: Make this secret unique and don't share it publicly. This is what protects your Google Sheet from unauthorized writes.
+   > **Important**: Make this secret unique and don't share it publicly. This is what protects your Google Sheet from unauthorized writes. Use a long, random string.
 
 3. **Save the file** (Ctrl+S / Cmd+S)
 
-4. **Keep this secret handy** - you'll need to add it to your `config.js` file later
+4. **Keep this secret handy** - you'll need to add the same value to your `config.js` file later
 
 ### Step 4: Test the Setup (Optional but Recommended)
 

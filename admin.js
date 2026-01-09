@@ -1213,7 +1213,7 @@ async function saveQuoteToSheets(quoteData) {
     try {
         const response = await fetch(CONFIG.appsScript.webAppUrl, {
             method: 'POST',
-            mode: 'no-cors', // Apps Script requires no-cors mode
+            mode: 'no-cors', // Required for cross-origin requests to Apps Script. Response body cannot be read with this mode.
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -1224,8 +1224,9 @@ async function saveQuoteToSheets(quoteData) {
             })
         });
         
-        // Note: With no-cors mode, we can't read the response
-        // We assume success if no error was thrown
+        // Note: With no-cors mode, we cannot read the response body or status code.
+        // The fetch will only throw an error if the request completely fails (network error).
+        // To verify success, users should check the Google Sheet after saving.
         console.log('Quote save request sent successfully');
         return true;
         
@@ -1493,7 +1494,7 @@ async function updateQuoteInSheets(quoteData) {
     try {
         const response = await fetch(CONFIG.appsScript.webAppUrl, {
             method: 'POST',
-            mode: 'no-cors',
+            mode: 'no-cors', // Required for cross-origin requests to Apps Script. Response body cannot be read with this mode.
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -1504,6 +1505,9 @@ async function updateQuoteInSheets(quoteData) {
             })
         });
         
+        // Note: With no-cors mode, we cannot read the response body or status code.
+        // The fetch will only throw an error if the request completely fails (network error).
+        // To verify success, users should check the Google Sheet after updating.
         console.log('Quote update request sent successfully');
         return true;
         

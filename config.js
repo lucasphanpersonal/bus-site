@@ -157,8 +157,9 @@ Website: lucasphanpersonal.github.io/bus-site
     appsScript: {
         enabled: false,  // Set to true after deploying the Apps Script
         webAppUrl: '',   // Your Apps Script web app URL (e.g., 'https://script.google.com/macros/s/AKfycby.../exec')
-        sharedSecret: 'bus-charter-secret-2024',  // Must match SHARED_SECRET in Code.gs
-        // IMPORTANT: Change the sharedSecret to a unique value for security!
+        sharedSecret: 'CHANGE_THIS_SECRET_BEFORE_DEPLOYING',  // Must match SHARED_SECRET in Code.gs. Change to a unique value!
+        // SECURITY: This secret protects your Google Sheet from unauthorized writes.
+        // Choose a long, random string that's different from this placeholder.
     }
 };
 

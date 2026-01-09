@@ -28,9 +28,11 @@ const CONFIG = {
   // Name of the sheet with form responses (for linking)
   FORM_RESPONSES_SHEET: 'Form Responses 1',
   
-  // Simple shared secret for authentication (change this!)
+  // Simple shared secret for authentication
+  // ⚠️ IMPORTANT: Change this to a unique value before deploying!
   // This should match the value in your config.js
-  SHARED_SECRET: 'bus-charter-secret-2024',
+  // DO NOT use the default value in production!
+  SHARED_SECRET: 'CHANGE_THIS_SECRET_BEFORE_DEPLOYING',
   
   // Enable logging for debugging
   DEBUG_MODE: true
