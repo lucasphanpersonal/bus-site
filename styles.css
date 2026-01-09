@@ -1198,7 +1198,7 @@ body.landing-page {
 
 @keyframes busDriveAcrossWithBounce {
     0% {
-        transform: translateX(-5vw) translateY(calc(-50% + 0px * sin(0deg))) scaleX(-1);
+        transform: translateX(-5vw) translateY(-50%) scaleX(-1);
     }
     5% {
         transform: translateX(0.5vw) translateY(calc(-50% - 6px)) scaleX(-1);
