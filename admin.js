@@ -1042,6 +1042,89 @@ function showMarkersOnly(map, tripDay) {
 }
 
 /**
+ * Save quote response to Google Sheets via Apps Script
+ */
+async function saveQuoteToSheets(quoteData) {
+    if (!CONFIG.appsScript || !CONFIG.appsScript.enabled) {
+        console.warn('Apps Script is not enabled');
+        return false;
+    }
+    
+    if (!CONFIG.appsScript.webAppUrl) {
+        console.error('Apps Script web app URL not configured');
+        throw new Error('Apps Script web app URL not configured. Please update config.js');
+    }
+    
+    try {
+        const response = await fetch(CONFIG.appsScript.webAppUrl, {
+            method: 'POST',
+            mode: 'no-cors', // Apps Script requires no-cors mode
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'saveQuote',
+                secret: CONFIG.appsScript.sharedSecret,
+                data: quoteData
+            })
+        });
+        
+        // Note: With no-cors mode, we can't read the response
+        // We assume success if no error was thrown
+        console.log('Quote save request sent successfully');
+        return true;
+        
+    } catch (error) {
+        console.error('Error saving quote to Sheets:', error);
+        throw error;
+    }
+}
+
+/**
+ * Show a temporary message to the user
+ */
+function showTemporaryMessage(message, type = 'info') {
+    // Create message element if it doesn't exist
+    let messageDiv = document.getElementById('tempMessage');
+    if (!messageDiv) {
+        messageDiv = document.createElement('div');
+        messageDiv.id = 'tempMessage';
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-weight: 600;
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+        `;
+        document.body.appendChild(messageDiv);
+    }
+    
+    // Set colors based on type
+    const colors = {
+        success: { bg: '#d1fae5', border: '#10b981', text: '#065f46' },
+        warning: { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' },
+        error: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b' },
+        info: { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' }
+    };
+    
+    const color = colors[type] || colors.info;
+    messageDiv.style.background = color.bg;
+    messageDiv.style.borderLeft = `4px solid ${color.border}`;
+    messageDiv.style.color = color.text;
+    messageDiv.textContent = message;
+    messageDiv.style.display = 'block';
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 3000);
+}
+
+/**
  * Close modal
  */
 function closeModal() {
@@ -1049,9 +1132,9 @@ function closeModal() {
 }
 
 /**
- * Send quote email - opens email client with pre-filled content
+ * Send quote email - opens email client with pre-filled content and saves to Google Sheets
  */
-function sendQuoteEmail() {
+async function sendQuoteEmail() {
     const quote = window.currentQuote;
     
     if (!quote) {
@@ -1113,6 +1196,43 @@ ${quoteDetails ? '\nADDITIONAL DETAILS:\n' + quoteDetails + '\n' : ''}
 This quote is valid for 30 days. Please let us know if you have any questions or would like to proceed with booking.
 
 ${signature}`;
+    
+    // Save quote to Google Sheets if Apps Script is enabled
+    if (CONFIG.appsScript && CONFIG.appsScript.enabled) {
+        try {
+            const saveButton = document.querySelector('button[onclick="sendQuoteEmail()"]');
+            const originalText = saveButton.innerHTML;
+            saveButton.innerHTML = '💾 Saving quote...';
+            saveButton.disabled = true;
+            
+            const saved = await saveQuoteToSheets({
+                quoteRequestId: quote.submittedAt, // Use timestamp as unique ID
+                customerName: quote.name,
+                customerEmail: quote.email,
+                quoteAmount: quoteAmount,
+                additionalDetails: quoteDetails,
+                status: 'Sent',
+                adminName: 'Admin', // Could be enhanced to track actual admin name
+                sentDate: new Date().toISOString(),
+                tripSummary: tripSummary,
+                totalMiles: totalMiles,
+                totalPassengers: quote.passengers,
+                tripDays: quote.tripDays.length
+            });
+            
+            saveButton.innerHTML = originalText;
+            saveButton.disabled = false;
+            
+            if (saved) {
+                // Show success message
+                showTemporaryMessage('✅ Quote saved to Google Sheets!', 'success');
+            }
+        } catch (error) {
+            console.error('Error saving quote:', error);
+            // Don't block the email from being sent, just show a warning
+            showTemporaryMessage('⚠️ Quote not saved to Sheets, but you can still send the email', 'warning');
+        }
+    }
     
     // Build mailto link
     const subject = encodeURIComponent(subjectTemplate);
