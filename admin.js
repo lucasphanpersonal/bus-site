@@ -115,6 +115,34 @@ function updateDataSourceBanner() {
 }
 
 /**
+ * Build Google Sheets API URL with cache-busting
+ * Adds a timestamp parameter to prevent browser caching of old spreadsheet data
+ * @param {string} spreadsheetId - The Google Sheets spreadsheet ID
+ * @param {string} sheetName - The name of the sheet/tab
+ * @param {string} apiKey - The Google API key
+ * @returns {string} The complete API URL with cache-busting parameter
+ * @throws {Error} If any parameter is missing or empty
+ */
+function buildSheetsApiUrl(spreadsheetId, sheetName, apiKey) {
+    // Validate input parameters
+    if (!spreadsheetId || typeof spreadsheetId !== 'string' || !spreadsheetId.trim()) {
+        throw new Error('Invalid spreadsheetId: must be a non-empty string');
+    }
+    if (!sheetName || typeof sheetName !== 'string' || !sheetName.trim()) {
+        throw new Error('Invalid sheetName: must be a non-empty string');
+    }
+    if (!apiKey || typeof apiKey !== 'string' || !apiKey.trim()) {
+        throw new Error('Invalid apiKey: must be a non-empty string');
+    }
+    
+    const encodedSheetName = encodeURIComponent(sheetName);
+    // Generate fresh timestamp on each call to ensure unique URL (Date.now() is called at execution time)
+    const timestamp = Date.now();
+    // Note: API key is in URL per Google Sheets API design for public spreadsheet access
+    return `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodedSheetName}?key=${apiKey}&_=${timestamp}`;
+}
+
+/**
  * Load saved quote responses from Google Sheets
  */
 async function loadSavedQuoteResponses() {
@@ -125,13 +153,14 @@ async function loadSavedQuoteResponses() {
         throw new Error('API key not found');
     }
     
-    // Build the Sheets API URL for Quote Responses sheet
-    const sheetName = encodeURIComponent('Quote Responses');
-    const spreadsheetId = sheetsConfig.spreadsheetId;
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?key=${apiKey}`;
+    // Build the Sheets API URL for Quote Responses sheet with cache-busting
+    const url = buildSheetsApiUrl(sheetsConfig.spreadsheetId, 'Quote Responses', apiKey);
     
     try {
-        const response = await fetch(url);
+        // Use cache: 'no-store' to prevent browser from caching the response
+        const response = await fetch(url, {
+            cache: 'no-store'
+        });
         
         if (!response.ok) {
             // Sheet may not exist yet, which is fine
@@ -377,12 +406,15 @@ async function getQuotesFromGoogleSheets() {
         throw new Error('API key not found. Please configure in config.js');
     }
     
-    // Build the Sheets API URL
-    const sheetName = encodeURIComponent(sheetsConfig.sheetName || 'Form Responses 1');
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsConfig.spreadsheetId}/values/${sheetName}?key=${apiKey}`;
+    // Build the Sheets API URL with cache-busting
+    const sheetName = sheetsConfig.sheetName || 'Form Responses 1';
+    const url = buildSheetsApiUrl(sheetsConfig.spreadsheetId, sheetName, apiKey);
     
     try {
-        const response = await fetch(url);
+        // Use cache: 'no-store' to prevent browser from caching the response
+        const response = await fetch(url, {
+            cache: 'no-store'
+        });
         
         if (!response.ok) {
             if (response.status === 403) {

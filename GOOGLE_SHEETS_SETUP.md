@@ -141,6 +141,19 @@ googleSheets: {
    - Your test quote in the list
    - All the same beautiful formatting with maps
 
+## Switching to a New Spreadsheet
+
+If you need to create a new spreadsheet (e.g., for a fresh start or new season):
+
+1. Create a new Google Form or use an existing one
+2. Link it to a new spreadsheet (Responses → Create Spreadsheet)
+3. Make the new spreadsheet publicly readable (Share → Anyone with link can view)
+4. Copy the new Spreadsheet ID
+5. Update `config.js` with the new Spreadsheet ID
+6. Refresh the admin dashboard page
+
+**Note:** You don't need to clear your browser cache! The system automatically prevents browser caching, so you'll immediately see data from the new spreadsheet.
+
 ## Troubleshooting
 
 ### "API access denied" Error
@@ -170,6 +183,17 @@ googleSheets: {
 2. Submit a test quote through the form and verify it appears in Google Sheets
 3. Check browser console (F12) for error messages
 4. Verify the sheet name matches (usually "Form Responses 1")
+
+### Still Seeing Old Spreadsheet Data
+
+**Problem:** After updating the Spreadsheet ID in config.js, old data still appears
+
+**Solution:**
+This should not happen as of the latest version (the system prevents browser caching). If you still experience this:
+1. Make sure you saved config.js and refreshed the page
+2. Verify the new Spreadsheet ID is correct in config.js
+3. Check browser console (F12) for any errors
+4. As a last resort, clear your browser cache (Ctrl+Shift+Delete)
 
 ### Column Mapping Issues
 
