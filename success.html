@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Quote request received successfully">
+    <title>Quote Request Received - Bus Charter Services</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .success-container {
+            max-width: 800px;
+            margin: 60px auto;
+            text-align: center;
+        }
+        
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: checkmark 0.6s ease-in-out;
+        }
+        
+        @keyframes checkmark {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .success-content {
+            background: var(--card-background);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .success-content h1 {
+            color: var(--success-color);
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .success-content p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+        
+        .info-box {
+            background: #f0fdf4;
+            border: 2px solid var(--success-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .info-box h3 {
+            color: var(--success-color);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .info-box li {
+            padding: 8px 0;
+            color: var(--text-primary);
+        }
+        
+        .info-box li::before {
+            content: "✓ ";
+            color: var(--success-color);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .contact-info {
+            background: var(--background);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .contact-info p {
+            margin: 5px 0;
+            font-size: 1rem;
+        }
+        
+        .home-button {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 14px 32px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .home-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-container">
+            <div class="success-content">
+                <div class="success-icon">✓</div>
+                <h1>Quote Request Received!</h1>
+                <p>Thank you for your interest in our charter bus services.</p>
+                
+                <div class="info-box">
+                    <h3>What Happens Next?</h3>
+                    <ul>
+                        <li>You'll receive a confirmation email at <span id="userEmail"></span> shortly</li>
+                        <li>Our team will review your trip details and calculate a personalized quote</li>
+                        <li>We'll contact you within 24 hours via email or phone</li>
+                        <li>Feel free to reach out if you have any questions in the meantime</li>
+                    </ul>
+                </div>
+                
+                <div class="contact-info">
+                    <p><strong>Need immediate assistance?</strong></p>
+                    <p>Call us or email us directly</p>
+                </div>
+                
+                <a href="index.html" class="home-button">← Back to Home</a>
+            </div>
+        </div>
+        
+        <footer class="footer">
+            <p>&copy; 2024 Bus Charter Services. All rights reserved.</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Get email from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const email = urlParams.get('email');
+        const name = urlParams.get('name');
+        
+        if (email) {
+            document.getElementById('userEmail').textContent = email;
+        } else {
+            document.getElementById('userEmail').textContent = 'your email address';
+        }
+        
+        // Update page title with name if available
+        if (name) {
+            document.querySelector('h1').textContent = `Thank you, ${name.split(' ')[0]}!`;
+        }
+    </script>
+</body>
+</html>

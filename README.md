@@ -1,21 +1,34 @@
 # Bus Charter Quote Request Website
 
-A modern, responsive website for requesting charter bus booking quotes. The site features a beautiful form interface that integrates with Google Forms for data collection and Google Maps for location autocomplete.
+A modern, responsive website for requesting charter bus booking quotes. The site features a beautiful form interface that integrates with Google Forms for data collection, Google Maps for location autocomplete, and includes a private admin dashboard for managing quotes.
 
 ## Features
 
+### Client-Facing Features
 - ✨ **Modern & Responsive Design** - Works seamlessly on desktop, tablet, and mobile devices
 - 📅 **Multiple Trip Days Support** - Add multiple trip days with dates and time ranges
 - 📍 **Smart Location Input** - Google Maps autocomplete for pickup and dropoff locations
 - 🗺️ **Multiple Locations Per Day** - Each trip day can have one pickup and multiple dropoff locations
 - 🎯 **Final Destination Tracking** - The last dropoff location automatically becomes the final destination
-- 📏 **Automatic Route Calculation** - Computes distance, travel time, and stop count for accurate quotes
+- 📏 **Automatic Route Calculation** - Computes distance, travel time, booking hours, and stop count for accurate quotes
+- ⏱️ **Booking Hours Tracking** - Calculates total booking hours from start to end time for each day
 - 👥 **Passenger Management** - Specify number of passengers
 - 📧 **Contact Information** - Collect all necessary contact details
 - 📝 **Trip Description** - Detailed description and special notes sections
+- ✅ **Confirmation Page** - Clients receive a professional confirmation page after submission
 - 🔗 **Google Forms Integration** - Submissions sent directly to your Google Form
 - ⚡ **Real-time Validation** - Client-side form validation for better UX
 - 🎨 **Clean UI** - Professional look without the typical embedded form appearance
+
+### Admin Dashboard Features
+- 🔐 **Secure Admin Access** - Password-protected dashboard
+- 📊 **Analytics Overview** - View total quotes, monthly stats, passengers, and miles
+- 📋 **Quote Management** - Browse and search through all submitted quote requests
+- 🗺️ **Google Maps Integration** - Visual route display for each quote
+- 📈 **Detailed Quote View** - See all trip logistics, booking hours, distances, and notable information
+- ⚠️ **Smart Alerts** - Automatic detection of notable trip characteristics (multi-day, large groups, long distances, interstate travel)
+- 💾 **Data Persistence** - All quotes stored locally for easy access and review
+- 📱 **Responsive Design** - Admin dashboard works on all devices
 
 ## Setup Instructions
 
@@ -132,18 +145,52 @@ python -m http.server 8000
 ```
 bus-site/
 ├── index.html      # Main HTML file with form structure
+├── success.html    # Confirmation page shown after form submission
+├── admin.html      # Admin dashboard for viewing quote requests
 ├── styles.css      # All styling including responsive design
 ├── script.js       # Form handling and API integrations
+├── admin.js        # Admin dashboard functionality
 ├── config.js       # Configuration for API keys (customize this)
 └── README.md       # This file
 ```
 
-## Browser Support
+## Admin Dashboard
 
-- ✅ Chrome/Edge (latest)
-- ✅ Firefox (latest)
-- ✅ Safari (latest)
-- ✅ Mobile browsers (iOS Safari, Chrome Mobile)
+### Accessing the Dashboard
+
+1. Navigate to `admin.html` in your browser
+2. Enter the admin password (default: `admin123`)
+3. View and manage all quote requests
+
+### Features
+
+- **Dashboard Overview**: See total quotes, monthly stats, total passengers, and total miles at a glance
+- **Quote List**: Browse all submitted quote requests with key information
+- **Detailed View**: Click any quote to see:
+  - Complete contact information
+  - Trip details and descriptions
+  - Route visualization on Google Maps
+  - Booking hours, driving time, and distances
+  - Notable information (large groups, long distances, multi-day trips, interstate travel)
+  
+### Security Considerations
+
+⚠️ **IMPORTANT**: The default admin password is `admin123`. **You MUST change this in production!**
+
+To change the admin password, edit `admin.js`:
+
+```javascript
+const ADMIN_PASSWORD = 'your-secure-password-here';
+```
+
+**Note**: This is a client-side implementation suitable for personal use or small businesses. For production use with sensitive data, implement proper backend authentication.
+
+### Data Storage
+
+- Quote data is stored in the browser's localStorage
+- Data persists across browser sessions
+- Data is stored locally on the device accessing the admin dashboard
+- For enterprise use, consider implementing a backend database
 
 ## Route Calculation Feature
 
@@ -153,17 +200,19 @@ The website automatically calculates route information for each trip to help wit
 
 - **Total Distance** - Sum of all driving distances in miles
 - **Total Driving Time** - Estimated time based on Google Maps routing
+- **Total Booking Hours** - Sum of booking hours (start to end time) across all trip days
 - **Number of Stops** - Count of all dropoff locations across all days
-- **Per-Day Breakdown** - Individual distance, time, and stops for each trip day
+- **Per-Day Breakdown** - Individual distance, driving time, booking hours, and stops for each trip day
 - **Leg-by-Leg Details** - Distance and time for each segment of the journey
 
 ### How It Works
 
 1. When a customer submits the form, the system uses Google's Distance Matrix API to calculate driving routes
 2. It computes the route from pickup → first dropoff → second dropoff → ... → final dropoff for each day
-3. A summary modal appears showing all calculated route information
-4. The customer can review and confirm before final submission
-5. Route data is automatically included in the Google Forms submission for the site owner
+3. Booking hours are calculated from the start and end times entered for each day
+4. A summary modal appears showing all calculated route information
+5. The customer can review and confirm before final submission
+6. Route data is automatically included in the Google Forms submission and stored in the admin dashboard
 
 ### Configuring Route Calculation
 
@@ -179,14 +228,21 @@ routeComputation: {
 ### Route Data in Google Forms
 
 The computed route information is automatically appended to the "Special Notes" field in your Google Form submission. It includes:
-- Total distance and driving time
+- Total distance, driving time, and booking hours
 - Number of stops and passengers
-- Per-day breakdown with distances and times
+- Per-day breakdown with all metrics
 - Individual leg distances and times
 
 This helps you quickly understand the scope of each quote request and provide accurate pricing.
 
 **Note:** Route calculations require the Google Distance Matrix API to be enabled in your Google Cloud Console.
+
+## Browser Support
+
+- ✅ Chrome/Edge (latest)
+- ✅ Firefox (latest)
+- ✅ Safari (latest)
+- ✅ Mobile browsers (iOS Safari, Chrome Mobile)
 
 ## Customization
 
@@ -230,9 +286,24 @@ This allows you to test the website before setting up the APIs.
 ## Security Notes
 
 - ⚠️ **Never commit API keys to public repositories**
-- Consider using environment variables or server-side configuration
+- ⚠️ **Change the default admin password (`admin123`) before deploying**
+- Consider using environment variables or server-side configuration for API keys
 - Restrict your Google Maps API key to your domain
 - Enable CORS restrictions on your APIs where possible
+- For production use, implement proper backend authentication for the admin dashboard
+- Consider encrypting sensitive data if storing in localStorage
+
+## Future Enhancements
+
+The following features could be added in future updates:
+
+- **Email Notifications**: Backend service to send confirmation emails to clients automatically
+- **Backend Database**: Server-side storage for quotes instead of localStorage
+- **User Authentication**: Proper multi-user authentication system for the admin dashboard
+- **Export Functionality**: Export quotes to CSV/PDF for record-keeping
+- **Quote Status Tracking**: Mark quotes as pending, approved, or completed
+- **Pricing Calculator**: Automatic price estimation based on distance, time, and passengers
+- **Calendar Integration**: Sync trip dates with calendar applications
 
 ## Support
 
