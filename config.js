@@ -157,7 +157,7 @@ Website: lucasphanpersonal.github.io/bus-site
     
     googleSheets: {
         enabled: true,  // Must be enabled for admin dashboard to work
-        spreadsheetId: '180fD_bqLFvRc0WjS8fXeXsomc_feqd2R_Nz5HSpLi8k',  // The ID from your Google Sheets URL
+        spreadsheetId: '1gG1qxLpGnrP9ixY_P0aOSlTdzzMsHJx-uCiBX4QEsSw',  // The ID from your Google Sheets URL
         apiKey: '',  // Leave empty to use the same Maps API key, or provide a different key
         sheetName: 'Form Responses 1',  // Default sheet name when linking Google Form
         // Column mapping (adjust if your sheet has different column order)
