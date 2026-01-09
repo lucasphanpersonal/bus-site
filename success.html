@@ -124,6 +124,12 @@
                 <h1>Quote Request Received!</h1>
                 <p>Thank you for your interest in our charter bus services.</p>
                 
+                <div class="info-box" style="background: #eff6ff; border-color: var(--primary-color);">
+                    <h3 style="color: var(--primary-color);">Your Quote Reference Number</h3>
+                    <p style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color); margin: 10px 0; font-family: monospace;" id="quoteId">Loading...</p>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 10px;">Please reference this number in all communications about your quote.</p>
+                </div>
+                
                 <div class="info-box">
                     <h3>What Happens Next?</h3>
                     <ul>
@@ -149,10 +155,18 @@
     </div>
     
     <script>
-        // Get email from URL parameters
+        // Get parameters from URL
         const urlParams = new URLSearchParams(window.location.search);
         const email = urlParams.get('email');
         const name = urlParams.get('name');
+        const quoteId = urlParams.get('quoteId');
+        
+        // Display quote ID
+        if (quoteId) {
+            document.getElementById('quoteId').textContent = quoteId;
+        } else {
+            document.getElementById('quoteId').textContent = 'Not available';
+        }
         
         if (email) {
             document.getElementById('userEmail').textContent = email;

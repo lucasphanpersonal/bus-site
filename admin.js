@@ -177,12 +177,24 @@ async function loadSavedQuoteResponses() {
 }
 
 /**
+ * Get the unique identifier for a quote (quote ID if available, otherwise timestamp)
+ * This helper ensures consistent behavior across all quote matching operations.
+ * 
+ * @param {Object} quote - The quote object
+ * @returns {string} The quote identifier to use for matching
+ */
+function getQuoteIdentifier(quote) {
+    return quote.quoteId || quote.submittedAt;
+}
+
+/**
  * Merge quote requests with saved responses
  */
 function mergeQuotesWithResponses(quotes, savedQuotes) {
     return quotes.map(quote => {
-        // Find matching saved quote by quoteRequestId (which is the submittedAt timestamp)
-        const savedQuote = savedQuotes.find(sq => sq.quoteRequestId === quote.submittedAt);
+        // Find matching saved quote by quoteId (primary) or timestamp (fallback for old quotes)
+        const quoteIdentifier = getQuoteIdentifier(quote);
+        const savedQuote = savedQuotes.find(sq => sq.quoteRequestId === quoteIdentifier);
         
         if (savedQuote) {
             // Add saved quote data to the quote object
@@ -482,6 +494,7 @@ function parseGoogleSheetsData(rows) {
             
             const quote = {
                 id: i, // Use row index as ID
+                quoteId: row[cols.quoteId] || '', // Unique quote identifier
                 submittedAt: row[cols.timestamp] || new Date().toISOString(),
                 tripDays: tripDays,
                 passengers: row[cols.passengers] || '',
@@ -691,6 +704,7 @@ function displayQuotes(quotes) {
                     <div class="quote-name">${quote.name}${statusBadge}${priceBadge}</div>
                     <div class="quote-date">${formattedDate}</div>
                 </div>
+                ${quote.quoteId ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px; font-family: monospace;">Quote ID: ${quote.quoteId}</div>` : ''}
                 <div class="quote-summary">
                     <div class="quote-detail">
                         <span class="quote-detail-label">Email</span>
@@ -833,6 +847,12 @@ function generateQuoteDetailHTML(quote) {
         <div class="detail-section">
             <h3>📋 Request Information</h3>
             <div class="detail-grid">
+                ${quote.quoteId ? `
+                <div class="detail-item" style="grid-column: 1 / -1;">
+                    <div class="detail-item-label">Quote ID</div>
+                    <div class="detail-item-value" style="font-family: monospace; font-weight: bold; color: var(--primary-color);">${quote.quoteId}</div>
+                </div>
+                ` : ''}
                 <div class="detail-item">
                     <div class="detail-item-label">Submitted</div>
                     <div class="detail-item-value">${formattedDate}</div>
@@ -1557,7 +1577,7 @@ ${signature}`;
             });
             
             const quoteDataToSave = {
-                quoteRequestId: quote.submittedAt, // Use timestamp as unique ID
+                quoteRequestId: getQuoteIdentifier(quote), // Use helper for consistent identifier
                 customerName: quote.name,
                 customerEmail: quote.email,
                 quoteAmount: quote.savedQuote?.quoteAmount || amount, // Keep original quote amount
