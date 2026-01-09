@@ -69,6 +69,10 @@ cd bus-site
 
 ### 3. Configure Google Maps API
 
+**✅ API Key Already Configured**: This repository includes a Google Maps API key with domain restrictions for GitHub Pages deployment. The key is already embedded in `config.js` and restricted to work only with authorized domains.
+
+If you need to use your own API key:
+
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select an existing one
 3. Enable the following APIs:
@@ -77,14 +81,15 @@ cd bus-site
    - Distance Matrix API (required for automatic route calculation)
 4. Create an API key:
    - Go to "Credentials" → "Create Credentials" → "API Key"
-   - Copy your API key
-   - (Recommended) Restrict the key to your domain for security
+   - **IMPORTANT**: Restrict the key to your domain for security
+   - Add your domain to "Application restrictions" → "HTTP referrers (websites)"
+5. Replace the API key in `config.js` with your own
 
-⚠️ **IMPORTANT**: Never commit API keys to the repository! See [SECURITY_SETUP.md](SECURITY_SETUP.md) for secure configuration.
+⚠️ **Security Note**: The included API key has domain restrictions set in Google Cloud Console, making it safe to embed in the frontend code. Always restrict your API keys to specific domains!
 
-### 4. Secure API Key Configuration
+### 4. (Optional) Additional API Key Configuration Methods
 
-**🔐 Your API keys must be kept secret.** Follow these steps to configure them securely:
+If you prefer to use environment variables or secret management for your own API keys, you can still use the `config-local.js` approach:
 
 #### For Local Development:
 

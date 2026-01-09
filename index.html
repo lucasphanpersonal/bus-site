@@ -189,8 +189,11 @@
                 emailjs: CONFIG.emailjs.publicKey ? '✅' : '❌'
             });
         } else {
-            console.log('ℹ️ Using default configuration (no local overrides)');
-            console.log('💡 To add API keys securely, see SECURITY_SETUP.md');
+            console.log('ℹ️ Using default configuration with embedded API key');
+            console.log('🔑 API Keys loaded:', {
+                googleMaps: CONFIG.googleMaps.apiKey ? '✅' : '❌',
+                emailjs: CONFIG.emailjs.publicKey ? '✅' : '❌'
+            });
         }
         
         // Initialize EmailJS if configured

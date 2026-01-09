@@ -1,19 +1,28 @@
 # Security Setup Guide - API Key Management
 
-## ⚠️ IMPORTANT: API Key Security
+## ✅ Current Configuration
 
-**Your API keys should NEVER be committed to the repository.** This guide shows you how to securely configure API keys for your bus charter website.
+**This repository now includes a Google Maps API key that is embedded in `config.js`.**
 
-## The Problem
+The included API key has **domain restrictions** set in Google Cloud Console, which means:
+- ✅ It only works from authorized domains (GitHub Pages)
+- ✅ It cannot be used from unauthorized websites
+- ✅ It is safe to commit to the repository
+- ✅ Ready to use immediately for GitHub Pages deployment
 
-API keys committed to public repositories can be:
-- Found by automated bots within minutes
-- Used maliciously, racking up charges on your account
-- Difficult to revoke and replace without breaking your application
+## When to Use This Guide
 
-## The Solution
+You should use the alternative methods in this guide if you:
+- Want to use your own API key instead of the provided one
+- Need to add additional API keys (EmailJS, etc.)
+- Are deploying to a different platform (not GitHub Pages)
+- Want extra security through environment variables
 
-We provide multiple secure methods for managing your API keys based on your deployment environment.
+## ⚠️ IMPORTANT: Domain Restrictions are Critical
+
+The provided API key is secure **only because** it has domain restrictions enabled. If you create your own API key, you **MUST** set up domain restrictions in Google Cloud Console.
+
+**Without domain restrictions**, API keys should NEVER be committed to repositories.
 
 ---
 
