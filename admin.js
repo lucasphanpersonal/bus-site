@@ -1592,9 +1592,18 @@ ${signature}`;
     
     const mailtoLink = `mailto:${to}?subject=${subjectEncoded}&body=${body}${bcc}`;
     
-    // Open email client after a short delay to ensure modal closes and UI updates
+    // Open email client in a way that doesn't navigate away from the dashboard
+    // Using window.open() keeps the dashboard page intact
     setTimeout(() => {
-        window.location.href = mailtoLink;
+        // Create a temporary link element and click it
+        // This approach works better across browsers for mailto: links
+        const tempLink = document.createElement('a');
+        tempLink.href = mailtoLink;
+        tempLink.target = '_blank'; // Attempt to open in new context
+        tempLink.style.display = 'none';
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        document.body.removeChild(tempLink);
     }, 100);
 }
 
