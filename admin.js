@@ -176,12 +176,65 @@ function showEmptyState() {
  * Show error state
  */
 function showErrorState(errorMessage) {
+    // Format multi-line error messages nicely with preserved whitespace
+    const formattedMessage = errorMessage
+        .split('\n')
+        .map(line => {
+            // Convert emoji checkmarks and X's to styled spans
+            if (line.includes('✅')) {
+                return `<div style="color: #059669; margin: 8px 0;">${line}</div>`;
+            } else if (line.includes('❌')) {
+                return `<div style="color: #dc2626; font-weight: 600; margin: 8px 0;">${line}</div>`;
+            } else if (line.match(/^\d+\./)) {
+                // Numbered list items
+                return `<div style="margin-left: 20px; margin: 4px 0;">${line}</div>`;
+            } else {
+                return `<div style="margin: 4px 0;">${line}</div>`;
+            }
+        })
+        .join('');
+    
     document.getElementById('quotesList').innerHTML = `
         <div class="empty-state">
-            <div class="empty-state-icon" style="color: #ef4444;">⚠️</div>
-            <p style="color: #dc2626; font-weight: 600;">Error loading quotes</p>
-            <p style="margin-top: 10px; font-size: 0.9rem; color: #991b1b;">${errorMessage}</p>
-            <button onclick="loadQuotes()" style="margin-top: 15px; padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">Retry</button>
+            <div class="empty-state-icon" style="color: #ef4444; font-size: 3rem;">⚠️</div>
+            <p style="color: #dc2626; font-weight: 700; font-size: 1.2rem; margin: 15px 0;">Error loading quotes</p>
+            <div style="
+                margin-top: 20px; 
+                padding: 20px; 
+                background: #fef2f2; 
+                border: 1px solid #fecaca; 
+                border-radius: 8px; 
+                text-align: left; 
+                max-width: 800px;
+                font-size: 0.9rem;
+                line-height: 1.6;
+                color: #991b1b;
+            ">
+                ${formattedMessage}
+            </div>
+            <div style="margin-top: 25px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button onclick="loadQuotes()" style="
+                    padding: 10px 20px; 
+                    background: #2563eb; 
+                    color: white; 
+                    border: none; 
+                    border-radius: 6px; 
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                ">🔄 Retry</button>
+                <a href="GOOGLE_SHEETS_SETUP.md" target="_blank" style="
+                    padding: 10px 20px; 
+                    background: #f3f4f6; 
+                    color: #374151; 
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px; 
+                    text-decoration: none;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    display: inline-block;
+                ">📖 Setup Guide</a>
+            </div>
         </div>
     `;
 }
@@ -210,11 +263,78 @@ async function getQuotesFromGoogleSheets() {
         
         if (!response.ok) {
             if (response.status === 403) {
-                throw new Error('API access denied. Make sure Google Sheets API is enabled and the spreadsheet is publicly readable.');
+                // Try to get more specific error details from the API response
+                let errorDetails = null;
+                try {
+                    errorDetails = await response.json();
+                } catch (e) {
+                    // Ignore JSON parse errors
+                }
+                
+                const errorMessage = errorDetails?.error?.message || '';
+                let detailedError = '⚠️ API Access Denied\n\n';
+                
+                // Check for specific error messages to provide targeted help
+                if (errorMessage.includes('Google Sheets API has not been used') || 
+                    errorMessage.includes('it is disabled') ||
+                    errorMessage.includes('API has not been enabled')) {
+                    detailedError += '❌ The Google Sheets API is NOT enabled for your API key.\n\n' +
+                        '✅ To fix this:\n' +
+                        '1. Go to: https://console.cloud.google.com/apis/library/sheets.googleapis.com\n' +
+                        '2. Make sure you\'re in the correct project (the one with your API key)\n' +
+                        '3. Click the "ENABLE" button\n' +
+                        '4. Wait a minute for changes to propagate, then refresh this page\n\n' +
+                        'See GOOGLE_SHEETS_SETUP.md for detailed step-by-step instructions.';
+                } else if (errorMessage.includes('API key not valid') || 
+                           errorMessage.includes('API key expired') ||
+                           errorMessage.includes('API key not found')) {
+                    detailedError += '❌ The API key is invalid, expired, or not found.\n\n' +
+                        '✅ To fix this:\n' +
+                        '1. Check the API key in config.js matches your Google Cloud Console key\n' +
+                        '2. Verify the key hasn\'t been deleted or restricted\n' +
+                        '3. If using API key restrictions, ensure Google Sheets API is allowed';
+                } else if (errorMessage.includes('The caller does not have permission') ||
+                           errorMessage.includes('Request had insufficient authentication scopes')) {
+                    detailedError += '❌ The spreadsheet is not publicly accessible.\n\n' +
+                        '✅ To fix this:\n' +
+                        '1. Open your Google Sheet\n' +
+                        '2. Click the "Share" button (top right)\n' +
+                        '3. Click "Change to anyone with the link"\n' +
+                        '4. Make sure it\'s set to "Viewer" (not Editor)\n' +
+                        '5. Click "Done"';
+                } else {
+                    // Generic 403 error - provide all common solutions
+                    detailedError += '❌ Unable to access the Google Sheets API.\n\n' +
+                        'Most common cause: Google Sheets API is not enabled.\n\n' +
+                        '✅ Please verify:\n' +
+                        '1. Google Sheets API is enabled: https://console.cloud.google.com/apis/library/sheets.googleapis.com\n' +
+                        '2. The spreadsheet is shared publicly: Share → "Anyone with the link" can View\n' +
+                        '3. Your API key in config.js is correct and not restricted\n\n' +
+                        'Full error: ' + (errorMessage || response.statusText) + '\n\n' +
+                        'See GOOGLE_SHEETS_SETUP.md for complete setup instructions.';
+                }
+                
+                throw new Error(detailedError);
             } else if (response.status === 404) {
-                throw new Error('Spreadsheet not found. Check the Spreadsheet ID in config.js');
+                throw new Error('❌ Spreadsheet not found.\n\n' +
+                    '✅ To fix this:\n' +
+                    '1. Check the Spreadsheet ID in config.js\n' +
+                    '2. The ID should be the long string between /d/ and /edit in your Google Sheets URL\n' +
+                    '3. Example: docs.google.com/spreadsheets/d/[THIS_IS_THE_ID]/edit\n\n' +
+                    'Current ID: ' + sheetsConfig.spreadsheetId);
+            } else if (response.status === 400) {
+                let errorDetails = null;
+                try {
+                    errorDetails = await response.json();
+                } catch (e) {
+                    // Ignore
+                }
+                throw new Error('❌ Bad request: ' + (errorDetails?.error?.message || 'Invalid sheet name or range') + '\n\n' +
+                    '✅ To fix this:\n' +
+                    'Check that the sheet name "' + sheetsConfig.sheetName + '" in config.js matches your Google Sheet tab name exactly (case-sensitive).');
             }
-            throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
+            throw new Error('❌ Failed to fetch data: ' + response.status + ' ' + response.statusText + '\n\n' +
+                'Please check your configuration and try again.');
         }
         
         const data = await response.json();
