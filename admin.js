@@ -128,10 +128,15 @@ async function loadSavedQuoteResponses() {
     // Build the Sheets API URL for Quote Responses sheet
     const sheetName = encodeURIComponent('Quote Responses');
     const spreadsheetId = sheetsConfig.spreadsheetId;
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?key=${apiKey}`;
+    // Add timestamp parameter to prevent browser caching of old spreadsheet data
+    const timestamp = new Date().getTime();
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?key=${apiKey}&_=${timestamp}`;
     
     try {
-        const response = await fetch(url);
+        // Use cache: 'no-store' to prevent browser from caching the response
+        const response = await fetch(url, {
+            cache: 'no-store'
+        });
         
         if (!response.ok) {
             // Sheet may not exist yet, which is fine
@@ -379,10 +384,15 @@ async function getQuotesFromGoogleSheets() {
     
     // Build the Sheets API URL
     const sheetName = encodeURIComponent(sheetsConfig.sheetName || 'Form Responses 1');
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsConfig.spreadsheetId}/values/${sheetName}?key=${apiKey}`;
+    // Add timestamp parameter to prevent browser caching of old spreadsheet data
+    const timestamp = new Date().getTime();
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsConfig.spreadsheetId}/values/${sheetName}?key=${apiKey}&_=${timestamp}`;
     
     try {
-        const response = await fetch(url);
+        // Use cache: 'no-store' to prevent browser from caching the response
+        const response = await fetch(url, {
+            cache: 'no-store'
+        });
         
         if (!response.ok) {
             if (response.status === 403) {
