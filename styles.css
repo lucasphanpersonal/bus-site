@@ -1188,80 +1188,77 @@ body.landing-page {
 
 .animated-bus {
     position: absolute;
+    left: 0;
     top: 50%;
     font-size: 4rem;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
     animation: busDriveAcrossWithBounce 15s linear infinite;
     will-change: transform;
-    transform: translateY(-50%) scaleX(-1); /* Face right */
 }
 
 @keyframes busDriveAcrossWithBounce {
     0% {
-        left: -5%;
-        transform: translateY(-50%) scaleX(-1);
+        transform: translateX(-5vw) translateY(calc(-50% + 0px * sin(0deg))) scaleX(-1);
     }
     5% {
-        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+        transform: translateX(0.5vw) translateY(calc(-50% - 6px)) scaleX(-1);
     }
     10% {
-        transform: translateY(-50%) scaleX(-1);
+        transform: translateX(6vw) translateY(-50%) scaleX(-1);
     }
     15% {
-        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+        transform: translateX(11.5vw) translateY(calc(-50% - 6px)) scaleX(-1);
     }
     20% {
-        transform: translateY(-50%) scaleX(-1);
+        transform: translateX(17vw) translateY(-50%) scaleX(-1);
     }
     25% {
-        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+        transform: translateX(22.5vw) translateY(calc(-50% - 6px)) scaleX(-1);
     }
     30% {
-        transform: translateY(-50%) scaleX(-1);
+        transform: translateX(28vw) translateY(-50%) scaleX(-1);
     }
     35% {
-        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+        transform: translateX(33.5vw) translateY(calc(-50% - 6px)) scaleX(-1);
     }
     40% {
-        transform: translateY(-50%) scaleX(-1);
+        transform: translateX(39vw) translateY(-50%) scaleX(-1);
     }
     45% {
-        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+        transform: translateX(44.5vw) translateY(calc(-50% - 6px)) scaleX(-1);
     }
     50% {
-        left: 50%;
-        transform: translateY(-50%) scaleX(-1);
+        transform: translateX(50vw) translateY(-50%) scaleX(-1);
     }
     55% {
-        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+        transform: translateX(55.5vw) translateY(calc(-50% - 6px)) scaleX(-1);
     }
     60% {
-        transform: translateY(-50%) scaleX(-1);
+        transform: translateX(61vw) translateY(-50%) scaleX(-1);
     }
     65% {
-        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+        transform: translateX(66.5vw) translateY(calc(-50% - 6px)) scaleX(-1);
     }
     70% {
-        transform: translateY(-50%) scaleX(-1);
+        transform: translateX(72vw) translateY(-50%) scaleX(-1);
     }
     75% {
-        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+        transform: translateX(77.5vw) translateY(calc(-50% - 6px)) scaleX(-1);
     }
     80% {
-        transform: translateY(-50%) scaleX(-1);
+        transform: translateX(83vw) translateY(-50%) scaleX(-1);
     }
     85% {
-        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+        transform: translateX(88.5vw) translateY(calc(-50% - 6px)) scaleX(-1);
     }
     90% {
-        transform: translateY(-50%) scaleX(-1);
+        transform: translateX(94vw) translateY(-50%) scaleX(-1);
     }
     95% {
-        transform: translateY(calc(-50% - 6px)) scaleX(-1);
+        transform: translateX(99.5vw) translateY(calc(-50% - 6px)) scaleX(-1);
     }
     100% {
-        left: 105%;
-        transform: translateY(-50%) scaleX(-1);
+        transform: translateX(105vw) translateY(-50%) scaleX(-1);
     }
 }
 
