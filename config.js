@@ -50,7 +50,7 @@ const CONFIG = {
     email: {
         // Your business email that customers should reply to
         // This will be used as the "From" address when sending quotes
-        fromEmail: 'your-business@example.com',  // Replace with your business email
+        fromEmail: 'lucasphan09@example.com',  // Replace with your business email
         
         // Your business name (appears in email signature)
         businessName: 'Bus Charter Services',  // Replace with your business name
@@ -69,8 +69,8 @@ Best regards,
 Bus Charter Services Team
 
 Phone: (555) 123-4567
-Email: your-business@example.com
-Website: www.your-website.com
+Email: lucasphan09@example.com
+Website: lucasphanpersonal.github.io/bus-site
             `.trim()
         }
     },
@@ -85,8 +85,8 @@ Website: www.your-website.com
     // See GOOGLE_SHEETS_SETUP.md for detailed instructions
     
     googleSheets: {
-        enabled: false,  // Set to true to use Google Sheets instead of localStorage
-        spreadsheetId: 'YOUR_SPREADSHEET_ID_HERE',  // The ID from your Google Sheets URL
+        enabled: true,  // Set to true to use Google Sheets instead of localStorage
+        spreadsheetId: '180fD_bqLFvRc0WjS8fXeXsomc_feqd2R_Nz5HSpLi8k',  // The ID from your Google Sheets URL
         apiKey: '',  // Leave empty to use the same Maps API key, or provide a different key
         sheetName: 'Form Responses 1',  // Default sheet name when linking Google Form
         // Column mapping (adjust if your sheet has different column order)
