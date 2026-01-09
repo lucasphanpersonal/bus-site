@@ -15,6 +15,7 @@ const CONFIG = {
         // Map your form fields to Google Form entry IDs
         // You'll get these by inspecting your Google Form
         fields: {
+            quoteId: 'entry.1234567890',     // Replace with actual entry ID - unique quote identifier
             tripDays: 'entry.630078859',     // Replace with actual entry ID - this field will contain dates, times, and locations for each day
             passengers: 'entry.444654228',   // Replace with actual entry ID
             name: 'entry.1143231549',         // Replace with actual entry ID
@@ -162,14 +163,15 @@ Website: lucasphanpersonal.github.io/bus-site
         // Column mapping (adjust if your sheet has different column order)
         columns: {
             timestamp: 0,      // Column A (0-indexed)
-            tripDays: 1,       // Column B
-            passengers: 2,     // Column C
-            name: 3,           // Column D
-            email: 4,          // Column E
-            phone: 5,          // Column F
-            company: 6,        // Column G
-            description: 7,    // Column H
-            notes: 8           // Column I (includes route info)
+            quoteId: 1,        // Column B - Unique quote identifier
+            tripDays: 2,       // Column C
+            passengers: 3,     // Column D
+            name: 4,           // Column E
+            email: 5,          // Column F
+            phone: 6,          // Column G
+            company: 7,        // Column H
+            description: 8,    // Column I
+            notes: 9           // Column J (includes route info)
         }
     },
 

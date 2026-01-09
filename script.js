@@ -17,6 +17,27 @@ let dateTimeCounter = 1;
 let dropoffCounters = { 0: 1 };
 
 /**
+ * Generate a unique quote ID
+ * Format: QUOTE-YYYYMMDD-XXXXX (e.g., QUOTE-20260109-A1B2C)
+ */
+function generateQuoteId() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const dateStr = `${year}${month}${day}`;
+    
+    // Generate a random 5-character alphanumeric code (uppercase)
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let randomCode = '';
+    for (let i = 0; i < 5; i++) {
+        randomCode += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    
+    return `QUOTE-${dateStr}-${randomCode}`;
+}
+
+/**
  * Initialize form functionality
  */
 function initializeForm() {
@@ -774,6 +795,7 @@ async function handleFormSubmit(event) {
 
         // Redirect to success page with query parameters
         const params = new URLSearchParams({
+            quoteId: formData.quoteId,
             name: formData.name,
             email: formData.email
         });
@@ -799,6 +821,7 @@ async function handleFormSubmit(event) {
 function collectFormData() {
     const form = document.getElementById('bookingForm');
     const formData = {
+        quoteId: generateQuoteId(), // Generate unique ID for this quote
         tripDays: [],
         passengers: '',
         name: '',
@@ -916,6 +939,10 @@ ${dropoffsText}`;
     const googleFormData = new URLSearchParams();
     
     // Map fields to Google Form entry IDs
+    // Add quote ID first
+    if (CONFIG.googleForm.fields.quoteId) {
+        googleFormData.append(CONFIG.googleForm.fields.quoteId, formData.quoteId);
+    }
     if (CONFIG.googleForm.fields.tripDays) {
         googleFormData.append(CONFIG.googleForm.fields.tripDays, tripDaysFormatted);
     }
