@@ -3,211 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Get a quote for charter bus bookings - easy and convenient">
-    <title>YH Travels - Quote Request</title>
+    <meta name="description" content="YH Travels - Professional Charter Bus Services">
+    <title>YH Travels - Charter Bus Services</title>
     <link rel="stylesheet" href="styles.css">
-    
-    <!-- EmailJS for automatic confirmation emails -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
-<body>
-    <div class="container">
-        <header class="header">
-            <h1>🚌 YH Travels</h1>
-            <p class="subtitle">Request a Quote for Your Charter Bus Booking</p>
-            <a href="admin.html" class="admin-link">Admin Portal →</a>
+<body class="landing-page">
+    <!-- Animated Background -->
+    <div class="landing-background">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Landing Content -->
+    <div class="landing-container">
+        <!-- Header with Logo -->
+        <header class="landing-header">
+            <div class="logo-container">
+                <span class="logo-icon">🚌</span>
+                <span class="logo-text">YH Travels</span>
+            </div>
         </header>
 
-        <main class="main-content">
-            <section class="intro-section">
-                <p>Fill out the form below to receive a personalized quote for your charter bus needs. We'll get back to you as soon as possible!</p>
-            </section>
+        <!-- Hero Section -->
+        <main class="landing-hero">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="title-line animate-fade-in-up">Your Journey,</span>
+                    <span class="title-line animate-fade-in-up delay-1">Our Commitment</span>
+                </h1>
+                
+                <p class="hero-subtitle animate-fade-in-up delay-2">
+                    Professional charter bus services for all your transportation needs.
+                    <span class="subtitle-accent">Comfortable. Reliable. Affordable.</span>
+                </p>
 
-            <form id="bookingForm" class="booking-form">
-                <!-- Trip Details Section -->
-                <div class="form-section">
-                    <h2>Trip Details</h2>
-                    
-                    <div id="dateTimeContainer">
-                        <div class="date-time-group" data-index="0">
-                            <h3>Trip Day #1</h3>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="date_0">Date *</label>
-                                    <input type="date" id="date_0" name="date_0" required>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="start_time_0">Start Time *</label>
-                                    <input type="time" id="start_time_0" name="start_time_0" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="end_time_0">End Time *</label>
-                                    <input type="time" id="end_time_0" name="end_time_0" required>
-                                    <div class="checkbox-inline">
-                                        <input type="checkbox" id="next_day_0" name="next_day_0">
-                                        <label for="next_day_0" class="checkbox-label">Ends next day</label>
-                                    </div>
-                                    <small>Check "Ends next day" if the trip continues past midnight (e.g., 11 PM to 1 AM)</small>
-                                </div>
-                            </div>
-                            
-                            <!-- Locations for this day -->
-                            <div class="locations-subsection">
-                                <h4>Locations for This Day</h4>
-                                
-                                <div class="form-group">
-                                    <label for="pickup_0">Pick-up Location *</label>
-                                    <input type="text" id="pickup_0" name="pickup_0" class="location-input" placeholder="Enter pick-up address or location" required>
-                                    <small>Start typing to see suggestions</small>
-                                </div>
-                                
-                                <div class="dropoff-container" data-day-index="0">
-                                    <div class="dropoff-group" data-dropoff-index="0">
-                                        <div class="form-group">
-                                            <label for="dropoff_0_0">Drop-off Location #1 *</label>
-                                            <input type="text" id="dropoff_0_0" name="dropoff_0_0" class="location-input" placeholder="Enter drop-off address or location" required>
-                                            <small>Start typing to see suggestions</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <button type="button" class="btn-secondary add-dropoff-btn" data-day-index="0">+ Add Another Drop-off</button>
-                                <small class="location-note">The final drop-off location will be your final destination for this day.</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button type="button" id="addDateBtn" class="btn-secondary">+ Add Another Trip Day</button>
+                <!-- Call-to-Action Buttons -->
+                <div class="cta-buttons animate-fade-in-up delay-3">
+                    <a href="quote.html" class="cta-button primary-cta">
+                        <span class="button-text">Get a Quote</span>
+                        <span class="button-icon">→</span>
+                    </a>
+                    <a href="admin.html" class="cta-button secondary-cta">
+                        <span class="button-text">Admin Portal</span>
+                        <span class="button-icon">🔐</span>
+                    </a>
                 </div>
 
-                <!-- Passenger Information -->
-                <div class="form-section">
-                    <h2>Passenger Information</h2>
-                    <div class="form-group">
-                        <label for="passengers">Number of Passengers *</label>
-                        <input type="number" id="passengers" name="passengers" min="1" max="500" placeholder="e.g., 50" required>
+                <!-- Feature Highlights -->
+                <div class="feature-highlights animate-fade-in delay-4">
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <div class="feature-text">Instant Quotes</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <div class="feature-text">Modern Fleet</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <div class="feature-text">24/7 Support</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <div class="feature-text">Licensed Drivers</div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Contact Information -->
-                <div class="form-section">
-                    <h2>Contact Information</h2>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="name">Full Name *</label>
-                            <input type="text" id="name" name="name" placeholder="John Doe" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email Address *</label>
-                            <input type="email" id="email" name="email" placeholder="john@example.com" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="phone">Phone Number *</label>
-                            <input type="tel" id="phone" name="phone" placeholder="(555) 123-4567" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="company">Company/Organization (Optional)</label>
-                            <input type="text" id="company" name="company" placeholder="ABC Company">
-                        </div>
-                    </div>
+            <!-- Animated Stats -->
+            <div class="stats-section animate-slide-in-bottom delay-5">
+                <div class="stat-card">
+                    <div class="stat-number">15+</div>
+                    <div class="stat-label">Years Experience</div>
                 </div>
-
-                <!-- Description Section -->
-                <div class="form-section">
-                    <h2>Trip Description</h2>
-                    <div class="form-group">
-                        <label for="description">Brief Description *</label>
-                        <textarea id="description" name="description" rows="4" placeholder="Tell us about your trip (e.g., corporate event, wedding, field trip)" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="notes">Special Notes or Requirements</label>
-                        <textarea id="notes" name="notes" rows="4" placeholder="Any additional information, special requests, or requirements"></textarea>
-                    </div>
+                <div class="stat-card">
+                    <div class="stat-number">1000+</div>
+                    <div class="stat-label">Happy Clients</div>
                 </div>
-
-                <!-- Submit Button -->
-                <div class="form-actions">
-                    <button type="submit" id="submitBtn" class="btn-primary">
-                        <span class="btn-text">Get Your Quote</span>
-                        <span class="btn-loader" style="display: none;">
-                            <span class="spinner"></span> Submitting...
-                        </span>
-                    </button>
+                <div class="stat-card">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Modern Buses</div>
                 </div>
-
-                <!-- Status Messages -->
-                <div id="statusMessage" class="status-message" style="display: none;"></div>
-            </form>
+            </div>
         </main>
 
-        <footer class="footer">
+        <!-- Footer -->
+        <footer class="landing-footer">
             <p>&copy; 2024 YH Travels. All rights reserved.</p>
         </footer>
     </div>
 
-    <!-- Load local config first (git-ignored, contains API keys) -->
-    <!-- The onerror handler silently continues if file doesn't exist (expected in production) -->
-    <script src="config-local.js" onerror="console.log('ℹ️ No local config found, using environment defaults')"></script>
-    
-    <!-- Load base config -->
-    <script src="config.js"></script>
-    
-    <!-- Merge local config with base config -->
     <script>
-        // Merge CONFIG_LOCAL into CONFIG if it exists
-        if (typeof CONFIG_LOCAL !== 'undefined') {
-            console.log('🔧 Merging local configuration...');
+        // Add subtle parallax effect on mouse move with throttling for better performance
+        let rafId = null;
+        document.addEventListener('mousemove', (e) => {
+            if (rafId) return;
             
-            // Deep merge function
-            function deepMerge(target, source) {
-                for (const key in source) {
-                    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-                        target[key] = target[key] || {};
-                        deepMerge(target[key], source[key]);
-                    } else {
-                        target[key] = source[key];
-                    }
-                }
-                return target;
-            }
-            
-            // Merge configurations
-            if (CONFIG_LOCAL.googleMaps) {
-                CONFIG.googleMaps = { ...CONFIG.googleMaps, ...CONFIG_LOCAL.googleMaps };
-            }
-            if (CONFIG_LOCAL.emailjs) {
-                CONFIG.emailjs = deepMerge({ ...CONFIG.emailjs }, CONFIG_LOCAL.emailjs);
-            }
-            
-            console.log('✅ Local configuration loaded successfully');
-            console.log('🔑 API Keys loaded:', {
-                googleMaps: CONFIG.googleMaps.apiKey ? '✅' : '❌',
-                emailjs: CONFIG.emailjs.publicKey ? '✅' : '❌'
+            rafId = requestAnimationFrame(() => {
+                const orbs = document.querySelectorAll('.gradient-orb');
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                
+                orbs.forEach((orb, index) => {
+                    const speed = (index + 1) * 10;
+                    const xMove = (x - 0.5) * speed;
+                    const yMove = (y - 0.5) * speed;
+                    orb.style.transform = `translate(${xMove}px, ${yMove}px)`;
+                });
+                
+                rafId = null;
             });
-        } else {
-            console.log('ℹ️ Using default configuration with embedded API key');
-            console.log('🔑 API Keys loaded:', {
-                googleMaps: CONFIG.googleMaps.apiKey ? '✅' : '❌',
-                emailjs: CONFIG.emailjs.publicKey ? '✅' : '❌'
-            });
-        }
-        
-        // Initialize EmailJS if configured
-        try {
-            if (typeof emailjs !== 'undefined' && CONFIG.emailjs && CONFIG.emailjs.enabled && CONFIG.emailjs.publicKey) {
-                emailjs.init(CONFIG.emailjs.publicKey);
-                console.log('✅ EmailJS initialized successfully');
-            }
-        } catch (error) {
-            console.warn('⚠️ Failed to initialize EmailJS:', error);
-            // Site will continue to work without email functionality
-        }
+        });
     </script>
-    <script src="script.js"></script>
 </body>
 </html>
