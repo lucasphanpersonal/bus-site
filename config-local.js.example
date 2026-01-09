@@ -13,6 +13,13 @@ const CONFIG_LOCAL = {
         apiKey: 'YOUR_GOOGLE_MAPS_API_KEY_HERE'  // Replace with your actual Google Maps API key
     },
     
+    // Google Sheets API Configuration (Optional - for Admin Dashboard)
+    // By default, the Google Maps API key is used for Google Sheets API too
+    // Only specify this if you want to use a different API key for Google Sheets
+    googleSheets: {
+        apiKey: ''  // Leave empty to use Google Maps API key, or provide a different key
+    },
+    
     // EmailJS Configuration (Optional - only if you want to enable email features)
     emailjs: {
         enabled: true,  // Set to true to enable email features
