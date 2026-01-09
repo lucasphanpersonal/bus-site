@@ -1575,13 +1575,40 @@ ${signature}`;
             console.log('Quote data to save:', quoteDataToSave);
             
             // Use update if quote already exists, otherwise save new
-            const saved = quote.savedQuote ? 
-                await updateQuoteInSheets(quoteDataToSave) : 
-                await saveQuoteToSheets(quoteDataToSave);
+            // If update fails with "not found", fall back to save
+            let saved = false;
+            let operationType = 'saved';
+            
+            if (quote.savedQuote) {
+                try {
+                    console.log('Attempting to update existing quote...');
+                    saved = await updateQuoteInSheets(quoteDataToSave);
+                    operationType = 'updated';
+                } catch (updateError) {
+                    console.warn('Update failed:', updateError.message);
+                    
+                    // If update fails because quote not found, try saving as new instead
+                    // Note: We check the error message string because the Apps Script returns
+                    // error messages as strings, not error codes. This matches the exact message
+                    // from Code.gs line 190: "Quote not found for update"
+                    if (updateError.message.includes('Quote not found')) {
+                        console.log('Quote not found in Sheets, falling back to save as new...');
+                        saved = await saveQuoteToSheets(quoteDataToSave);
+                        operationType = 'saved';
+                    } else {
+                        // Re-throw other errors
+                        throw updateError;
+                    }
+                }
+            } else {
+                console.log('Saving new quote...');
+                saved = await saveQuoteToSheets(quoteDataToSave);
+                operationType = 'saved';
+            }
             
             if (saved) {
                 // Show success message
-                showTemporaryMessage(`✅ Quote ${quote.savedQuote ? 'updated' : 'saved'} with status: ${newStatus}`, 'success');
+                showTemporaryMessage(`✅ Quote ${operationType} with status: ${newStatus}`, 'success');
                 
                 // Reload quotes immediately to update UI before opening email
                 await loadQuotes();
