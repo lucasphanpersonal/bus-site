@@ -1337,19 +1337,20 @@ async function saveQuoteToSheets(quoteData) {
         
         console.log('Apps Script HTTP response status:', response.status, response.statusText);
         
+        // Read response as text first (can only read body once)
+        const responseText = await response.text();
+        
         // Check if the HTTP response was successful
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Apps Script HTTP error response:', errorText);
+            console.error('Apps Script HTTP error response:', responseText);
             throw new Error(`HTTP ${response.status}: ${response.statusText}. The Apps Script may not be deployed correctly or the URL may be wrong. Check console for details.`);
         }
         
-        // Parse the JSON response
+        // Parse the text as JSON
         let result;
         try {
-            result = await response.json();
+            result = JSON.parse(responseText);
         } catch (parseError) {
-            const responseText = await response.text();
             console.error('Failed to parse Apps Script response as JSON:', responseText);
             throw new Error('Invalid response from Apps Script. Expected JSON but got: ' + responseText.substring(0, 200));
         }
@@ -1753,19 +1754,20 @@ async function updateQuoteInSheets(quoteData) {
         
         console.log('Apps Script HTTP response status:', response.status, response.statusText);
         
+        // Read response as text first (can only read body once)
+        const responseText = await response.text();
+        
         // Check if the HTTP response was successful
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Apps Script HTTP error response:', errorText);
+            console.error('Apps Script HTTP error response:', responseText);
             throw new Error(`HTTP ${response.status}: ${response.statusText}. The Apps Script may not be deployed correctly or the URL may be wrong. Check console for details.`);
         }
         
-        // Parse the JSON response
+        // Parse the text as JSON
         let result;
         try {
-            result = await response.json();
+            result = JSON.parse(responseText);
         } catch (parseError) {
-            const responseText = await response.text();
             console.error('Failed to parse Apps Script response as JSON:', responseText);
             throw new Error('Invalid response from Apps Script. Expected JSON but got: ' + responseText.substring(0, 200));
         }
