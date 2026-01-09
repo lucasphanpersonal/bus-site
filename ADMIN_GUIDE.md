@@ -125,10 +125,10 @@ For production use, consider:
 ### Route Visualization
 
 When viewing a quote detail:
-- The system automatically displays the route on Google Maps
-- Shows pickup point, all stops, and final destination
+- The system automatically displays a route map for **each trip day**
+- Each map shows pickup point, all stops, and final destination for that specific day
 - Uses Google Directions API for accurate routing
-- Displays the route for the first trip day
+- Multi-day trips will have separate maps for each day
 
 ### Requirements
 

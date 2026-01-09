@@ -527,9 +527,9 @@ function showQuoteDetail(quoteId) {
     
     modal.style.display = 'block';
     
-    // Initialize map if Google Maps is available and route info exists
-    if (window.google && quote.routeInfo) {
-        setTimeout(() => initializeQuoteMap(quote), 100);
+    // Initialize maps for all trip days if Google Maps is available
+    if (window.google && quote.tripDays && quote.tripDays.length > 0) {
+        setTimeout(() => initializeQuoteMaps(quote), 100);
     }
 }
 
@@ -628,7 +628,6 @@ function generateQuoteDetailHTML(quote) {
                         <div class="detail-item-value">${quote.routeInfo.totals.stops}</div>
                     </div>
                 </div>
-                <div id="mapContainer" class="map-container"></div>
             </div>
         `;
     }
@@ -679,6 +678,7 @@ function generateQuoteDetailHTML(quote) {
                         `<li><strong>Drop-off ${idx + 1}:</strong> ${dropoff}</li>`
                     ).join('')}
                 </ul>
+                <div id="mapContainer-day-${index}" class="map-container"></div>
             </div>
         `;
     });
@@ -831,37 +831,37 @@ function checkMultipleStates(locations) {
 }
 
 /**
- * Initialize Google Map for quote
+ * Initialize Google Maps for all trip days
  */
-function initializeQuoteMap(quote) {
-    const mapContainer = document.getElementById('mapContainer');
-    if (!mapContainer || !window.google) return;
+function initializeQuoteMaps(quote) {
+    if (!window.google) return;
     
-    // Create map
-    const map = new google.maps.Map(mapContainer, {
-        zoom: 10,
-        mapTypeId: 'roadmap'
-    });
-    
-    const bounds = new google.maps.LatLngBounds();
-    const directionsService = new google.maps.DirectionsService();
-    const directionsRenderer = new google.maps.DirectionsRenderer({
-        map: map,
-        suppressMarkers: false
-    });
-    
-    // For simplicity, show the route for the first trip day
-    // In a more advanced implementation, you could show all days
-    if (quote.tripDays.length > 0) {
-        const firstDay = quote.tripDays[0];
-        const waypoints = firstDay.dropoffs.slice(0, -1).map(location => ({
+    // Create a map for each trip day
+    quote.tripDays.forEach((tripDay, index) => {
+        const mapContainer = document.getElementById(`mapContainer-day-${index}`);
+        if (!mapContainer) return;
+        
+        // Create map for this day
+        const map = new google.maps.Map(mapContainer, {
+            zoom: 10,
+            mapTypeId: 'roadmap'
+        });
+        
+        const directionsService = new google.maps.DirectionsService();
+        const directionsRenderer = new google.maps.DirectionsRenderer({
+            map: map,
+            suppressMarkers: false
+        });
+        
+        // Build waypoints from all dropoffs except the last one
+        const waypoints = tripDay.dropoffs.slice(0, -1).map(location => ({
             location: location,
             stopover: true
         }));
         
         const request = {
-            origin: firstDay.pickup,
-            destination: firstDay.dropoffs[firstDay.dropoffs.length - 1],
+            origin: tripDay.pickup,
+            destination: tripDay.dropoffs[tripDay.dropoffs.length - 1],
             waypoints: waypoints,
             travelMode: google.maps.TravelMode.DRIVING
         };
@@ -870,19 +870,20 @@ function initializeQuoteMap(quote) {
             if (status === 'OK') {
                 directionsRenderer.setDirections(result);
             } else {
-                console.error('Directions request failed:', status);
+                console.error(`Directions request failed for day ${index + 1}:`, status);
                 // Fallback: show markers only
-                showMarkersOnly(map, quote.tripDays[0], bounds);
+                showMarkersOnly(map, tripDay);
             }
         });
-    }
+    });
 }
 
 /**
  * Show markers only (fallback if directions fail)
  */
-function showMarkersOnly(map, tripDay, bounds) {
+function showMarkersOnly(map, tripDay) {
     const geocoder = new google.maps.Geocoder();
+    const bounds = new google.maps.LatLngBounds();
     const locations = [tripDay.pickup, ...tripDay.dropoffs];
     
     locations.forEach((location, index) => {
