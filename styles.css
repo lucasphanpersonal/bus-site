@@ -6,7 +6,7 @@
 }
 
 :root {
-    /* Light blue color palette (wife's favorite!) */
+    /* Light blue color palette */
     --primary-color: #87CEEB;
     --primary-hover: #5DADE2;
     --primary-dark: #3498DB;
@@ -476,23 +476,12 @@ small {
     color: white;
     width: 100%;
     box-shadow: 0 2px 8px rgba(135, 206, 235, 0.3);
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.02);
-    }
 }
 
 .btn-primary:hover:not(:disabled) {
     background: var(--primary-hover);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(135, 206, 235, 0.4);
-    animation: none;
 }
 
 .btn-primary:active:not(:disabled) {
