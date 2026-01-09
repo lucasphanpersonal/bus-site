@@ -45,6 +45,36 @@ const CONFIG = {
         showSummary: true  // Show route summary to user before submission
     },
 
+    // Email Configuration (for Admin Dashboard)
+    // Configure how admins send quote responses to customers
+    email: {
+        // Your business email that customers should reply to
+        // This will be used as the "From" address when sending quotes
+        fromEmail: 'your-business@example.com',  // Replace with your business email
+        
+        // Your business name (appears in email signature)
+        businessName: 'Bus Charter Services',  // Replace with your business name
+        
+        // Optional: BCC email for keeping records of sent quotes
+        bccEmail: '',  // Leave empty or add an email to BCC on all quote responses
+        
+        // Email template settings
+        templates: {
+            // Default subject line for quote responses
+            subject: 'Your Bus Charter Quote Request',
+            
+            // Email signature (supports basic HTML)
+            signature: `
+Best regards,
+Bus Charter Services Team
+
+Phone: (555) 123-4567
+Email: your-business@example.com
+Website: www.your-website.com
+            `.trim()
+        }
+    },
+
     // Google Sheets API Configuration (for Admin Dashboard)
     // To set this up:
     // 1. Your Google Form should be linked to a Google Sheet (Responses tab → Create Spreadsheet)

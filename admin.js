@@ -541,6 +541,9 @@ function showQuoteDetail(quoteId) {
     
     if (!quote) return;
     
+    // Store current quote globally for email function
+    window.currentQuote = quote;
+    
     const modal = document.getElementById('quoteModal');
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
@@ -714,6 +717,9 @@ function generateQuoteDetailHTML(quote) {
     // Notable Information
     html += generateNotableInfo(quote);
     
+    // Quote Response Section
+    html += generateQuoteResponseSection(quote);
+    
     return html;
 }
 
@@ -765,6 +771,67 @@ function generateNotableInfo(quote) {
     });
     
     html += `
+            </div>
+        </div>
+    `;
+    
+    return html;
+}
+
+/**
+ * Generate quote response section with email composer
+ */
+function generateQuoteResponseSection(quote) {
+    const emailConfig = CONFIG.email || {};
+    const fromEmail = emailConfig.fromEmail || 'your-business@example.com';
+    const businessName = emailConfig.businessName || 'Bus Charter Services';
+    
+    // Generate trip summary for email
+    const tripSummary = quote.tripDays.map((day, idx) => {
+        const routeInfo = quote.routeInfo?.tripDays[idx];
+        const distance = routeInfo ? (routeInfo.totals.distance / METERS_PER_MILE).toFixed(1) : 'N/A';
+        const duration = routeInfo ? `${routeInfo.bookingHours}h ${routeInfo.bookingMinutes}m` : 'N/A';
+        
+        return `Day ${idx + 1}: ${day.date}
+  Time: ${day.startTime} - ${day.endTime}${day.endsNextDay ? ' (overnight)' : ''}
+  Distance: ${distance} miles
+  Duration: ${duration}
+  Pickup: ${day.pickup}
+  Dropoffs: ${day.dropoffs.join(', ')}`;
+    }).join('\n\n');
+    
+    const totalMiles = quote.routeInfo ? (quote.routeInfo.totals.distance / METERS_PER_MILE).toFixed(1) : 'N/A';
+    const totalBookingHours = quote.routeInfo ? Math.floor(quote.routeInfo.totals.bookingHours / 60) : 'N/A';
+    const totalBookingMinutes = quote.routeInfo ? quote.routeInfo.totals.bookingHours % 60 : 0;
+    
+    let html = `
+        <div class="detail-section" style="border-top: 2px solid var(--border-color); padding-top: 30px; margin-top: 30px;">
+            <h3>✉️ Send Quote Response</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                Compose and send a quote response to ${quote.name} at ${quote.email}
+            </p>
+            
+            <div style="background: var(--background); padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">Quote Amount ($)</label>
+                    <input type="number" id="quoteAmount" placeholder="e.g., 1500" 
+                           style="width: 200px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">Additional Details (optional)</label>
+                    <textarea id="quoteDetails" rows="4" placeholder="Any additional information, terms, or conditions..."
+                              style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; font-family: inherit; resize: vertical;"></textarea>
+                </div>
+                
+                <button onclick="sendQuoteEmail()" 
+                        style="background: var(--primary-color); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600;">
+                    📧 Compose Email
+                </button>
+                
+                <p style="margin-top: 12px; font-size: 0.85rem; color: var(--text-secondary);">
+                    This will open your email client with a pre-filled message. You can edit before sending.
+                </p>
             </div>
         </div>
     `;
@@ -870,6 +937,84 @@ function closeModal() {
     document.getElementById('quoteModal').style.display = 'none';
 }
 
+/**
+ * Send quote email - opens email client with pre-filled content
+ */
+function sendQuoteEmail() {
+    const quote = window.currentQuote;
+    
+    if (!quote) {
+        alert('Error: Quote data not found. Please close and reopen the quote detail.');
+        return;
+    }
+    
+    const emailConfig = CONFIG.email || {};
+    const fromEmail = emailConfig.fromEmail || 'your-business@example.com';
+    const businessName = emailConfig.businessName || 'Bus Charter Services';
+    const signature = emailConfig.templates?.signature || 'Best regards,\n' + businessName;
+    const subjectTemplate = emailConfig.templates?.subject || 'Your Bus Charter Quote Request';
+    const bccEmail = emailConfig.bccEmail || '';
+    
+    // Get values from form
+    const quoteAmount = document.getElementById('quoteAmount')?.value || '';
+    const quoteDetails = document.getElementById('quoteDetails')?.value || '';
+    
+    if (!quoteAmount) {
+        alert('Please enter a quote amount before sending.');
+        return;
+    }
+    
+    // Build trip summary
+    const tripSummary = quote.tripDays.map((day, idx) => {
+        const routeInfo = quote.routeInfo?.tripDays[idx];
+        const distance = routeInfo ? (routeInfo.totals.distance / METERS_PER_MILE).toFixed(1) : 'N/A';
+        const duration = routeInfo ? `${routeInfo.bookingHours}h ${routeInfo.bookingMinutes}m` : 'N/A';
+        
+        return `Day ${idx + 1}: ${day.date}
+  Time: ${day.startTime} - ${day.endTime}${day.endsNextDay ? ' (overnight)' : ''}
+  Distance: ${distance} miles
+  Duration: ${duration}
+  Pickup: ${day.pickup}
+  Dropoffs: ${day.dropoffs.join(', ')}`;
+    }).join('\n\n');
+    
+    const totalMiles = quote.routeInfo ? (quote.routeInfo.totals.distance / METERS_PER_MILE).toFixed(1) : 'N/A';
+    const totalBookingHours = quote.routeInfo ? Math.floor(quote.routeInfo.totals.bookingHours / 60) : 0;
+    const totalBookingMinutes = quote.routeInfo ? quote.routeInfo.totals.bookingHours % 60 : 0;
+    
+    // Build email body
+    const emailBody = `Dear ${quote.name},
+
+Thank you for your bus charter quote request. We're pleased to provide you with the following quote:
+
+QUOTE AMOUNT: $${quoteAmount}
+
+TRIP SUMMARY:
+${tripSummary}
+
+TOTALS:
+- Total Distance: ${totalMiles} miles
+- Total Booking Time: ${totalBookingHours}h ${totalBookingMinutes}m
+- Number of Passengers: ${quote.passengers}
+- Trip Days: ${quote.tripDays.length}
+
+${quoteDetails ? '\nADDITIONAL DETAILS:\n' + quoteDetails + '\n' : ''}
+This quote is valid for 30 days. Please let us know if you have any questions or would like to proceed with booking.
+
+${signature}`;
+    
+    // Build mailto link
+    const subject = encodeURIComponent(subjectTemplate);
+    const body = encodeURIComponent(emailBody);
+    const to = encodeURIComponent(quote.email);
+    const bcc = bccEmail ? `&bcc=${encodeURIComponent(bccEmail)}` : '';
+    
+    const mailtoLink = `mailto:${to}?subject=${subject}&body=${body}${bcc}`;
+    
+    // Open email client
+    window.location.href = mailtoLink;
+}
+
 // Close modal when clicking outside
 window.onclick = function(event) {
     const modal = document.getElementById('quoteModal');
@@ -878,5 +1023,6 @@ window.onclick = function(event) {
     }
 }
 
-// Make saveQuote available globally for use by the form submission
+// Make functions available globally
 window.saveQuoteToAdmin = saveQuote;
+window.sendQuoteEmail = sendQuoteEmail;
