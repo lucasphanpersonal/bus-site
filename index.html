@@ -152,9 +152,14 @@
     <script src="config.js"></script>
     <script>
         // Initialize EmailJS if configured
-        if (typeof emailjs !== 'undefined' && CONFIG.emailjs && CONFIG.emailjs.enabled && CONFIG.emailjs.publicKey) {
-            emailjs.init(CONFIG.emailjs.publicKey);
-            console.log('EmailJS initialized');
+        try {
+            if (typeof emailjs !== 'undefined' && CONFIG.emailjs && CONFIG.emailjs.enabled && CONFIG.emailjs.publicKey) {
+                emailjs.init(CONFIG.emailjs.publicKey);
+                console.log('EmailJS initialized successfully');
+            }
+        } catch (error) {
+            console.warn('Failed to initialize EmailJS:', error);
+            // Site will continue to work without email functionality
         }
     </script>
     <script src="script.js"></script>

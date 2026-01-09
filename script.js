@@ -906,9 +906,12 @@ async function sendConfirmationEmail(formData) {
 function formatTripDaysForEmail(tripDays) {
     return tripDays.map((day, idx) => {
         const overnightNote = day.endsNextDay ? ' (overnight - ends next day)' : '';
+        const dropoffsList = day.dropoffs.map((d, i) => `  ${i + 1}. ${d}`).join('\n');
+        
         return `Day ${idx + 1}: ${day.date} from ${day.startTime} to ${day.endTime}${overnightNote}
   Pick-up: ${day.pickup}
-  Drop-offs: ${day.dropoffs.map((d, i) => `\n    ${i + 1}. ${d}`).join('')}`;
+  Drop-offs:
+${dropoffsList}`;
     }).join('\n\n');
 }
 

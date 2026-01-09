@@ -6,6 +6,9 @@ const ADMIN_PASSWORD = 'admin123'; // TODO: Change this to a secure password!
 const AUTH_KEY = 'busCharterAuth';
 const METERS_PER_MILE = 1609.34; // Conversion constant
 
+// Global state for loaded quotes
+let loadedQuotes = [];
+
 // State abbreviations for interstate detection
 const US_STATE_ABBREVIATIONS = [
     'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
@@ -119,7 +122,7 @@ async function loadQuotes() {
             showLoadingState();
             quotes = await getQuotesFromGoogleSheets();
         } else {
-            throw new Error('Google Sheets integration is not enabled. Please configure it in config.js');
+            throw new Error('Google Sheets integration is not enabled. Please set googleSheets.enabled to true and configure your spreadsheet ID in config.js. See GOOGLE_SHEETS_SETUP.md for detailed setup instructions.');
         }
         
         if (quotes.length === 0) {
@@ -130,6 +133,9 @@ async function loadQuotes() {
         
         // Sort by date (newest first)
         quotes.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+        
+        // Store quotes globally for detail views
+        loadedQuotes = quotes;
         
         // Display quotes
         displayQuotes(quotes);
@@ -507,8 +513,7 @@ function updateStats(quotes) {
  * Show quote detail in modal
  */
 function showQuoteDetail(quoteId) {
-    const quotes = getQuotes();
-    const quote = quotes.find(q => q.id === quoteId);
+    const quote = loadedQuotes.find(q => q.id === quoteId);
     
     if (!quote) return;
     
