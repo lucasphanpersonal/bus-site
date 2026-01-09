@@ -276,11 +276,6 @@ body {
     transform: scale(1.05);
 }
 
-.remove-date-btn:hover {
-    background: #dc2626;
-    transform: scale(1.05);
-}
-
 /* Form Groups */
 .form-group {
     margin-bottom: var(--spacing-md);
