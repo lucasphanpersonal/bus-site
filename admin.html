@@ -337,6 +337,32 @@
             font-weight: 600;
         }
     </style>
+    
+    <!-- Google Maps JavaScript API -->
+    <script>
+        // Load Google Maps API dynamically with the API key from config
+        function loadGoogleMapsAPI() {
+            // Wait for config to be loaded
+            if (typeof CONFIG === 'undefined') {
+                setTimeout(loadGoogleMapsAPI, 100);
+                return;
+            }
+            
+            if (!CONFIG.googleMaps || !CONFIG.googleMaps.apiKey) {
+                console.warn('Google Maps API key not configured');
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${CONFIG.googleMaps.apiKey}&libraries=places`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        }
+        
+        // Load the config first, then load Google Maps API
+        loadGoogleMapsAPI();
+    </script>
 </head>
 <body>
     <!-- Login Form -->
