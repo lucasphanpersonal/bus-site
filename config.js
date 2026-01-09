@@ -91,6 +91,21 @@ Website: lucasphanpersonal.github.io/bus-site
         // Template variables available:
         // {{customer_name}}, {{customer_email}}, {{customer_phone}}, {{company}},
         // {{passengers}}, {{trip_description}}, {{trip_days}}, {{notes}}, {{submission_date}}
+        
+        // Admin Notification Configuration
+        // Send notification to admin email when a new quote is received
+        adminNotification: {
+            enabled: false,  // Set to true to enable admin notifications
+            adminEmail: 'huabaohuang622@gmail.com',  // Admin email to receive notifications
+            adminTemplateId: '',  // Your EmailJS Template ID for admin notifications
+            // TODO: Replace hardcoded API key with environment variables or secret management services
+            // for better security. Consider using services like:
+            // - AWS Secrets Manager
+            // - Azure Key Vault
+            // - Google Cloud Secret Manager
+            // - Netlify Environment Variables
+            // - Vercel Environment Variables
+        }
     },
 
     // Google Sheets API Configuration (for Admin Dashboard)

@@ -17,6 +17,7 @@ A modern, responsive website for requesting charter bus booking quotes. The site
 - 📝 **Trip Description** - Detailed description and special notes sections
 - ✅ **Confirmation Page** - Clients receive a professional confirmation page after submission
 - 📬 **Automatic Confirmation Emails** - Optional automatic email confirmations to customers (via EmailJS)
+- 🔔 **Admin Notifications** - Optional email notifications to admin when new quotes are received
 - 🔗 **Google Forms Integration** - Submissions sent directly to your Google Form
 - ⚡ **Real-time Validation** - Client-side form validation for better UX
 - 🎨 **Clean UI** - Professional look without the typical embedded form appearance
@@ -104,13 +105,15 @@ const CONFIG = {
 };
 ```
 
-### 5. (Optional) Configure Email Confirmations
+### 5. (Optional) Configure Email Confirmations and Admin Notifications
 
-To send automatic confirmation emails to customers when they submit a quote:
+To send automatic confirmation emails to customers and notifications to admin when they submit a quote:
 
 1. Sign up for a free account at [EmailJS](https://www.emailjs.com/) (200 free emails/month)
 2. Connect your email service (Gmail, Outlook, etc.)
-3. Create an email template for quote confirmations
+3. Create email templates:
+   - One for customer quote confirmations
+   - One for admin notifications (optional)
 4. Update `config.js` with your EmailJS credentials:
 
 ```javascript
@@ -118,13 +121,22 @@ emailjs: {
     enabled: true,
     publicKey: 'YOUR_EMAILJS_PUBLIC_KEY',
     serviceId: 'YOUR_SERVICE_ID',
-    templateId: 'YOUR_TEMPLATE_ID'
+    templateId: 'YOUR_CUSTOMER_TEMPLATE_ID',
+    
+    // Optional: Admin notifications
+    adminNotification: {
+        enabled: true,
+        adminEmail: 'huabaohuang622@gmail.com',  // Configure your admin email
+        adminTemplateId: 'YOUR_ADMIN_TEMPLATE_ID'
+    }
 }
 ```
 
-📖 **See [EMAIL_INTEGRATION_GUIDE.md](EMAIL_INTEGRATION_GUIDE.md) for detailed setup instructions and alternative email solutions.**
+📖 **See [EMAIL_INTEGRATION_GUIDE.md](EMAIL_INTEGRATION_GUIDE.md) for detailed setup instructions, template examples, and alternative email solutions.**
 
 **Note:** Email integration is optional. The site works perfectly without it - customers will still see a confirmation page and submissions will be saved to Google Forms.
+
+⚠️ **Security Note:** For production use, consider moving sensitive configuration to environment variables or secret management services instead of hardcoding values.
 
 ### 6. Deploy
 
