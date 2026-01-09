@@ -6,6 +6,10 @@ const ADMIN_PASSWORD = 'admin123'; // TODO: Change this to a secure password!
 const AUTH_KEY = 'busCharterAuth';
 const METERS_PER_MILE = 1609.34; // Conversion constant
 
+// Configuration constants for Apps Script integration
+const MIN_SHARED_SECRET_LENGTH = 8; // Minimum length for shared secret security
+const WARNING_DISPLAY_DELAY_MS = 3000; // Delay before opening email when Apps Script is disabled
+
 // Global state for loaded quotes
 let loadedQuotes = [];
 
@@ -1303,6 +1307,54 @@ function showMarkersOnly(map, tripDay) {
 }
 
 /**
+ * Helper function to format Apps Script response error message
+ * @param {Response} response - The fetch response object
+ * @returns {string} Formatted error message
+ */
+function formatAppsScriptErrorMessage(response) {
+    return `HTTP ${response.status}: ${response.statusText}. The Apps Script may not be deployed correctly or the URL may be wrong. Check console for details.`;
+}
+
+/**
+ * Helper function to handle Apps Script response
+ * Reads response as text, checks HTTP status, parses JSON, and validates success
+ * @param {Response} response - The fetch response object
+ * @param {string} operationType - Type of operation for error messages ('save' or 'update')
+ * @returns {Promise<Object>} Parsed JSON result
+ * @throws {Error} If response is not ok, JSON parse fails, or success is false
+ */
+async function handleAppsScriptResponse(response, operationType = 'save') {
+    console.log('Apps Script HTTP response status:', response.status, response.statusText);
+    
+    // Read response as text first (can only read body once)
+    const responseText = await response.text();
+    
+    // Check if the HTTP response was successful
+    if (!response.ok) {
+        console.error('Apps Script HTTP error response:', responseText);
+        throw new Error(formatAppsScriptErrorMessage(response));
+    }
+    
+    // Parse the text as JSON
+    let result;
+    try {
+        result = JSON.parse(responseText);
+    } catch (parseError) {
+        console.error('Failed to parse Apps Script response as JSON:', responseText);
+        throw new Error('Invalid response from Apps Script. Expected JSON but got: ' + responseText.substring(0, 200));
+    }
+    
+    console.log('Apps Script response:', result);
+    
+    if (!result.success) {
+        throw new Error(result.message || `Failed to ${operationType} quote`);
+    }
+    
+    console.log(`Quote ${operationType}d successfully to Sheets`);
+    return result;
+}
+
+/**
  * Save quote response to Google Sheets via Apps Script
  */
 async function saveQuoteToSheets(quoteData) {
@@ -1335,16 +1387,8 @@ async function saveQuoteToSheets(quoteData) {
             body: formData.toString()
         });
         
-        // Parse the JSON response
-        const result = await response.json();
-        
-        console.log('Apps Script response:', result);
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to save quote');
-        }
-        
-        console.log('Quote saved successfully to Sheets');
+        // Handle response using shared helper
+        await handleAppsScriptResponse(response, 'save');
         return true;
         
     } catch (error) {
@@ -1564,7 +1608,27 @@ ${signature}`;
     }
     
     // Save quote to Google Sheets if Apps Script is enabled
-    if (CONFIG.appsScript && CONFIG.appsScript.enabled) {
+    if (!CONFIG.appsScript || !CONFIG.appsScript.enabled) {
+        // Apps Script is not enabled - warn user
+        console.warn('⚠️ Apps Script is disabled. Quote will NOT be saved to Google Sheets!');
+        showTemporaryMessage('⚠️ Warning: Apps Script is disabled. Quote will NOT be saved to Google Sheets! Only the email will be opened. Enable Apps Script in config.js to save quotes.', 'warning');
+        
+        // Give user time to see the warning before opening email
+        await new Promise(resolve => setTimeout(resolve, WARNING_DISPLAY_DELAY_MS));
+    } else {
+        // Validate Apps Script configuration before attempting to save
+        if (!CONFIG.appsScript.webAppUrl || CONFIG.appsScript.webAppUrl.includes('YOUR_')) {
+            console.error('❌ Apps Script web app URL is not configured properly');
+            showTemporaryMessage('❌ Apps Script web app URL is not configured. Please deploy your Apps Script and add the URL to config.js. See APPS_SCRIPT_SETUP.md', 'error');
+            return; // Don't proceed
+        }
+        
+        if (!CONFIG.appsScript.sharedSecret || CONFIG.appsScript.sharedSecret.length < MIN_SHARED_SECRET_LENGTH) {
+            console.error('❌ Apps Script shared secret is not configured properly');
+            showTemporaryMessage(`❌ Apps Script shared secret is not configured or too short (minimum ${MIN_SHARED_SECRET_LENGTH} characters). Please update config.js. See APPS_SCRIPT_SETUP.md`, 'error');
+            return; // Don't proceed
+        }
+        
         try {
             // Show saving status
             showTemporaryMessage('💾 Saving quote...', 'info');
@@ -1713,16 +1777,8 @@ async function updateQuoteInSheets(quoteData) {
             body: formData.toString()
         });
         
-        // Parse the JSON response
-        const result = await response.json();
-        
-        console.log('Apps Script response:', result);
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to update quote');
-        }
-        
-        console.log('Quote updated successfully in Sheets');
+        // Handle response using shared helper
+        await handleAppsScriptResponse(response, 'update');
         return true;
         
     } catch (error) {
