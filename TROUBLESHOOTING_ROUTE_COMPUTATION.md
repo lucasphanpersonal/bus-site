@@ -24,6 +24,22 @@ Route computation requires the **Google Maps Distance Matrix API** to calculate 
 2. **API key issues** - Key is missing, invalid, or doesn't have the right permissions
 3. **API call failures** - Network errors, rate limiting, or invalid addresses
 4. **Silent errors** - JavaScript errors that are caught but not visible
+5. **⭐ Extremely long distances** - Cross-country or transcontinental trips (e.g., Boston to Seattle)
+
+### The Long Distance Problem (Your Case!)
+
+**Google Maps Distance Matrix API has limitations for extremely long routes:**
+
+- ❌ Routes over ~2,500-3,000 miles may fail
+- ❌ Cross-country trips (East Coast to West Coast) often fail
+- ❌ Routes that would take 40+ hours of driving may fail
+- ❌ Routes crossing multiple time zones may have issues
+
+**Your specific example:**
+- Quincy, MA → Times Square, NY: ✅ Works (~217 miles)
+- Times Square, NY → Space Needle, Seattle, WA: ❌ **Fails (~2,850 miles)**
+
+This is a **Google Maps API limitation**, not a bug in your code!
 
 ## How to Debug
 
@@ -165,13 +181,19 @@ googleMaps: {
 
 **Symptoms:**
 - Console shows: "ZERO_RESULTS" or "NOT_FOUND"
+- Console shows: "Distance is too long for route computation (Google Maps limitation for extremely long trips)"
 - Some legs compute successfully, others fail
+- Cross-country trips fail (e.g., NY to Seattle)
 
 **Solution:**
-- Use full, properly formatted addresses
-- Example: `17 Rodman St, Quincy, MA 02169, USA` instead of just `17 Rodman St`
-- Use the autocomplete suggestions when filling the form
-- Very long distances (cross-country) might have issues
+- **For extremely long trips (2,500+ miles):** This is a Google Maps API limitation
+  - Break the trip into multiple days with intermediate stops
+  - Example: Instead of "NY → Seattle" (fails), use "NY → Chicago" (day 1) and "Chicago → Seattle" (day 2)
+- **For invalid addresses:**
+  - Use full, properly formatted addresses
+  - Example: `17 Rodman St, Quincy, MA 02169, USA` instead of just `17 Rodman St`
+  - Use the autocomplete suggestions when filling the form
+- **For very long distances:** Consider if a bus charter is the right transportation method
 
 ### Problem 5: Rate Limiting
 
@@ -215,6 +237,92 @@ If route computation keeps failing, you can:
 3. Add the information when responding to the quote
 
 Or fix the API issues following this guide!
+
+## Handling Extremely Long Trips (NEW!)
+
+### The Problem
+
+Google Maps Distance Matrix API cannot compute routes for extremely long distances (typically over 2,500-3,000 miles or 40+ hours of driving).
+
+### Why It Happens
+
+- API has distance/time limits for single route queries
+- Cross-continental trips exceed these limits
+- This is a Google Maps limitation, not a bug
+
+### Your Options
+
+#### Option 1: Break Into Multiple Days (Recommended)
+
+Instead of one long trip, create multiple days with intermediate stops:
+
+**❌ This will fail:**
+```
+Day 1: New York → Seattle (2,850 miles)
+```
+
+**✅ This will work:**
+```
+Day 1: New York → Chicago (790 miles)
+Day 2: Chicago → Denver (1,000 miles)  
+Day 3: Denver → Seattle (1,300 miles)
+```
+
+#### Option 2: Use Shorter Routes
+
+Ensure each individual leg is under ~2,500 miles:
+
+**❌ Fails:**
+- Times Square, NY → Space Needle, Seattle (~2,850 mi)
+
+**✅ Works:**
+- Times Square, NY → Chicago, IL (~790 mi)
+- Chicago, IL → Space Needle, Seattle (~2,060 mi)
+
+#### Option 3: Accept Partial Information
+
+The system now handles partial route failures gracefully:
+- ✅ Successfully computed legs are shown
+- ⚠️ Failed legs are listed with reasons
+- ℹ️ Totals show "(partial)" indicator
+- 📊 You can still review and submit the quote
+
+### What the Updated System Shows
+
+When long-distance legs fail, you'll now see:
+
+```
+⚠️ Notice: 1 route segment could not be computed. This may be due to 
+extremely long distances (e.g., cross-country trips), locations separated 
+by ocean, or other route limitations.
+
+The displayed distance and time are incomplete. Please review the failed 
+segments below...
+
+Day 1:
+  Distance: 217.0 miles (partial)
+  Driving Time: 3h 40m (partial)
+  
+  Failed segments (1):
+  • Times Square, Manhattan, NY, USA → Space Needle, Broad Street, Seattle, WA, USA
+    Distance is too long for route computation (Google Maps limitation)
+```
+
+### Best Practices
+
+1. **Plan realistic daily segments** - Keep each day's driving under 12 hours
+2. **Add intermediate stops** - Break long trips into manageable chunks
+3. **Use major cities as waypoints** - Chicago, Denver, etc.
+4. **Consider flight alternatives** - For 2,500+ mile trips, flying might be better
+
+### Still Want Cross-Country Trips?
+
+If you absolutely need to quote very long trips:
+
+1. ✅ **Submit the quote anyway** - The form still works with partial info
+2. 📝 **Manually calculate** - Use Google Maps to get estimates
+3. 📧 **Add in response** - Include accurate mileage when sending the quote to customer
+4. 🚌 **Consider feasibility** - Is a multi-day bus charter realistic?
 
 ## Enhanced Logging (Added in Latest Update)
 

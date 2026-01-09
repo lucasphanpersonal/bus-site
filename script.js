@@ -312,6 +312,7 @@ async function computeRouteInformation(tripDays) {
             bookingHours: bookingTime.hours,
             bookingMinutes: bookingTime.minutes,
             legs: [],
+            failedLegs: [],  // Track legs that failed to compute
             totals: {
                 distance: 0,
                 duration: 0,
@@ -333,6 +334,11 @@ async function computeRouteInformation(tripDays) {
             if (!origin || typeof origin !== 'string' || !origin.trim() || 
                 !destination || typeof destination !== 'string' || !destination.trim()) {
                 console.warn(`Skipping invalid location pair at day ${i}, leg ${j}`);
+                dayInfo.failedLegs.push({
+                    from: origin,
+                    to: destination,
+                    reason: 'Invalid location'
+                });
                 continue;
             }
             
@@ -355,6 +361,11 @@ async function computeRouteInformation(tripDays) {
                 }
             } catch (error) {
                 console.error(`Error computing leg ${j} for day ${i}:`, error);
+                dayInfo.failedLegs.push({
+                    from: origin,
+                    to: destination,
+                    reason: error.message || 'Unknown error'
+                });
                 // Continue with other legs even if one fails
             }
         }
@@ -365,7 +376,15 @@ async function computeRouteInformation(tripDays) {
         routeInfo.totals.stops += dayInfo.totals.stops;
         routeInfo.totals.bookingHours += bookingTime.totalMinutes;
         
-        console.log(`Day ${i + 1} complete: ${(dayInfo.totals.distance / METERS_PER_MILE).toFixed(1)} miles, ${Math.floor(dayInfo.totals.duration / 60)} minutes`);
+        const failedCount = dayInfo.failedLegs.length;
+        const successCount = dayInfo.legs.length;
+        const totalLegs = locations.length - 1;
+        
+        if (failedCount > 0) {
+            console.warn(`Day ${i + 1} partial: ${successCount}/${totalLegs} legs computed successfully, ${failedCount} failed`);
+        } else {
+            console.log(`Day ${i + 1} complete: ${(dayInfo.totals.distance / METERS_PER_MILE).toFixed(1)} miles, ${Math.floor(dayInfo.totals.duration / 60)} minutes`);
+        }
     }
 
     console.log('Route computation complete:', routeInfo);
@@ -397,7 +416,25 @@ function getDistanceAndTime(service, origin, destination) {
                             duration: result.duration
                         });
                     } else {
-                        const errorMsg = `No route found between "${origin}" and "${destination}": ${result?.status || 'Unknown error'}`;
+                        // Handle specific error cases
+                        let errorMsg = `No route found between "${origin}" and "${destination}"`;
+                        let userFriendlyMsg = '';
+                        
+                        switch (result?.status) {
+                            case 'ZERO_RESULTS':
+                                userFriendlyMsg = 'No driving route exists between these locations (may be too far apart, separated by ocean, or not connected by roads)';
+                                break;
+                            case 'MAX_ROUTE_LENGTH_EXCEEDED':
+                                userFriendlyMsg = 'Distance is too long for route computation (Google Maps limitation for extremely long trips)';
+                                break;
+                            case 'NOT_FOUND':
+                                userFriendlyMsg = 'One or both addresses could not be found';
+                                break;
+                            default:
+                                userFriendlyMsg = result?.status || 'Unknown error';
+                        }
+                        
+                        errorMsg += `: ${userFriendlyMsg}`;
                         console.error(errorMsg);
                         reject(new Error(errorMsg));
                     }
@@ -461,20 +498,39 @@ async function showRouteSummary(formData) {
         const totalBookingMinutesTotal = routeInfo.totals.bookingHours;
         const drivingExceedsBooking = totalDrivingMinutes > totalBookingMinutesTotal;
         
+        // Count total failed legs across all days
+        const totalFailedLegs = routeInfo.tripDays.reduce((sum, day) => sum + (day.failedLegs?.length || 0), 0);
+        const hasFailedLegs = totalFailedLegs > 0;
+        
         let summaryHTML = `
             <h2 style="margin-bottom: 20px; color: #1e293b;">🗺️ Route Summary</h2>
             <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                 <h3 style="margin-bottom: 15px; color: #2563eb;">Total Trip Overview</h3>
-                <p style="margin: 8px 0;"><strong>Total Distance:</strong> ${totalMiles} miles</p>
-                <p style="margin: 8px 0;"><strong>Total Driving Time:</strong> ${totalHours}h ${totalMinutes}m</p>
+                <p style="margin: 8px 0;"><strong>Total Distance:</strong> ${totalMiles} miles${hasFailedLegs ? ' (partial - some legs not computed)' : ''}</p>
+                <p style="margin: 8px 0;"><strong>Total Driving Time:</strong> ${totalHours}h ${totalMinutes}m${hasFailedLegs ? ' (partial)' : ''}</p>
                 <p style="margin: 8px 0;"><strong>Total Booking Hours:</strong> ${totalBookingHours}h ${totalBookingMinutes}m</p>
                 <p style="margin: 8px 0;"><strong>Total Stops:</strong> ${routeInfo.totals.stops}</p>
                 <p style="margin: 8px 0;"><strong>Number of Passengers:</strong> ${formData.passengers}</p>
             </div>
         `;
         
+        // Add warning if some legs failed to compute
+        if (hasFailedLegs) {
+            summaryHTML += `
+            <div style="margin-bottom: 20px; padding: 15px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                <p style="margin: 0 0 10px 0; font-size: 14px; color: #92400e;">
+                    <strong>⚠️ Notice:</strong> ${totalFailedLegs} route segment${totalFailedLegs > 1 ? 's' : ''} could not be computed. 
+                    This may be due to extremely long distances (e.g., cross-country trips), locations separated by ocean, or other route limitations.
+                </p>
+                <p style="margin: 0; font-size: 13px; color: #92400e;">
+                    The displayed distance and time are <strong>incomplete</strong>. Please review the failed segments below and consider breaking up very long trips into multiple days or shorter segments.
+                </p>
+            </div>
+            `;
+        }
+        
         // Add warning if driving time exceeds booking hours
-        if (drivingExceedsBooking) {
+        if (drivingExceedsBooking && !hasFailedLegs) {
             summaryHTML += `
             <div style="margin-bottom: 20px; padding: 15px; background: #fef2f2; border-radius: 8px; border-left: 4px solid #dc2626;">
                 <p style="margin: 0; font-size: 14px; color: #991b1b;">
@@ -496,15 +552,27 @@ async function showRouteSummary(formData) {
             const dayDrivingMinutes = dayHours * 60 + dayMinutes;
             const dayBookingMinutes = day.totals.bookingMinutes;
             const dayWarning = dayDrivingMinutes > dayBookingMinutes;
+            const hasFailedLegsThisDay = day.failedLegs && day.failedLegs.length > 0;
             
             summaryHTML += `
-                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid ${dayWarning ? '#dc2626' : '#e2e8f0'}; border-radius: 8px; ${dayWarning ? 'background: #fef2f2;' : ''}">
+                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid ${dayWarning ? '#dc2626' : (hasFailedLegsThisDay ? '#f59e0b' : '#e2e8f0')}; border-radius: 8px; ${dayWarning ? 'background: #fef2f2;' : (hasFailedLegsThisDay ? 'background: #fffbeb;' : '')}">
                     <h4 style="margin-bottom: 10px; color: #1e293b;">Day ${day.dayNumber} - ${day.date}</h4>
                     <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${day.startTime} - ${day.endTime}${overnightIndicator} (${day.bookingHours}h ${day.bookingMinutes}m booking)</p>
-                    <p style="margin: 5px 0; font-size: 14px;"><strong>Distance:</strong> ${dayMiles} miles</p>
-                    <p style="margin: 5px 0; font-size: 14px;"><strong>Driving Time:</strong> ${dayHours}h ${dayMinutes}m</p>
+                    <p style="margin: 5px 0; font-size: 14px;"><strong>Distance:</strong> ${dayMiles} miles${hasFailedLegsThisDay ? ' (partial)' : ''}</p>
+                    <p style="margin: 5px 0; font-size: 14px;"><strong>Driving Time:</strong> ${dayHours}h ${dayMinutes}m${hasFailedLegsThisDay ? ' (partial)' : ''}</p>
                     <p style="margin: 5px 0; font-size: 14px;"><strong>Stops:</strong> ${day.totals.stops}</p>
                     ${dayWarning ? `<p style="margin: 10px 0 0 0; font-size: 13px; color: #991b1b;"><strong>⚠️ Warning:</strong> Driving time exceeds booked hours for this day!</p>` : ''}
+                    ${hasFailedLegsThisDay ? `
+                        <div style="margin-top: 10px; padding: 10px; background: rgba(251, 191, 36, 0.1); border-radius: 4px;">
+                            <p style="margin: 0 0 5px 0; font-size: 13px; color: #92400e;"><strong>Failed segments (${day.failedLegs.length}):</strong></p>
+                            ${day.failedLegs.map(leg => `
+                                <p style="margin: 3px 0; font-size: 12px; color: #78350f;">
+                                    • ${leg.from} → ${leg.to}<br>
+                                    <span style="font-style: italic; color: #a16207;">${leg.reason}</span>
+                                </p>
+                            `).join('')}
+                        </div>
+                    ` : ''}
                 </div>
             `;
         });
