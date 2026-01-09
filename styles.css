@@ -1194,15 +1194,15 @@ body.landing-page {
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
     animation: slideBusAcross 15s linear infinite;
     will-change: transform;
-    transform: translate(-100px, -50%) scaleX(-1); /* Flip horizontally to face right */
+    transform: translate(-150px, -50%) scaleX(-1); /* Flip horizontally to face right */
 }
 
 @keyframes slideBusAcross {
     0% {
-        transform: translate(-100px, -50%) scaleX(-1);
+        transform: translate(-150px, -50%) scaleX(-1);
     }
     100% {
-        transform: translate(calc(100vw + 100px), -50%) scaleX(-1);
+        transform: translate(calc(100vw + 150px), -50%) scaleX(-1);
     }
 }
 
@@ -1262,31 +1262,31 @@ body.landing-page {
     will-change: transform;
 }
 
-/* Clouds - move slowly in background */
+/* Clouds - move slowly in background (right to left for parallax) */
 .cloud {
     top: 10%;
     font-size: 2rem;
     opacity: 0.6;
-    animation: moveCloudLeft 25s linear infinite;
+    animation: moveCloudRightToLeft 30s linear infinite;
 }
 
 .cloud-1 {
-    left: 20%;
+    left: 100%;
     animation-delay: 0s;
 }
 
 .cloud-2 {
-    left: 60%;
-    animation-delay: -8s;
+    left: 100%;
+    animation-delay: -10s;
 }
 
 .cloud-3 {
-    left: 90%;
-    animation-delay: -16s;
+    left: 100%;
+    animation-delay: -20s;
     font-size: 1.5rem;
 }
 
-@keyframes moveCloudLeft {
+@keyframes moveCloudRightToLeft {
     0% {
         transform: translateX(0);
     }
@@ -1313,44 +1313,44 @@ body.landing-page {
     }
 }
 
-/* Trees - move faster in foreground for parallax effect */
+/* Trees - move faster in foreground for parallax effect (right to left) */
 .tree {
     bottom: 35px;
     font-size: 2.5rem;
-    animation: moveTreeLeft 12s linear infinite;
+    animation: moveTreeRightToLeft 8s linear infinite;
 }
 
 .tree-1 {
-    left: 10%;
+    left: 100%;
     animation-delay: 0s;
 }
 
 .tree-2 {
-    left: 30%;
-    animation-delay: -2s;
+    left: 100%;
+    animation-delay: -1.3s;
 }
 
 .tree-3 {
-    left: 50%;
-    animation-delay: -4s;
+    left: 100%;
+    animation-delay: -2.6s;
 }
 
 .tree-4 {
-    left: 70%;
-    animation-delay: -6s;
+    left: 100%;
+    animation-delay: -4s;
 }
 
 .tree-5 {
-    left: 85%;
-    animation-delay: -8s;
+    left: 100%;
+    animation-delay: -5.3s;
 }
 
 .tree-6 {
-    left: 95%;
-    animation-delay: -10s;
+    left: 100%;
+    animation-delay: -6.6s;
 }
 
-@keyframes moveTreeLeft {
+@keyframes moveTreeRightToLeft {
     0% {
         transform: translateX(0);
     }
