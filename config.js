@@ -23,7 +23,7 @@ const CONFIG = {
             company: 'entry.2056082094',      // Replace with actual entry ID
             description: 'entry.280408210',  // Replace with actual entry ID
             notes: 'entry.1946711073',        // Replace with actual entry ID
-            routeInfo: 'entry.ROUTE_INFO'     // Optional: Add a separate field for computed route information (distance, time, etc.)
+            routeInfo: null     // Optional: Add a separate field for computed route information (distance, time, etc.). Set to null or leave empty if not using a dedicated field. Route info will be appended to notes field automatically.
         }
     },
 

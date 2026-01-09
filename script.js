@@ -7,8 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Constants
-const METERS_TO_MILES = 1609.34;
-const UNCONFIGURED_ROUTE_INFO_FIELD = 'entry.ROUTE_INFO';
+const METERS_PER_MILE = 1609.34;
 const API_CALL_DELAY_MS = 200; // Delay between Distance Matrix API calls to avoid rate limiting
 
 // Counter for date/time groups
@@ -308,8 +307,8 @@ async function computeRouteInformation(tripDays) {
                     dayInfo.totals.duration += result.duration.value;
                 }
                 
-                // Add delay between API calls to avoid rate limiting
-                if (j < locations.length - 2 || i < tripDays.length - 1) {
+                // Add delay between API calls to avoid rate limiting (except after the very last call)
+                if (!(i === tripDays.length - 1 && j === locations.length - 2)) {
                     await new Promise(resolve => setTimeout(resolve, API_CALL_DELAY_MS));
                 }
             } catch (error) {
@@ -398,7 +397,7 @@ async function showRouteSummary(formData) {
         `;
 
         // Format route summary
-        const totalMiles = (routeInfo.totals.distance / METERS_TO_MILES).toFixed(1);
+        const totalMiles = (routeInfo.totals.distance / METERS_PER_MILE).toFixed(1);
         const totalHours = Math.floor(routeInfo.totals.duration / 3600);
         const totalMinutes = Math.floor((routeInfo.totals.duration % 3600) / 60);
         
@@ -415,7 +414,7 @@ async function showRouteSummary(formData) {
 
         // Add details for each trip day
         routeInfo.tripDays.forEach((day) => {
-            const dayMiles = (day.totals.distance / METERS_TO_MILES).toFixed(1);
+            const dayMiles = (day.totals.distance / METERS_PER_MILE).toFixed(1);
             const dayHours = Math.floor(day.totals.duration / 3600);
             const dayMinutes = Math.floor((day.totals.duration % 3600) / 60);
             
@@ -495,7 +494,7 @@ async function showRouteSummary(formData) {
 function formatRouteInformation(routeInfo, passengers) {
     if (!routeInfo) return '';
     
-    const totalMiles = (routeInfo.totals.distance / METERS_TO_MILES).toFixed(1);
+    const totalMiles = (routeInfo.totals.distance / METERS_PER_MILE).toFixed(1);
     const totalHours = Math.floor(routeInfo.totals.duration / 3600);
     const totalMinutes = Math.floor((routeInfo.totals.duration % 3600) / 60);
     
@@ -508,7 +507,7 @@ Number of Passengers: ${passengers}
 `;
     
     routeInfo.tripDays.forEach((day) => {
-        const dayMiles = (day.totals.distance / METERS_TO_MILES).toFixed(1);
+        const dayMiles = (day.totals.distance / METERS_PER_MILE).toFixed(1);
         const dayHours = Math.floor(day.totals.duration / 3600);
         const dayMinutes = Math.floor((day.totals.duration % 3600) / 60);
         
@@ -519,9 +518,10 @@ Number of Passengers: ${passengers}
 `;
         
         day.legs.forEach((leg, idx) => {
-            // Add null checks for leg data
-            if (leg && leg.distance && leg.distance.value && leg.duration && leg.duration.value) {
-                const legMiles = (leg.distance.value / METERS_TO_MILES).toFixed(1);
+            // Add null checks and value validation for leg data
+            if (leg && leg.distance && leg.distance.value && typeof leg.distance.value === 'number' && leg.distance.value > 0 &&
+                leg.duration && leg.duration.value && typeof leg.duration.value === 'number' && leg.duration.value > 0) {
+                const legMiles = (leg.distance.value / METERS_PER_MILE).toFixed(1);
                 const legMinutes = Math.floor(leg.duration.value / 60);
                 formatted += `  Leg ${idx + 1}: ${legMiles} mi, ${legMinutes} min\n`;
             }
@@ -773,8 +773,7 @@ ${dropoffsText}`;
         googleFormData.append(CONFIG.googleForm.fields.notes, notesWithRouteInfo);
     }
     // If a separate route info field is configured, use it
-    if (CONFIG.googleForm.fields.routeInfo && routeInfoFormatted && 
-        CONFIG.googleForm.fields.routeInfo !== UNCONFIGURED_ROUTE_INFO_FIELD) {
+    if (CONFIG.googleForm.fields.routeInfo && routeInfoFormatted) {
         googleFormData.append(CONFIG.googleForm.fields.routeInfo, routeInfoFormatted);
     }
 
