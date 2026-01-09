@@ -30,6 +30,14 @@ const CONFIG = {
     // Google Maps API Configuration
     // This API key is restricted to specific domains in Google Cloud Console
     // for security. It can only be used from authorized GitHub Pages domains.
+    // 
+    // ⚠️ CRITICAL: Verify domain restrictions are set in Google Cloud Console:
+    //    1. Go to https://console.cloud.google.com/apis/credentials
+    //    2. Select this API key
+    //    3. Under "Application restrictions" → ensure "HTTP referrers (websites)" is selected
+    //    4. Verify your GitHub Pages domain is listed
+    //    5. Monitor usage regularly at https://console.cloud.google.com/apis/dashboard
+    //
     // To get your own API key:
     // 1. Go to https://console.cloud.google.com/
     // 2. Create a new project or select existing
