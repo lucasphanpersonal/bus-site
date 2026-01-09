@@ -673,10 +673,14 @@ function displayQuotes(quotes) {
             `<span style="background: ${getStatusColor(quote.savedQuote.status).bg}; color: ${getStatusColor(quote.savedQuote.status).text}; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 10px;">${quote.savedQuote.status}</span>` : 
             `<span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 10px;">⏳ Pending</span>`;
         
+        // Add quote amount badge if available
+        const quoteAmountBadge = hasResponse ? 
+            `<span style="background: ${getStatusColor(quote.savedQuote.status).bg}; color: ${getStatusColor(quote.savedQuote.status).text}; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 5px;">$${quote.savedQuote.quoteAmount}</span>` : '';
+        
         return `
             <div class="quote-card" onclick="showQuoteDetail(${quote.id})">
                 <div class="quote-header-row">
-                    <div class="quote-name">${quote.name}${statusBadge}</div>
+                    <div class="quote-name">${quote.name}${statusBadge}${quoteAmountBadge}</div>
                     <div class="quote-date">${formattedDate}</div>
                 </div>
                 <div class="quote-summary">
@@ -701,8 +705,8 @@ function displayQuotes(quotes) {
                         <span class="quote-detail-value">${totalMiles} mi</span>
                     </div>
                     <div class="quote-detail">
-                        <span class="quote-detail-label">${hasResponse ? 'Quote Amount' : 'Booking Hours'}</span>
-                        <span class="quote-detail-value">${hasResponse ? '$' + quote.savedQuote.quoteAmount : totalBookingHours}</span>
+                        <span class="quote-detail-label">Booking Hours</span>
+                        <span class="quote-detail-value">${totalBookingHours}</span>
                     </div>
                 </div>
             </div>
@@ -739,6 +743,12 @@ function updateStats(quotes) {
                qDate.getFullYear() === now.getFullYear();
     }).length;
     
+    // Calculate status-based metrics
+    const pendingQuotes = quotes.filter(q => !q.savedQuote).length;
+    const sentQuotes = quotes.filter(q => q.savedQuote && q.savedQuote.status === 'Sent').length;
+    const acceptedQuotes = quotes.filter(q => q.savedQuote && q.savedQuote.status === 'Accepted').length;
+    const declinedQuotes = quotes.filter(q => q.savedQuote && q.savedQuote.status === 'Declined').length;
+    
     // Calculate total passengers
     const totalPassengers = quotes.reduce((sum, q) => sum + parseInt(q.passengers || 0), 0);
     
@@ -751,6 +761,10 @@ function updateStats(quotes) {
     }, 0);
     
     document.getElementById('totalQuotes').textContent = totalQuotes;
+    document.getElementById('pendingQuotes').textContent = pendingQuotes;
+    document.getElementById('sentQuotes').textContent = sentQuotes;
+    document.getElementById('acceptedQuotes').textContent = acceptedQuotes;
+    document.getElementById('declinedQuotes').textContent = declinedQuotes;
     document.getElementById('monthQuotes').textContent = thisMonth;
     document.getElementById('totalPassengers').textContent = totalPassengers.toLocaleString();
     document.getElementById('totalMiles').textContent = totalMiles.toFixed(0).toLocaleString();
