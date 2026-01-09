@@ -1297,9 +1297,10 @@ async function saveQuoteToSheets(quoteData) {
     }
     
     try {
+        console.log('Saving quote to Sheets:', quoteData);
+        
         const response = await fetch(CONFIG.appsScript.webAppUrl, {
             method: 'POST',
-            mode: 'no-cors', // Required for cross-origin requests to Apps Script. Response body cannot be read with this mode.
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -1310,10 +1311,16 @@ async function saveQuoteToSheets(quoteData) {
             })
         });
         
-        // Note: With no-cors mode, we cannot read the response body or status code.
-        // The fetch will only throw an error if the request completely fails (network error).
-        // To verify success, users should check the Google Sheet after saving.
-        console.log('Quote save request sent successfully');
+        // Parse the JSON response
+        const result = await response.json();
+        
+        console.log('Apps Script response:', result);
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to save quote');
+        }
+        
+        console.log('Quote saved successfully to Sheets');
         return true;
         
     } catch (error) {
@@ -1360,10 +1367,11 @@ function showTemporaryMessage(message, type = 'info') {
     messageDiv.textContent = message;
     messageDiv.style.display = 'block';
     
-    // Auto-hide after 3 seconds
+    // Auto-hide after a delay (longer for errors and warnings)
+    const hideDelay = (type === 'error' || type === 'warning') ? 5000 : 3000;
     setTimeout(() => {
         messageDiv.style.display = 'none';
-    }, 3000);
+    }, hideDelay);
 }
 
 /**
@@ -1576,8 +1584,21 @@ ${signature}`;
             }
         } catch (error) {
             console.error('Error saving quote:', error);
-            // Don't block the email from being sent, just show a warning
-            showTemporaryMessage('⚠️ Quote not saved to Sheets, but you can still send the email', 'warning');
+            
+            // Show specific error message based on the error type
+            let errorMessage = '⚠️ Failed to save quote: ';
+            if (error.message.includes('Authentication failed')) {
+                errorMessage += 'Authentication failed. Please check your shared secret in config.js';
+            } else if (error.message.includes('not configured')) {
+                errorMessage += 'Apps Script is not properly configured. See APPS_SCRIPT_SETUP.md';
+            } else {
+                errorMessage += error.message;
+            }
+            
+            showTemporaryMessage(errorMessage, 'error');
+            
+            // Don't proceed with email if save failed - user should fix the issue first
+            return;
         }
     }
     
@@ -1625,7 +1646,6 @@ async function updateQuoteInSheets(quoteData) {
         
         const response = await fetch(CONFIG.appsScript.webAppUrl, {
             method: 'POST',
-            mode: 'no-cors', // Required for cross-origin requests to Apps Script. Response body cannot be read with this mode.
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -1636,10 +1656,16 @@ async function updateQuoteInSheets(quoteData) {
             })
         });
         
-        // Note: With no-cors mode, we cannot read the response body or status code.
-        // The fetch will only throw an error if the request completely fails (network error).
-        // To verify success, users should check the Google Sheet after updating.
-        console.log('Quote update request sent successfully');
+        // Parse the JSON response
+        const result = await response.json();
+        
+        console.log('Apps Script response:', result);
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to update quote');
+        }
+        
+        console.log('Quote updated successfully in Sheets');
         return true;
         
     } catch (error) {

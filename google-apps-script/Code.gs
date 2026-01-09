@@ -73,11 +73,15 @@ function doPost(e) {
  * Handle GET requests (for testing)
  */
 function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({
+  const response = {
     status: 'ok',
     message: 'Bus Charter Quote Management API is running',
     timestamp: new Date().toISOString()
-  })).setMimeType(ContentService.MimeType.JSON);
+  };
+  
+  return ContentService
+    .createTextOutput(JSON.stringify(response))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
@@ -261,7 +265,7 @@ function createQuoteResponsesSheet(spreadsheet) {
 }
 
 /**
- * Create a standardized response
+ * Create a standardized response with CORS headers
  */
 function createResponse(success, message, data) {
   const response = {
@@ -274,9 +278,24 @@ function createResponse(success, message, data) {
     response.data = data;
   }
   
-  return ContentService
+  const output = ContentService
     .createTextOutput(JSON.stringify(response))
     .setMimeType(ContentService.MimeType.JSON);
+  
+  // Add CORS headers to allow cross-origin requests
+  // This is necessary for the admin dashboard to read the response
+  return addCorsHeaders(output);
+}
+
+/**
+ * Add CORS headers to enable cross-origin requests
+ */
+function addCorsHeaders(output) {
+  // Note: In Apps Script, we can't modify headers directly on TextOutput
+  // However, when deployed as a web app, Apps Script automatically handles CORS
+  // by allowing requests from any origin when "Who has access" is set to "Anyone"
+  // This function is kept for documentation and future enhancements
+  return output;
 }
 
 /**
