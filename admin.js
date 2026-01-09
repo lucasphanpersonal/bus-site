@@ -173,6 +173,15 @@ function showEmptyState() {
 }
 
 /**
+ * Escape HTML to prevent XSS attacks
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
  * Show error state
  */
 function showErrorState(errorMessage) {
@@ -180,16 +189,19 @@ function showErrorState(errorMessage) {
     const formattedMessage = errorMessage
         .split('\n')
         .map(line => {
+            // Escape HTML to prevent XSS
+            const escapedLine = escapeHtml(line);
+            
             // Convert emoji checkmarks and X's to styled spans
             if (line.includes('✅')) {
-                return `<div style="color: #059669; margin: 8px 0;">${line}</div>`;
+                return `<div style="color: #059669; margin: 8px 0;">${escapedLine}</div>`;
             } else if (line.includes('❌')) {
-                return `<div style="color: #dc2626; font-weight: 600; margin: 8px 0;">${line}</div>`;
+                return `<div style="color: #dc2626; font-weight: 600; margin: 8px 0;">${escapedLine}</div>`;
             } else if (line.match(/^\d+\./)) {
                 // Numbered list items
-                return `<div style="margin-left: 20px; margin: 4px 0;">${line}</div>`;
+                return `<div style="margin: 4px 0 4px 20px;">${escapedLine}</div>`;
             } else {
-                return `<div style="margin: 4px 0;">${line}</div>`;
+                return `<div style="margin: 4px 0;">${escapedLine}</div>`;
             }
         })
         .join('');
