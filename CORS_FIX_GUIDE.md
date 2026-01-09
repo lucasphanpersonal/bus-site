@@ -24,25 +24,34 @@ The fix involves two parts:
 
 ### Part 1: Update Your Google Apps Script Code
 
-Your `Code.gs` file needs a `doOptions()` function to handle CORS preflight requests.
+Your `Code.gs` file needs a `doOptions()` function that returns JSON to properly handle CORS preflight requests.
 
 **If you deployed your Apps Script BEFORE this fix was added**, you need to update it:
 
 1. Open your Google Sheet
 2. Click **Extensions** → **Apps Script**
 3. Find the `doGet()` function in your code
-4. Right after `doGet()`, add this new function:
+4. Right after `doGet()`, add or replace the `doOptions()` function with this:
 
 ```javascript
 /**
  * Handle OPTIONS requests (CORS preflight)
  * This is required for cross-origin POST requests from the admin dashboard
+ * 
+ * IMPORTANT: When deployed with "Who has access" = "Anyone", Google Apps Script
+ * automatically adds CORS headers to responses. However, we must return JSON
+ * format for the headers to be added correctly.
  */
 function doOptions(e) {
-  // Return a response that allows the actual POST request to proceed
+  // Return a JSON response to ensure CORS headers are added by Google Apps Script
+  const response = {
+    status: 'ok',
+    message: 'CORS preflight successful'
+  };
+  
   return ContentService
-    .createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT);
+    .createTextOutput(JSON.stringify(response))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 ```
 
@@ -63,11 +72,22 @@ The web app MUST be deployed with "Anyone" access for CORS to work:
 
 ## Why Does This Work?
 
-1. **doOptions() Function**: When the browser sends a preflight OPTIONS request, Google Apps Script now responds properly instead of returning an error.
+1. **doOptions() Function with JSON**: When the browser sends a preflight OPTIONS request, Google Apps Script responds with a JSON response. The JSON mime type (`ContentService.MimeType.JSON`) triggers Google Apps Script to automatically add CORS headers to the response.
 
-2. **"Anyone" Access**: When the web app is set to "Anyone" access, Google Apps Script automatically adds the necessary CORS headers (`Access-Control-Allow-Origin: *`) to all responses, including the OPTIONS response.
+2. **"Anyone" Access**: When the web app is set to "Anyone" access, Google Apps Script automatically adds these CORS headers to all responses:
+   - `Access-Control-Allow-Origin: *`
+   - `Access-Control-Allow-Methods: GET, POST, OPTIONS`
+   - `Access-Control-Allow-Headers: Content-Type`
 
-3. **Shared Secret Protection**: Even though "Anyone" can access the web app, the shared secret in your config.js protects it from unauthorized writes.
+3. **Shared Secret Protection**: Even though "Anyone" can access the web app, the shared secret in your config.js protects it from unauthorized writes. All requests without the correct secret are rejected by the `doPost()` function.
+
+## Critical: Why JSON Format Matters
+
+Google Apps Script's automatic CORS header addition is triggered by the response mime type. When you use:
+- `setMimeType(ContentService.MimeType.JSON)` → CORS headers ARE added
+- `setMimeType(ContentService.MimeType.TEXT)` → CORS headers may NOT be added
+
+This is why the `doOptions()` function must return a JSON response, even though the content itself doesn't matter for the preflight check.
 
 ## Testing the Fix
 

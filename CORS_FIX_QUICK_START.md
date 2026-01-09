@@ -11,19 +11,25 @@ Follow these steps to fix it immediately:
 
 1. Open your Google Sheet
 2. Click **Extensions** → **Apps Script**
-3. Find the `doGet()` function in your code
-4. Right **after** the `doGet()` function (after the closing `}`), paste this:
+3. Find the `doOptions()` function in your code
+4. **Replace it** with this updated version (or add it after `doGet()` if missing):
 
 ```javascript
 /**
  * Handle OPTIONS requests (CORS preflight)
  * This is required for cross-origin POST requests from the admin dashboard
+ * 
+ * IMPORTANT: Returns JSON to ensure Google Apps Script adds CORS headers
  */
 function doOptions(e) {
-  // Return a response that allows the actual POST request to proceed
+  const response = {
+    status: 'ok',
+    message: 'CORS preflight successful'
+  };
+  
   return ContentService
-    .createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT);
+    .createTextOutput(JSON.stringify(response))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 ```
 
@@ -70,14 +76,18 @@ function doGet(e) {
 }
 
 /**
- * Handle OPTIONS requests (CORS preflight)  ← NEW FUNCTION
+ * Handle OPTIONS requests (CORS preflight)  ← UPDATED FUNCTION
  * This is required for cross-origin POST requests from the admin dashboard
  */
-function doOptions(e) {                     ← ADD THIS
-  return ContentService                     ← ADD THIS
-    .createTextOutput('')                   ← ADD THIS
-    .setMimeType(ContentService.MimeType.TEXT); ← ADD THIS
-}                                           ← ADD THIS
+function doOptions(e) {                     ← UPDATE THIS
+  const response = {                        ← MUST RETURN JSON
+    status: 'ok',                           ← FOR CORS TO WORK
+    message: 'CORS preflight successful'    ← 
+  };                                        ← 
+  return ContentService                     ← 
+    .createTextOutput(JSON.stringify(response)) ← 
+    .setMimeType(ContentService.MimeType.JSON); ← 
+}                                           ← 
 
 /**
  * Save a new quote response
@@ -90,7 +100,11 @@ function handleSaveQuote(data) {
 
 - Browsers send an OPTIONS request before POST requests (called "preflight")
 - Without `doOptions()`, that preflight request fails
-- With `doOptions()`, the preflight succeeds and POST works
-- Google Apps Script automatically adds CORS headers when set to "Anyone"
+- The `doOptions()` function MUST return JSON format (not plain text)
+- JSON format triggers Google Apps Script to add CORS headers automatically
+- When deployed with "Anyone" access, Google adds: `Access-Control-Allow-Origin: *`
+- With proper CORS headers, the browser allows the POST request to proceed
+
+**Key Insight**: Using `ContentService.MimeType.JSON` is critical - plain text responses don't trigger CORS header addition in Google Apps Script.
 
 That's it! The fix is simple but essential for cross-origin requests to work.

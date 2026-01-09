@@ -204,16 +204,52 @@ The script is deployed with "Anyone" access, but:
 **Problem**: "Access to fetch has been blocked by CORS policy: Response to preflight request doesn't pass access control check"
 
 **Solution**:
-1. **Most Common Cause**: The web app was deployed with "Who has access" set to something other than "Anyone"
-   - Go to Apps Script editor
+
+This error occurs when the Google Apps Script web app doesn't properly respond to CORS preflight requests. Follow these steps IN ORDER:
+
+1. **Verify the Code**:
+   - Open Apps Script editor (Extensions → Apps Script)
+   - Ensure the `doOptions()` function is present and returns JSON:
+   ```javascript
+   function doOptions(e) {
+     const response = {
+       status: 'ok',
+       message: 'CORS preflight successful'
+     };
+     return ContentService
+       .createTextOutput(JSON.stringify(response))
+       .setMimeType(ContentService.MimeType.JSON);
+   }
+   ```
+   - If missing or different, update it with the code above
+   - Click **Save** (💾)
+
+2. **Check Deployment Settings** (CRITICAL):
    - Click **Deploy** → **Manage deployments**
    - Click the pencil icon (✏️) to edit your deployment
-   - Change **"Who has access"** to **"Anyone"**
+   - Verify these EXACT settings:
+     * **Execute as**: Me (your Google account)
+     * **Who has access**: **Anyone** ⚠️ MUST be "Anyone", not "Only myself" or organization
+   - If you changed anything, click **Deploy**
+   - Wait 2-3 minutes for changes to propagate
+
+3. **Create New Deployment** (if step 2 didn't work):
+   - Click **Deploy** → **New deployment**
+   - Select **Web app**
+   - Set:
+     * Execute as: **Me**
+     * Who has access: **Anyone**
    - Click **Deploy**
-2. After updating the deployment, wait a minute for changes to take effect
-3. If the issue persists, create a **new deployment** (Deploy → New deployment) with "Anyone" access
-4. Update your `config.js` with the new web app URL if you created a new deployment
-5. **Note**: The `Code.gs` file includes a `doOptions()` function to handle CORS preflight requests - make sure this is present in your deployed script
+   - Copy the new web app URL
+   - Update `config.js` with the new URL
+
+4. **Test the Fix**:
+   - Clear browser cache (Ctrl+Shift+Delete)
+   - Open admin dashboard
+   - Try to send a quote
+   - Check browser console (F12) for any remaining errors
+
+**Why This Works**: Google Apps Script automatically adds CORS headers (`Access-Control-Allow-Origin: *`) ONLY when the web app is deployed with "Anyone" access AND the `doOptions()` function returns a JSON response. The JSON mime type triggers Google's automatic CORS header addition.
 
 ## Updating the Script
 
