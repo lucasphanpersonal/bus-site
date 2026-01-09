@@ -816,7 +816,9 @@ ${dropoffsText}`;
         return;
     } catch (error) {
         console.error('Google Forms submission error:', error);
-        throw new Error('Failed to submit to Google Forms');
+        // Don't throw error - allow submission to continue to localStorage
+        console.warn('Continuing with local storage despite Google Forms error');
+        return;
     }
 }
 
