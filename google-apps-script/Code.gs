@@ -29,10 +29,10 @@ const CONFIG = {
   FORM_RESPONSES_SHEET: 'Form Responses 1',
   
   // Simple shared secret for authentication
-  // ⚠️ IMPORTANT: Change this to a unique value before deploying!
-  // This should match the value in your config.js
-  // DO NOT use the default value in production!
-  SHARED_SECRET: 'CHANGE_THIS_SECRET_BEFORE_DEPLOYING',
+  // ⚠️ IMPORTANT: This MUST match sharedSecret in config.js!
+  // If you change this, also update config.js
+  // Current value matches config.js for easy deployment
+  SHARED_SECRET: 'lp-test-9994',
   
   // Enable logging for debugging
   DEBUG_MODE: true
@@ -71,12 +71,19 @@ function doPost(e) {
 
 /**
  * Handle GET requests (for testing)
+ * Test this endpoint by opening the web app URL in your browser
+ * You should see: {"status":"ok","message":"...","timestamp":"...","corsEnabled":true}
  */
 function doGet(e) {
   const response = {
     status: 'ok',
     message: 'Bus Charter Quote Management API is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    corsEnabled: true,
+    deploymentInfo: {
+      note: 'If you can see this response, the API is accessible',
+      corsNote: 'CORS headers are automatically added by Google Apps Script when deployed with "Anyone" access'
+    }
   };
   
   return ContentService
