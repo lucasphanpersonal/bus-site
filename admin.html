@@ -337,37 +337,6 @@
             font-weight: 600;
         }
     </style>
-    
-    <!-- Google Maps JavaScript API -->
-    <script>
-        // Load Google Maps API dynamically with the API key from config
-        function loadGoogleMapsAPI(retryCount = 0) {
-            const maxRetries = 50; // Max 5 seconds (50 * 100ms)
-            
-            // Wait for config to be loaded
-            if (typeof CONFIG === 'undefined') {
-                if (retryCount < maxRetries) {
-                    setTimeout(() => loadGoogleMapsAPI(retryCount + 1), 100);
-                } else {
-                    console.error('Failed to load Google Maps API: CONFIG not loaded after timeout');
-                }
-                return;
-            }
-            
-            if (!CONFIG.googleMaps || !CONFIG.googleMaps.apiKey) {
-                console.warn('Google Maps API key not configured');
-                return;
-            }
-            
-            const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${CONFIG.googleMaps.apiKey}&libraries=places`;
-            script.async = true;
-            document.head.appendChild(script);
-        }
-        
-        // Load the config first, then load Google Maps API
-        loadGoogleMapsAPI();
-    </script>
 </head>
 <body>
     <!-- Login Form -->
@@ -447,6 +416,21 @@
     </div>
     
     <script src="config.js"></script>
+    
+    <!-- Google Maps JavaScript API -->
+    <script>
+        // Load Google Maps API dynamically with the API key from config
+        // This runs after config.js is loaded, so CONFIG is available
+        if (CONFIG.googleMaps && CONFIG.googleMaps.apiKey) {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${CONFIG.googleMaps.apiKey}&libraries=places`;
+            script.async = true;
+            document.head.appendChild(script);
+        } else {
+            console.warn('Google Maps API key not configured in config.js');
+        }
+    </script>
+    
     <script src="admin.js"></script>
 </body>
 </html>
