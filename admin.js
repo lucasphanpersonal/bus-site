@@ -1588,6 +1588,9 @@ ${signature}`;
                     console.warn('Update failed:', updateError.message);
                     
                     // If update fails because quote not found, try saving as new instead
+                    // Note: We check the error message string because the Apps Script returns
+                    // error messages as strings, not error codes. This matches the exact message
+                    // from Code.gs line 190: "Quote not found for update"
                     if (updateError.message.includes('Quote not found')) {
                         console.log('Quote not found in Sheets, falling back to save as new...');
                         saved = await saveQuoteToSheets(quoteDataToSave);
