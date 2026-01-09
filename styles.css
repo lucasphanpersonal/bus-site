@@ -1194,15 +1194,15 @@ body.landing-page {
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
     animation: slideBusAcross 15s linear infinite;
     will-change: transform;
-    transform: translate(-100px, -50%);
+    transform: translate(-100px, -50%) scaleX(-1); /* Flip horizontally to face right */
 }
 
 @keyframes slideBusAcross {
     0% {
-        transform: translate(-100px, -50%);
+        transform: translate(-100px, -50%) scaleX(-1);
     }
     100% {
-        transform: translate(calc(100vw + 100px), -50%);
+        transform: translate(calc(100vw + 100px), -50%) scaleX(-1);
     }
 }
 
@@ -1234,6 +1234,131 @@ body.landing-page {
     }
 }
 
+/* Scenery elements for motion effect */
+.scenery-background,
+.scenery-foreground {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.scenery-background {
+    z-index: 1;
+}
+
+.scenery-foreground {
+    z-index: 3;
+}
+
+.animated-bus {
+    z-index: 2;
+}
+
+.scenery-item {
+    position: absolute;
+    will-change: transform;
+}
+
+/* Clouds - move slowly in background */
+.cloud {
+    top: 10%;
+    font-size: 2rem;
+    opacity: 0.6;
+    animation: moveCloudLeft 25s linear infinite;
+}
+
+.cloud-1 {
+    left: 20%;
+    animation-delay: 0s;
+}
+
+.cloud-2 {
+    left: 60%;
+    animation-delay: -8s;
+}
+
+.cloud-3 {
+    left: 90%;
+    animation-delay: -16s;
+    font-size: 1.5rem;
+}
+
+@keyframes moveCloudLeft {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-120vw);
+    }
+}
+
+/* Sun - stays relatively stationary */
+.sun {
+    top: 8%;
+    right: 10%;
+    font-size: 3rem;
+    opacity: 0.8;
+    animation: sunGlow 3s ease-in-out infinite;
+}
+
+@keyframes sunGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 10px rgba(255, 200, 0, 0.5));
+    }
+    50% {
+        filter: drop-shadow(0 0 20px rgba(255, 200, 0, 0.8));
+    }
+}
+
+/* Trees - move faster in foreground for parallax effect */
+.tree {
+    bottom: 35px;
+    font-size: 2.5rem;
+    animation: moveTreeLeft 12s linear infinite;
+}
+
+.tree-1 {
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.tree-2 {
+    left: 30%;
+    animation-delay: -2s;
+}
+
+.tree-3 {
+    left: 50%;
+    animation-delay: -4s;
+}
+
+.tree-4 {
+    left: 70%;
+    animation-delay: -6s;
+}
+
+.tree-5 {
+    left: 85%;
+    animation-delay: -8s;
+}
+
+.tree-6 {
+    left: 95%;
+    animation-delay: -10s;
+}
+
+@keyframes moveTreeLeft {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-120vw);
+    }
+}
+
 /* Responsive adjustments for bus animation */
 @media (max-width: 768px) {
     .bus-animation-container {
@@ -1248,6 +1373,20 @@ body.landing-page {
     .bus-animation-container::before {
         bottom: 25px;
     }
+    
+    .cloud {
+        font-size: 1.5rem;
+    }
+    
+    .sun {
+        font-size: 2.5rem;
+        right: 5%;
+    }
+    
+    .tree {
+        font-size: 2rem;
+        bottom: 20px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1261,5 +1400,18 @@ body.landing-page {
     
     .bus-animation-container::before {
         bottom: 18px;
+    }
+    
+    .cloud {
+        font-size: 1.2rem;
+    }
+    
+    .sun {
+        font-size: 2rem;
+    }
+    
+    .tree {
+        font-size: 1.5rem;
+        bottom: 15px;
     }
 }
