@@ -42,14 +42,14 @@ Scroll down to the "Send Quote Response" section:
 
 1. **Enter Quote Amount**: Type the dollar amount (e.g., 1500)
 2. **Add Details** (optional): Include any additional terms, conditions, or notes
-3. Click **"📧 Compose Email"**
+3. Click **"📧 Send Quote"**
 
 ### What Happens Next
 
-When you click "Compose Email":
+When you click "Send Quote":
 
-1. ✅ The quote is **automatically saved to Google Sheets**
-2. ✅ You'll see a confirmation: "✅ Quote saved to Google Sheets!"
+1. ✅ The quote is **automatically saved to Google Sheets** with status "Sent"
+2. ✅ You'll see a confirmation: "✅ Quote saved with status: Sent"
 3. ✅ Your email client opens with a **pre-filled message** containing:
    - The quote amount
    - Complete trip summary
@@ -57,71 +57,87 @@ When you click "Compose Email":
    - Your business signature
 4. ✅ You can edit the email before sending if needed
 5. ✅ Click Send in your email client to send the quote
+6. ✅ The dashboard will automatically refresh to show the updated status
 
-## Editing a Saved Quote
+## Managing Quote Responses
 
-If you need to update a quote after saving it:
+After you send a quote, the customer will respond with either acceptance, decline, or request for negotiation. The admin dashboard provides state-specific actions based on where you are in the quote workflow.
 
-### Step 1: Open the Quote
+### Accepting a Quote
 
-1. Open the same quote request in the admin dashboard
-2. You'll now see the saved quote information at the top:
-   - Quote amount
-   - Status
-   - When it was sent
-   - Any additional details
+When a customer accepts your quote (via phone, email, or other means):
 
-### Step 2: Edit the Quote
+1. **Open the quote** that was previously sent
+2. You'll see the **Accept Quote** section with a green border
+3. **Enter the Agreed Price** - this is the final price (may be different from original if negotiated)
+4. **Add Additional Notes** (optional) - include payment terms, pickup details, etc.
+5. Click **"✅ Accept & Compose Confirmation Email"**
 
-1. Click the **"✏️ Edit Quote"** button (this focuses the input fields)
-2. Update the quote amount or additional details
-3. Click **"Update & Compose Email"**
+**What Happens:**
+- ✅ Quote status updates to "Accepted" in Google Sheets
+- ✅ The agreed price is saved
+- ✅ Email client opens with a professional **booking confirmation email**
+- ✅ Dashboard refreshes to show the booking as confirmed
 
-### What Happens
+### Declining a Quote
 
-- ✅ The quote is **updated in Google Sheets**
-- ✅ Your email client opens with the updated information
-- ✅ You can send the updated quote to the customer
+When a customer declines your quote:
+
+1. **Open the quote** that was previously sent
+2. You'll see the **Decline Quote** section with a red border
+3. **Enter a reason** (optional) - helps track why quotes are declined
+4. Click **"❌ Decline & Compose Email"**
+
+**What Happens:**
+- ✅ Quote status updates to "Declined" in Google Sheets
+- ✅ Email client opens with a polite **decline response email**
+- ✅ Dashboard refreshes to show the quote as declined
+
+## Understanding the Quote Workflow
+
+The system guides you through a state-based workflow:
+
+### 1. Pending State (No Quote Sent)
+- **Action Available**: Send Quote
+- **What You See**: Simple form to enter quote amount and details
+- **Next State**: After sending → Sent
+
+### 2. Sent State (Waiting for Customer Response)
+- **Actions Available**: Accept or Decline
+- **What You See**: Two sections (green for accept, red for decline)
+- **Next State**: After customer responds → Accepted or Declined
+
+### 3. Accepted State (Booking Confirmed)
+- **Actions Available**: None (workflow complete)
+- **What You See**: Confirmation message with agreed price
+- **Status**: Final - booking is confirmed
+
+### 4. Declined State (Quote Not Accepted)
+- **Actions Available**: None (workflow complete)
+- **What You See**: Decline message with optional reason
+- **Status**: Final - quote was declined
 
 ## Managing Quote Status
 
-You can track the status of each quote through the process:
+You can track the status of each quote through the workflow:
 
 ### Available Statuses
 
-| Status | Meaning | Use When |
-|--------|---------|----------|
-| 🟢 **Sent** | Quote has been sent to customer | You've sent the initial quote email |
-| 🟡 **Draft** | Quote is being prepared | You're still working on pricing |
-| 🔵 **Accepted** | Customer accepted the quote | Customer confirms they want to book |
-| 🔴 **Declined** | Customer declined the quote | Customer decides not to proceed |
-
-### Updating Status
-
-1. Open the quote detail modal
-2. Find the status dropdown (only visible for saved quotes)
-3. Select the new status
-4. Click **"💾 Update Status"**
-5. The status updates immediately in Google Sheets
-6. The dashboard refreshes to show the new status
-
-### Status Without Sending Email
-
-You can update the status **without** composing a new email:
-
-- Useful when customer calls or emails you directly
-- Useful for keeping track of progress
-- Just change the dropdown and click "Update Status"
+| Status | Meaning | Actions Available |
+|--------|---------|-------------------|
+| ⏳ **Pending** | No quote sent yet | Send Quote |
+| 🟢 **Sent** | Quote has been sent to customer | Accept or Decline |
+| 🔵 **Accepted** | Customer accepted the quote | None (complete) |
+| 🔴 **Declined** | Customer declined the quote | None (complete) |
 
 ## Understanding Status Badges
 
 In the quote list view, you'll see status indicators:
 
-- 🟢 **Green badge** (Sent): Quote has been sent
-- 🟡 **Yellow badge** (Draft): Quote is in draft
-- 🔵 **Blue badge** (Accepted): Customer accepted
-- 🔴 **Red badge** (Declined): Customer declined
-- ⏳ **Yellow badge** (Pending): No quote sent yet
+- ⏳ **Yellow badge** (Pending): No quote sent yet - needs action
+- 🟢 **Green badge** (Sent): Quote has been sent - waiting for customer
+- 🔵 **Blue badge** (Accepted): Customer accepted - booking confirmed
+- 🔴 **Red badge** (Declined): Customer declined - no action needed
 
 This makes it easy to see at a glance which quotes need attention.
 
@@ -146,50 +162,66 @@ For quotes with responses, the list view shows:
 
 ## Tips and Best Practices
 
-### 1. Save Quotes Even If You Don't Send Immediately
+### 1. Track Negotiated Prices
 
-You can:
-- Enter a quote amount
-- Set status to "Draft"
-- Update status when you send later
+When accepting a quote:
+- Always enter the **final agreed price** in the "Agreed Price" field
+- This may differ from your original quote if you negotiated
+- Use the Additional Notes field to document the negotiation
+- Example: "Customer requested discount for returning customer - agreed to $1400 (original quote was $1500)"
 
-This helps you:
-- Track quotes you're working on
-- Come back to unfinished quotes
-- Remember what you quoted
+### 2. Document Decline Reasons
 
-### 2. Use Additional Details Effectively
+When declining a quote:
+- Add a brief reason to help track patterns
+- Common reasons: "Dates unavailable", "Out of service area", "Group too large"
+- This data helps you understand your market and improve services
 
-Include in the additional details:
-- Payment terms (deposit, final payment)
+### 3. Use Additional Details Effectively
+
+When sending initial quotes, include:
+- Payment terms (deposit amount, final payment timing)
 - What's included (driver, fuel, tolls)
-- What's NOT included (gratuity, parking)
+- What's NOT included (gratuity, parking fees)
 - Cancellation policy
 - Special conditions or requirements
 
-### 3. Update Status Promptly
-
-Keep statuses current to:
-- Know which quotes are still pending
-- See your conversion rate (Accepted vs total)
-- Follow up on sent quotes that haven't been accepted
-- Track why quotes were declined (add notes)
+When accepting quotes, include:
+- Payment instructions and deadline
+- Pickup time and location details
+- Contact person for day-of coordination
+- Any special requests or accommodations
 
 ### 4. Review Before Sending
 
-Even though the email is pre-filled:
+Even though emails are pre-filled:
 - Always review the email before sending
 - Check all dates and details are correct
-- Verify the quote amount matches your calculation
+- Verify the quote/agreed amount is accurate
 - Add personal touches if desired
+- Double-check recipient email address
 
-### 5. Keep Google Sheets as Backup
+### 5. Monitor Your Metrics
+
+The dashboard now shows:
+- **Pending**: Quotes waiting for your response
+- **Sent**: Quotes waiting for customer response
+- **Accepted**: Confirmed bookings
+- **Declined**: Lost opportunities
+
+Use these to:
+- Follow up on sent quotes that haven't been accepted
+- Calculate your conversion rate (Accepted / Total Quotes)
+- Identify busy periods
+- Track business growth over time
+
+### 6. Keep Google Sheets as Backup
 
 Your "Quote Responses" sheet is a valuable business record:
 - Export it regularly for accounting
 - Track trends over time
 - Calculate conversion rates
-- Review declined quotes to improve pricing
+- Review declined quotes to improve pricing or understand market limits
 
 ## Troubleshooting
 
@@ -224,13 +256,14 @@ Your "Quote Responses" sheet is a valuable business record:
 
 ### Status Update Doesn't Work
 
-**Problem**: Status doesn't change when you update it
+**Problem**: Status doesn't change when you perform an action
 
 **Solution**:
-1. Make sure you clicked "Update Status" button
-2. Wait for the confirmation message
-3. Check the Google Sheet to verify the update
-4. If it still doesn't work, check Apps Script execution logs
+1. Verify Apps Script is enabled and properly configured
+2. Check the Google Sheet "Quote Responses" tab for the updated entry
+3. Wait a moment and refresh the dashboard - it should auto-refresh after 2 seconds
+4. Check browser console (F12) for errors
+5. Verify the Apps Script shared secret matches in config.js and Code.gs
 
 ### Email Client Doesn't Open
 
@@ -244,27 +277,42 @@ Your "Quote Responses" sheet is a valuable business record:
 
 ## Advanced Usage
 
-### Tracking Multiple Versions
+### Handling Price Negotiations
 
-If you need to send multiple versions of a quote:
+If a customer wants to negotiate on price:
 
-1. Send initial quote (saves as status "Sent")
-2. Customer requests changes
-3. Edit the quote with new amount
-4. Click "Update & Compose Email"
-5. The quote is updated (not duplicated)
+1. The quote is initially sent (Status: "Sent")
+2. Customer requests a lower price
+3. You agree on a new price
+4. Open the quote and click "Accept"
+5. Enter the **negotiated price** (different from original quote)
+6. Add notes explaining the negotiation
+7. Send the confirmation email
 
-**Note**: Currently, the system doesn't track version history. Each update overwrites the previous version. The timestamp shows when it was last modified.
+The system tracks the final agreed price, not the original quote amount.
+
+### Managing Multiple Quote Iterations
+
+If you need to send an updated quote before getting a response:
+
+**Current Limitation**: The system is designed for a single quote per request. If you need to send a revised quote:
+
+1. Contact the customer directly with the new quote
+2. When they accept, use the "Accept" action with the final agreed price
+3. Document the revision in the Additional Notes
+
+**Future Enhancement**: Version tracking for multiple quote iterations is being considered.
 
 ### Bulk Status Updates
 
-If you need to update multiple quotes:
+**Not Recommended**: Status changes should flow through the natural workflow (Pending → Sent → Accepted/Declined)
 
-1. Consider using the Google Sheet directly
-2. Open the "Quote Responses" sheet
-3. Filter by status
-4. Update the Status column for multiple rows
-5. Timestamps will still reflect last update
+If you absolutely need to update multiple quotes:
+
+1. Open the "Quote Responses" sheet in Google Sheets
+2. **Be careful** - manual edits bypass the workflow
+3. Update the Status column (must be exactly: "Sent", "Accepted", or "Declined")
+4. Refresh the admin dashboard to see changes
 
 ### Exporting Quote Data
 
@@ -301,23 +349,26 @@ The admin dashboard works on mobile devices:
 
 ## FAQ
 
-**Q: Can I delete a saved quote?**  
-A: Not from the UI currently. You can manually delete from the Google Sheet, or change status to "Declined" to mark it as no longer active.
+**Q: Can I go back and change a status after it's been set to Accepted/Declined?**  
+A: While the UI doesn't provide this option (these are considered final states), you can manually edit the status in the Google Sheet if absolutely necessary. However, this is not recommended as it bypasses the workflow.
 
-**Q: Can I see a history of changes to a quote?**  
-A: Not currently. The timestamp shows the last update, but previous versions aren't tracked. Consider this a feature for future enhancement.
+**Q: What if I accidentally click Accept instead of Decline?**  
+A: Close the email draft without sending it, then manually update the status in the Google Sheet, or contact support for guidance on reversing the action.
 
-**Q: What happens if I save the same quote twice?**  
-A: The second save updates the first one - it doesn't create a duplicate. The quote is identified by the request timestamp.
+**Q: Can I send a quote without using the email composer?**  
+A: The system is designed to save the quote when you click the action button. If you want to send the quote through another channel (phone call, text), you can still click the button to save the status, then just close the email draft without sending.
+
+**Q: Why can't I edit a quote after it's been sent?**  
+A: The new workflow focuses on clear state transitions. Once sent, you either accept (potentially with a different agreed price) or decline. If you need to revise a quote before customer response, contact them directly and use the Accept action with the final agreed price.
+
+**Q: What's the difference between Quote Amount and Agreed Price?**  
+A: Quote Amount is what you initially offer (when status is Sent). Agreed Price is the final negotiated amount when the customer accepts (could be the same or different after negotiation).
 
 **Q: Can multiple admins use this at the same time?**  
-A: Yes! All admins see the same data from Google Sheets. However, if two admins edit the same quote simultaneously, the last save wins.
+A: Yes! All admins see the same data from Google Sheets. The workflow ensures clear state transitions, reducing conflicts.
 
-**Q: Is there a character limit for additional details?**  
-A: Google Sheets cells can hold up to 50,000 characters. In practice, keep additional details to a few paragraphs for best results.
-
-**Q: Can I customize the email template?**  
-A: The email is generated in the admin.js file. You can modify the template, but it requires editing the code. The signature can be customized in config.js.
+**Q: Can I customize the email templates for Accept and Decline?**  
+A: The email templates are generated in the admin.js file. You can modify them by editing the `sendQuoteEmail()` function, but this requires coding knowledge. The signature can be customized in config.js without coding.
 
 **Q: Does this work offline?**  
 A: No, you need internet connection to save quotes (they're saved to Google Sheets in the cloud).
@@ -336,14 +387,16 @@ If you need assistance:
 
 Potential improvements being considered:
 
-- [ ] Version history for quotes
+- [ ] Version history for quotes (track multiple revisions)
+- [ ] Ability to edit and resend quotes before customer responds
 - [ ] Quote templates for different vehicle types
-- [ ] Automatic quote calculation based on mileage
-- [ ] Integration with calendar for availability
-- [ ] Deposit tracking
-- [ ] Automated follow-up reminders
-- [ ] Quote comparison (show multiple quotes to customer)
+- [ ] Automatic quote calculation based on mileage and booking hours
+- [ ] Integration with calendar for availability checking
+- [ ] Deposit tracking and payment status
+- [ ] Automated follow-up reminders for sent quotes
 - [ ] Customer portal for viewing quote status
+- [ ] Partial payment tracking
+- [ ] Quote expiration dates with automatic reminders
 
 ---
 
