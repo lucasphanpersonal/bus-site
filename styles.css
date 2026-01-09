@@ -15,6 +15,12 @@
     --error-color: #ff3b30;
     --warning-color: #ff9500;
     
+    /* New accent colors */
+    --accent-lime: #84cc16;      /* Lime green accent */
+    --accent-orange: #f97316;    /* Orange accent */
+    --accent-lime-light: #bef264;
+    --accent-orange-light: #fb923c;
+    
     /* Neutral colors */
     --background: #ffffff;
     --background-secondary: #f5f5f7;
@@ -722,7 +728,7 @@ body.landing-page {
 .orb-2 {
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(93, 173, 226, 0.5) 0%, rgba(93, 173, 226, 0) 70%);
+    background: radial-gradient(circle, rgba(132, 204, 22, 0.4) 0%, rgba(132, 204, 22, 0) 70%);
     top: 50%;
     right: -100px;
     animation-delay: 7s;
@@ -731,7 +737,7 @@ body.landing-page {
 .orb-3 {
     width: 350px;
     height: 350px;
-    background: radial-gradient(circle, rgba(174, 214, 241, 0.4) 0%, rgba(174, 214, 241, 0) 70%);
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.4) 0%, rgba(249, 115, 22, 0) 70%);
     bottom: -100px;
     left: 30%;
     animation-delay: 14s;
@@ -783,6 +789,7 @@ body.landing-page {
     font-weight: 700;
     color: var(--text-primary);
     font-size: 1.8rem;
+    font-style: italic;
 }
 
 @keyframes slideDown {
@@ -913,15 +920,15 @@ body.landing-page {
 
 .secondary-cta {
     background: white;
-    color: var(--primary-dark);
-    border: 2px solid var(--primary-color);
+    color: var(--accent-orange);
+    border: 2px solid var(--accent-orange);
 }
 
 .secondary-cta:hover {
     transform: translateY(-3px);
-    background: var(--primary-color);
+    background: linear-gradient(135deg, var(--accent-orange) 0%, #ea580c 100%);
     color: white;
-    box-shadow: 0 12px 30px rgba(135, 206, 235, 0.3);
+    box-shadow: 0 12px 30px rgba(249, 115, 22, 0.3);
 }
 
 .button-text {
@@ -969,6 +976,18 @@ body.landing-page {
     font-size: 0.9rem;
     font-weight: 700;
     flex-shrink: 0;
+}
+
+.feature-item:nth-child(2) .feature-icon {
+    background: linear-gradient(135deg, var(--accent-lime) 0%, #65a30d 100%);
+}
+
+.feature-item:nth-child(3) .feature-icon {
+    background: linear-gradient(135deg, var(--accent-orange) 0%, #ea580c 100%);
+}
+
+.feature-item:nth-child(4) .feature-icon {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-lime) 100%);
 }
 
 .feature-text {
@@ -1169,20 +1188,21 @@ body.landing-page {
 
 .animated-bus {
     position: absolute;
+    left: 0;
+    top: 50%;
     font-size: 4rem;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
     animation: slideBusAcross 15s linear infinite;
     will-change: transform;
+    transform: translate(-100px, -50%);
 }
 
 @keyframes slideBusAcross {
     0% {
-        left: -100px;
-        transform: translateX(0);
+        transform: translate(-100px, -50%);
     }
     100% {
-        left: 100%;
-        transform: translateX(100px);
+        transform: translate(calc(100vw + 100px), -50%);
     }
 }
 
@@ -1196,8 +1216,8 @@ body.landing-page {
     height: 2px;
     background: repeating-linear-gradient(
         to right,
-        var(--primary-color) 0,
-        var(--primary-color) 20px,
+        var(--accent-lime) 0,
+        var(--accent-lime) 20px,
         transparent 20px,
         transparent 40px
     );
