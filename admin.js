@@ -1571,10 +1571,8 @@ ${signature}`;
                 // Show success message
                 showTemporaryMessage(`✅ Quote ${quote.savedQuote ? 'updated' : 'saved'} with status: ${newStatus}`, 'success');
                 
-                // Reload quotes after a delay
-                setTimeout(() => {
-                    loadQuotes();
-                }, 2000);
+                // Reload quotes immediately to update UI before opening email
+                await loadQuotes();
             }
         } catch (error) {
             console.error('Error saving quote:', error);
@@ -1582,6 +1580,9 @@ ${signature}`;
             showTemporaryMessage('⚠️ Quote not saved to Sheets, but you can still send the email', 'warning');
         }
     }
+    
+    // Close the modal to show the updated quote list
+    closeModal();
     
     // Build mailto link
     const subjectEncoded = encodeURIComponent(subject);
@@ -1591,8 +1592,19 @@ ${signature}`;
     
     const mailtoLink = `mailto:${to}?subject=${subjectEncoded}&body=${body}${bcc}`;
     
-    // Open email client
-    window.location.href = mailtoLink;
+    // Open email client in a way that doesn't navigate away from the dashboard
+    // Using window.open() keeps the dashboard page intact
+    setTimeout(() => {
+        // Create a temporary link element and click it
+        // This approach works better across browsers for mailto: links
+        const tempLink = document.createElement('a');
+        tempLink.href = mailtoLink;
+        tempLink.target = '_blank'; // Attempt to open in new context
+        tempLink.style.display = 'none';
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        document.body.removeChild(tempLink);
+    }, 100);
 }
 
 /**
