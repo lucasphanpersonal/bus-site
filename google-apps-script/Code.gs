@@ -107,7 +107,8 @@ function handleSaveQuote(data) {
       data.tripSummary || '',
       data.totalMiles || '',
       data.totalPassengers || '',
-      data.tripDays || ''
+      data.tripDays || '',
+      data.agreedPrice || '' // Agreed price (may differ from initial quote)
     ];
     
     // Append to sheet
@@ -157,6 +158,7 @@ function handleUpdateQuote(data) {
     sheet.getRange(rowIndex, 5).setValue(data.quoteAmount || ''); // Column E: Quote Amount
     sheet.getRange(rowIndex, 6).setValue(data.additionalDetails || ''); // Column F: Additional Details
     sheet.getRange(rowIndex, 7).setValue(data.status || 'Sent'); // Column G: Status
+    sheet.getRange(rowIndex, 14).setValue(data.agreedPrice || ''); // Column N: Agreed Price
     sheet.getRange(rowIndex, 1).setValue(new Date()); // Column A: Update timestamp
     
     log('Quote updated successfully', { rowIndex, customerEmail: data.customerEmail });
@@ -233,7 +235,8 @@ function createQuoteResponsesSheet(spreadsheet) {
     'Trip Summary',
     'Total Miles',
     'Total Passengers',
-    'Trip Days'
+    'Trip Days',
+    'Agreed Price'
   ];
   
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);

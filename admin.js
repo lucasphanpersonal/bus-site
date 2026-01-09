@@ -147,7 +147,7 @@ async function loadSavedQuoteResponses() {
         
         // Parse the rows into saved quote objects
         // Column structure: Timestamp, Quote Request ID, Customer Name, Customer Email, Quote Amount, 
-        //                   Additional Details, Status, Admin Name, Sent Date, Trip Summary, Total Miles, Total Passengers, Trip Days
+        //                   Additional Details, Status, Admin Name, Sent Date, Trip Summary, Total Miles, Total Passengers, Trip Days, Agreed Price
         const savedQuotes = [];
         for (let i = 1; i < data.values.length; i++) {
             const row = data.values[i];
@@ -164,7 +164,8 @@ async function loadSavedQuoteResponses() {
                 tripSummary: row[9] || '',
                 totalMiles: row[10] || '',
                 totalPassengers: row[11] || '',
-                tripDays: row[12] || ''
+                tripDays: row[12] || '',
+                agreedPrice: row[13] || ''
             });
         }
         
@@ -673,14 +674,21 @@ function displayQuotes(quotes) {
             `<span style="background: ${getStatusColor(quote.savedQuote.status).bg}; color: ${getStatusColor(quote.savedQuote.status).text}; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 10px;">${quote.savedQuote.status}</span>` : 
             `<span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 10px;">⏳ Pending</span>`;
         
-        // Add quote amount badge if available
-        const quoteAmountBadge = hasResponse ? 
-            `<span style="background: ${getStatusColor(quote.savedQuote.status).bg}; color: ${getStatusColor(quote.savedQuote.status).text}; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 5px;">$${quote.savedQuote.quoteAmount}</span>` : '';
+        // Add price badge - show agreed price for accepted quotes, quote amount for others
+        let priceBadge = '';
+        if (hasResponse) {
+            const isAccepted = quote.savedQuote.status === 'Accepted';
+            const priceToShow = (isAccepted && quote.savedQuote.agreedPrice) ? quote.savedQuote.agreedPrice : quote.savedQuote.quoteAmount;
+            const priceLabel = (isAccepted && quote.savedQuote.agreedPrice) ? 'Agreed: ' : '';
+            if (priceToShow) {
+                priceBadge = `<span style="background: ${getStatusColor(quote.savedQuote.status).bg}; color: ${getStatusColor(quote.savedQuote.status).text}; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 5px;">${priceLabel}$${priceToShow}</span>`;
+            }
+        }
         
         return `
             <div class="quote-card" onclick="showQuoteDetail(${quote.id})">
                 <div class="quote-header-row">
-                    <div class="quote-name">${quote.name}${statusBadge}${quoteAmountBadge}</div>
+                    <div class="quote-name">${quote.name}${statusBadge}${priceBadge}</div>
                     <div class="quote-date">${formattedDate}</div>
                 </div>
                 <div class="quote-summary">
@@ -760,11 +768,20 @@ function updateStats(quotes) {
         return sum;
     }, 0);
     
+    // Calculate total revenue from agreed prices (accepted quotes only)
+    const totalRevenue = quotes.reduce((sum, q) => {
+        if (q.savedQuote && q.savedQuote.status === 'Accepted' && q.savedQuote.agreedPrice) {
+            return sum + parseFloat(q.savedQuote.agreedPrice);
+        }
+        return sum;
+    }, 0);
+    
     document.getElementById('totalQuotes').textContent = totalQuotes;
     document.getElementById('pendingQuotes').textContent = pendingQuotes;
     document.getElementById('sentQuotes').textContent = sentQuotes;
     document.getElementById('acceptedQuotes').textContent = acceptedQuotes;
     document.getElementById('declinedQuotes').textContent = declinedQuotes;
+    document.getElementById('totalRevenue').textContent = '$' + totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     document.getElementById('monthQuotes').textContent = thisMonth;
     document.getElementById('totalPassengers').textContent = totalPassengers.toLocaleString();
     document.getElementById('totalMiles').textContent = totalMiles.toFixed(0).toLocaleString();
@@ -1050,6 +1067,11 @@ function generateQuoteResponseSection(quote) {
                         <div style="font-weight: 700; font-size: 1.1rem; color: ${statusColor.text}; margin-bottom: 5px;">
                             Quote Amount: $${sq.quoteAmount}
                         </div>
+                        ${sq.agreedPrice && sq.status === 'Accepted' ? `
+                        <div style="font-weight: 700; font-size: 1.1rem; color: ${statusColor.text}; margin-bottom: 5px;">
+                            Agreed Price: $${sq.agreedPrice}
+                        </div>
+                        ` : ''}
                         <div style="color: ${statusColor.text}; font-size: 0.9rem;">
                             Status: <strong>${sq.status}</strong> • Sent by ${sq.adminName} on ${new Date(sq.sentDate).toLocaleDateString()}
                         </div>
@@ -1519,15 +1541,16 @@ ${signature}`;
                 quoteRequestId: quote.submittedAt, // Use timestamp as unique ID
                 customerName: quote.name,
                 customerEmail: quote.email,
-                quoteAmount: amount || 'N/A',
+                quoteAmount: quote.savedQuote?.quoteAmount || amount, // Keep original quote amount
                 additionalDetails: details,
                 status: newStatus,
                 adminName: 'Admin', // Could be enhanced to track actual admin name
-                sentDate: new Date().toISOString(),
+                sentDate: quote.savedQuote?.sentDate || new Date().toISOString(),
                 tripSummary: tripSummary,
                 totalMiles: totalMiles,
                 totalPassengers: quote.passengers,
-                tripDays: quote.tripDays.length
+                tripDays: quote.tripDays.length,
+                agreedPrice: emailType === 'accept' ? amount : (quote.savedQuote?.agreedPrice || '') // Save agreed price when accepting, preserve existing otherwise
             };
             
             // Use update if quote already exists, otherwise save new
