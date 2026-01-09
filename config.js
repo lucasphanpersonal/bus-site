@@ -34,9 +34,16 @@ const CONFIG = {
     // 3. Enable Google Maps JavaScript API, Places API, and Distance Matrix API
     // 4. Create credentials (API Key)
     // 5. Restrict the key to your domain for security
+    // 6. NEVER commit API keys to the repository
+    //
+    // SECURITY: For secure API key management, use one of these methods:
+    // Option 1: Environment Variables (Recommended for deployment platforms)
+    // Option 2: Create a local config-local.js file (git-ignored)
+    // Option 3: Use platform-specific secrets (Netlify, Vercel, etc.)
+    // See SECURITY_SETUP.md for detailed instructions
     
     googleMaps: {
-        apiKey: 'AIzaSyBug8nyirxDx8cbgOET9qtPViJyhS6DnOc'  // Replace with actual API key
+        apiKey: ''  // DO NOT commit API keys here. See SECURITY_SETUP.md for setup instructions
     },
 
     // Route computation settings
@@ -91,6 +98,22 @@ Website: lucasphanpersonal.github.io/bus-site
         // Template variables available:
         // {{customer_name}}, {{customer_email}}, {{customer_phone}}, {{company}},
         // {{passengers}}, {{trip_description}}, {{trip_days}}, {{notes}}, {{submission_date}}
+        
+        // Admin Notification Configuration
+        // Send notification to admin email when a new quote is received
+        adminNotification: {
+            enabled: false,  // Set to true to enable admin notifications
+            adminEmail: 'huabaohuang622@gmail.com',  // Admin email to receive notifications
+            adminTemplateId: '',  // Your EmailJS Template ID for admin notifications
+            // TODO: Replace hardcoded admin email with environment variables or secret management services
+            // for better security. Consider using services like:
+            // - AWS Secrets Manager
+            // - Azure Key Vault
+            // - Google Cloud Secret Manager
+            // - Netlify Environment Variables
+            // - Vercel Environment Variables
+            // For production, set this in config-local.js or use environment variables
+        }
     },
 
     // Google Sheets API Configuration (for Admin Dashboard)

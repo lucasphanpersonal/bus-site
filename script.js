@@ -645,6 +645,16 @@ async function handleFormSubmit(event) {
             }
         }
 
+        // Send admin notification if configured
+        if (CONFIG.emailjs && CONFIG.emailjs.adminNotification && CONFIG.emailjs.adminNotification.enabled) {
+            try {
+                await sendAdminNotification(formData);
+            } catch (emailError) {
+                console.warn('Failed to send admin notification:', emailError);
+                // Don't block submission if admin notification fails
+            }
+        }
+
         // Redirect to success page with query parameters
         const params = new URLSearchParams({
             name: formData.name,
@@ -896,6 +906,60 @@ async function sendConfirmationEmail(formData) {
         console.log('Confirmation email sent successfully:', response);
     } catch (error) {
         console.error('Failed to send confirmation email:', error);
+        throw error;
+    }
+}
+
+/**
+ * Send notification email to admin when a new quote is received
+ */
+async function sendAdminNotification(formData) {
+    if (typeof emailjs === 'undefined') {
+        console.warn('EmailJS library not loaded');
+        return;
+    }
+
+    // Validate required configuration
+    if (!CONFIG.emailjs.adminNotification.adminTemplateId) {
+        console.error('Admin notification template ID is not configured. Please set adminTemplateId in config-local.js');
+        return;
+    }
+
+    // Format route information if available
+    let routeInfoText = '';
+    if (formData.routeInfo) {
+        routeInfoText = formatRouteInformation(formData.routeInfo, formData.passengers);
+    }
+
+    const templateParams = {
+        admin_email: CONFIG.emailjs.adminNotification.adminEmail,
+        customer_name: formData.name,
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        company: formData.company || 'N/A',
+        passengers: formData.passengers,
+        trip_description: formData.description,
+        trip_days: formatTripDaysForEmail(formData.tripDays),
+        notes: formData.notes || 'None',
+        route_info: routeInfoText || 'Route information not available',
+        submission_date: new Date().toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
+    };
+
+    try {
+        const response = await emailjs.send(
+            CONFIG.emailjs.serviceId,
+            CONFIG.emailjs.adminNotification.adminTemplateId,
+            templateParams
+        );
+        console.log('Admin notification sent successfully:', response);
+    } catch (error) {
+        console.error('Failed to send admin notification:', error);
         throw error;
     }
 }

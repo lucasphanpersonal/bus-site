@@ -27,7 +27,13 @@ build/
 .env
 .env.local
 .env.production
+.env.*.local
 config.local.js
+config-local.js
+*.local.js
+*-local.js
+secrets.js
+api-keys.js
 
 # Temporary files
 tmp/

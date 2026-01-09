@@ -149,6 +149,105 @@ Bus Charter Services Team
 
 ---
 
+### Admin Notification Feature
+
+The website now includes a feature to send automatic email notifications to an admin when new quotes are received. This helps you stay on top of incoming quote requests.
+
+#### Setup Steps:
+
+1. **Create Admin Notification Template in EmailJS**
+   - In your EmailJS dashboard, create a new email template
+   - Name it something like "Admin Quote Notification"
+   - Get the Template ID
+
+2. **Admin Template Example:**
+
+```
+Subject: New Bus Charter Quote Request Received
+
+New Quote Request Received!
+
+A new quote request has been submitted on {{submission_date}}.
+
+Customer Information:
+- Name: {{customer_name}}
+- Email: {{customer_email}}
+- Phone: {{customer_phone}}
+- Company: {{company}}
+
+Trip Details:
+- Passengers: {{passengers}}
+- Description: {{trip_description}}
+
+Trip Schedule:
+{{trip_days}}
+
+Special Notes:
+{{notes}}
+
+Route Information:
+{{route_info}}
+
+Please review and respond to the customer as soon as possible.
+
+---
+This notification was sent to: {{admin_email}}
+```
+
+3. **Configure in config.js:**
+
+```javascript
+emailjs: {
+    enabled: true,  // Must be enabled
+    publicKey: 'YOUR_PUBLIC_KEY',
+    serviceId: 'YOUR_SERVICE_ID',
+    templateId: 'YOUR_CUSTOMER_TEMPLATE_ID',
+    
+    adminNotification: {
+        enabled: true,  // Enable admin notifications
+        adminEmail: 'huabaohuang622@gmail.com',  // Admin email (currently hardcoded)
+        adminTemplateId: 'YOUR_ADMIN_TEMPLATE_ID'  // Admin notification template
+    }
+}
+```
+
+4. **Security Note:**
+
+⚠️ **IMPORTANT**: The admin email is currently hardcoded in the configuration. For production use, consider:
+- Moving sensitive configuration to environment variables
+- Using secret management services (AWS Secrets Manager, Azure Key Vault, Google Cloud Secret Manager)
+- Using platform-specific environment variables (Netlify, Vercel)
+- Implementing proper backend authentication
+
+See the TODO comment in `config.js` for more details.
+
+#### Template Variables Available:
+
+The admin notification email template has access to these variables:
+- `{{admin_email}}` - Admin email address
+- `{{customer_name}}` - Customer's name
+- `{{customer_email}}` - Customer's email
+- `{{customer_phone}}` - Customer's phone
+- `{{company}}` - Company/organization name
+- `{{passengers}}` - Number of passengers
+- `{{trip_description}}` - Trip description
+- `{{trip_days}}` - Formatted trip days with dates, times, and locations
+- `{{notes}}` - Special notes from customer
+- `{{route_info}}` - Computed route information (distance, time, etc.)
+- `{{submission_date}}` - Date and time of submission
+
+#### How It Works:
+
+1. Customer submits a quote request
+2. Form is submitted to Google Forms (primary storage)
+3. Customer receives confirmation email (if enabled)
+4. Admin receives notification email (if enabled)
+5. Customer is redirected to success page
+
+The admin notification is sent asynchronously and will not block the form submission if it fails.
+
+---
+
 ### Option 2: Netlify Forms + Functions (Serverless)
 
 **Best for:** Sites hosted on Netlify, moderate volume

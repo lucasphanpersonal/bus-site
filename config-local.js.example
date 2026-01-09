@@ -1,0 +1,39 @@
+// config-local.js.example
+// This is a template file. Copy this to config-local.js and add your real API keys.
+// config-local.js is git-ignored and will not be committed to the repository.
+
+// HOW TO USE:
+// 1. Copy this file: cp config-local.js.example config-local.js
+// 2. Edit config-local.js and replace the placeholder values with your real API keys
+// 3. NEVER commit config-local.js to the repository
+
+const CONFIG_LOCAL = {
+    // Google Maps API Configuration
+    googleMaps: {
+        apiKey: 'YOUR_GOOGLE_MAPS_API_KEY_HERE'  // Replace with your actual Google Maps API key
+    },
+    
+    // EmailJS Configuration (Optional - only if you want to enable email features)
+    emailjs: {
+        enabled: true,  // Set to true to enable email features
+        publicKey: 'YOUR_EMAILJS_PUBLIC_KEY_HERE',      // Your EmailJS Public Key (User ID)
+        serviceId: 'YOUR_EMAILJS_SERVICE_ID_HERE',      // Your EmailJS Service ID
+        templateId: 'YOUR_EMAILJS_TEMPLATE_ID_HERE',    // Your EmailJS Template ID for customer confirmations
+        
+        // Admin Notification Configuration (Optional)
+        adminNotification: {
+            enabled: true,  // Set to true to enable admin notifications
+            // Note: You can also set this via environment variable for better security
+            adminEmail: 'huabaohuang622@gmail.com',  // Admin email - consider using environment variable in production
+            adminTemplateId: 'YOUR_ADMIN_TEMPLATE_ID_HERE'  // Your EmailJS Template ID for admin notifications
+        }
+    }
+    
+    // Note: You only need to include the values you want to override from config.js
+    // Any values not specified here will use the defaults from config.js
+};
+
+// Don't change this line - it's needed for the config to work
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CONFIG_LOCAL;
+}

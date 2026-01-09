@@ -17,6 +17,7 @@ A modern, responsive website for requesting charter bus booking quotes. The site
 - 📝 **Trip Description** - Detailed description and special notes sections
 - ✅ **Confirmation Page** - Clients receive a professional confirmation page after submission
 - 📬 **Automatic Confirmation Emails** - Optional automatic email confirmations to customers (via EmailJS)
+- 🔔 **Admin Notifications** - Optional email notifications to admin when new quotes are received
 - 🔗 **Google Forms Integration** - Submissions sent directly to your Google Form
 - ⚡ **Real-time Validation** - Client-side form validation for better UX
 - 🎨 **Clean UI** - Professional look without the typical embedded form appearance
@@ -79,9 +80,42 @@ cd bus-site
    - Copy your API key
    - (Recommended) Restrict the key to your domain for security
 
-### 4. Update Configuration
+⚠️ **IMPORTANT**: Never commit API keys to the repository! See [SECURITY_SETUP.md](SECURITY_SETUP.md) for secure configuration.
 
-Edit `config.js` and replace the placeholder values:
+### 4. Secure API Key Configuration
+
+**🔐 Your API keys must be kept secret.** Follow these steps to configure them securely:
+
+#### For Local Development:
+
+1. Copy the example config file:
+   ```bash
+   cp config-local.js.example config-local.js
+   ```
+
+2. Edit `config-local.js` and add your real API keys:
+   ```javascript
+   const CONFIG_LOCAL = {
+       googleMaps: {
+           apiKey: 'YOUR_ACTUAL_API_KEY'
+       }
+   };
+   ```
+
+3. The file is already in `.gitignore` and won't be committed.
+
+#### For Production Deployment:
+
+Use environment variables or your platform's secret management:
+- **Netlify**: Use Environment Variables in site settings
+- **Vercel**: Use Environment Variables in project settings  
+- **GitHub Pages**: Use GitHub Secrets with GitHub Actions
+
+📖 **See [SECURITY_SETUP.md](SECURITY_SETUP.md) for complete setup instructions for all deployment methods.**
+
+### 5. Update Configuration (Google Forms)
+
+Edit `config.js` and update the Google Forms configuration (API keys should go in `config-local.js`):
 
 ```javascript
 const CONFIG = {
@@ -97,20 +131,21 @@ const CONFIG = {
             description: 'entry.XXXXXXXXX',
             notes: 'entry.XXXXXXXXX'
         }
-    },
-    googleMaps: {
-        apiKey: 'YOUR_GOOGLE_MAPS_API_KEY'
     }
 };
 ```
 
-### 5. (Optional) Configure Email Confirmations
+**Note**: Do NOT put API keys in `config.js`. Use `config-local.js` as described in step 4.
 
-To send automatic confirmation emails to customers when they submit a quote:
+### 5. (Optional) Configure Email Confirmations and Admin Notifications
+
+To send automatic confirmation emails to customers and notifications to admin when they submit a quote:
 
 1. Sign up for a free account at [EmailJS](https://www.emailjs.com/) (200 free emails/month)
 2. Connect your email service (Gmail, Outlook, etc.)
-3. Create an email template for quote confirmations
+3. Create email templates:
+   - One for customer quote confirmations
+   - One for admin notifications (optional)
 4. Update `config.js` with your EmailJS credentials:
 
 ```javascript
@@ -118,13 +153,22 @@ emailjs: {
     enabled: true,
     publicKey: 'YOUR_EMAILJS_PUBLIC_KEY',
     serviceId: 'YOUR_SERVICE_ID',
-    templateId: 'YOUR_TEMPLATE_ID'
+    templateId: 'YOUR_CUSTOMER_TEMPLATE_ID',
+    
+    // Optional: Admin notifications
+    adminNotification: {
+        enabled: true,
+        adminEmail: 'huabaohuang622@gmail.com',  // Configure your admin email
+        adminTemplateId: 'YOUR_ADMIN_TEMPLATE_ID'
+    }
 }
 ```
 
-📖 **See [EMAIL_INTEGRATION_GUIDE.md](EMAIL_INTEGRATION_GUIDE.md) for detailed setup instructions and alternative email solutions.**
+📖 **See [EMAIL_INTEGRATION_GUIDE.md](EMAIL_INTEGRATION_GUIDE.md) for detailed setup instructions, template examples, and alternative email solutions.**
 
 **Note:** Email integration is optional. The site works perfectly without it - customers will still see a confirmation page and submissions will be saved to Google Forms.
+
+⚠️ **Security Note:** For production use, consider moving sensitive configuration to environment variables or secret management services instead of hardcoding values.
 
 ### 6. Deploy
 
@@ -315,12 +359,27 @@ This allows you to test the website before setting up the APIs.
 
 ## Security Notes
 
-- ⚠️ **Never commit API keys to public repositories**
+### 🔐 Critical Security Practices
+
+- ⚠️ **NEVER commit API keys to the repository** - Use `config-local.js` (already git-ignored)
+- ⚠️ **API key exposed?** Revoke it immediately and generate a new one
 - ⚠️ **Change the default admin password (`admin123`) before deploying**
-- Consider using environment variables or server-side configuration for API keys
-- Restrict your Google Maps API key to your domain
-- Enable CORS restrictions on your APIs where possible
-- For production use, implement proper backend authentication for the admin dashboard
+- ✅ **Use [SECURITY_SETUP.md](SECURITY_SETUP.md)** for proper API key configuration
+- ✅ **Restrict your Google Maps API key** to your domain in Google Cloud Console
+- ✅ **Set up billing alerts** in Google Cloud Console to prevent unexpected charges
+- ✅ **For production**, use environment variables or platform-specific secrets (Netlify, Vercel, etc.)
+- ✅ **Enable CORS restrictions** on your APIs where possible
+- ✅ **For production use**, implement proper backend authentication for the admin dashboard
+
+### If Your API Key Was Compromised:
+
+1. **Immediately revoke the exposed API key** in Google Cloud Console
+2. **Generate a new API key** with proper domain restrictions
+3. **Update your local config** in `config-local.js` (not `config.js`)
+4. **Never commit the new key** to the repository
+5. **Consider removing from git history** - see [SECURITY_SETUP.md](SECURITY_SETUP.md)
+
+📖 **Full security guide**: [SECURITY_SETUP.md](SECURITY_SETUP.md)
 
 ## Future Enhancements
 
