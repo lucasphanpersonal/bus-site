@@ -59,6 +59,8 @@ The script uses a shared secret for basic authentication. You should change this
 
 **IMPORTANT**: The web app must be deployed with "Anyone" access to allow the admin dashboard to read responses from the Apps Script. Google Apps Script automatically handles CORS (Cross-Origin Resource Sharing) for web apps deployed with "Anyone" access, which enables the admin dashboard to receive and process responses from the script.
 
+The script includes a `doOptions()` function that handles CORS preflight requests (OPTIONS method), which is required when the admin dashboard makes POST requests with custom headers (Content-Type: application/json). This ensures that cross-origin requests from your GitHub Pages site to the Google Apps Script work properly.
+
 1. Click **Deploy** → **New deployment**
 2. Click the gear icon (⚙️) next to "Select type"
 3. Choose **Web app**
@@ -196,6 +198,22 @@ The script is deployed with "Anyone" access, but:
 1. Check that the web app URL is accessible (open it in a browser - you should see a JSON response)
 2. Make sure you're not blocking cross-origin requests
 3. Check browser console for specific error messages
+
+### CORS Policy Error
+
+**Problem**: "Access to fetch has been blocked by CORS policy: Response to preflight request doesn't pass access control check"
+
+**Solution**:
+1. **Most Common Cause**: The web app was deployed with "Who has access" set to something other than "Anyone"
+   - Go to Apps Script editor
+   - Click **Deploy** → **Manage deployments**
+   - Click the pencil icon (✏️) to edit your deployment
+   - Change **"Who has access"** to **"Anyone"**
+   - Click **Deploy**
+2. After updating the deployment, wait a minute for changes to take effect
+3. If the issue persists, create a **new deployment** (Deploy → New deployment) with "Anyone" access
+4. Update your `config.js` with the new web app URL if you created a new deployment
+5. **Note**: The `Code.gs` file includes a `doOptions()` function to handle CORS preflight requests - make sure this is present in your deployed script
 
 ## Updating the Script
 

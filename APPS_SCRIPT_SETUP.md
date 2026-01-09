@@ -101,6 +101,8 @@ Now we'll make the script accessible from your admin dashboard:
    
    **Who has access**: Select **Anyone**
    > Don't worry - the script validates all requests with your shared secret, so it's protected.
+   > 
+   > **CRITICAL**: Must be set to "Anyone" to enable CORS (Cross-Origin Resource Sharing), which allows the admin dashboard to communicate with the script. The script includes a `doOptions()` function to handle CORS preflight requests properly.
 
 6. Click **Deploy**
 7. You may need to authorize again - follow the same steps as in Step 4
@@ -332,9 +334,35 @@ If you encounter issues:
 ### Common Issues Quick Reference
 
 - **Authentication failed**: Shared secret mismatch between config.js and Code.gs
-- **CORS errors**: Web app must be deployed with "Anyone" access
+- **CORS errors**: Web app must be deployed with "Anyone" access. The script includes a `doOptions()` function to handle preflight requests - ensure this is present in your deployed Code.gs
 - **Quote saves but UI doesn't update**: Manually refresh the page
 - **Failed to fetch**: Web app URL is incorrect or deployment is broken
+
+### Detailed CORS Troubleshooting
+
+If you see an error like "Access to fetch has been blocked by CORS policy":
+
+1. **Verify "Anyone" Access**: 
+   - Open Apps Script editor
+   - Click Deploy → Manage deployments
+   - Edit your deployment
+   - Ensure "Who has access" is set to "Anyone"
+   - Redeploy if you made changes
+
+2. **Verify doOptions() Function**:
+   - Make sure your Code.gs includes the `doOptions()` function
+   - This function handles CORS preflight (OPTIONS) requests
+   - If it's missing, copy the latest Code.gs from the repository
+
+3. **Try a New Deployment**:
+   - Sometimes existing deployments have issues
+   - Create a new deployment with "Anyone" access
+   - Update config.js with the new URL
+
+4. **Wait for Propagation**:
+   - After changing deployment settings, wait 1-2 minutes
+   - Clear your browser cache
+   - Try the admin dashboard again
 
 See [TROUBLESHOOTING_STATUS_UPDATES.md](TROUBLESHOOTING_STATUS_UPDATES.md) for detailed solutions.
 
