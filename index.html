@@ -150,6 +150,7 @@
     </div>
 
     <!-- Load local config first (git-ignored, contains API keys) -->
+    <!-- The onerror handler silently continues if file doesn't exist (expected in production) -->
     <script src="config-local.js" onerror="console.log('ℹ️ No local config found, using environment defaults')"></script>
     
     <!-- Load base config -->

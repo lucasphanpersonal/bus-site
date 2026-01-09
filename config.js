@@ -112,6 +112,7 @@ Website: lucasphanpersonal.github.io/bus-site
             // - Google Cloud Secret Manager
             // - Netlify Environment Variables
             // - Vercel Environment Variables
+            // For production, set this in config-local.js or use environment variables
         }
     },
 

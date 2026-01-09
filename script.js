@@ -919,6 +919,12 @@ async function sendAdminNotification(formData) {
         return;
     }
 
+    // Validate required configuration
+    if (!CONFIG.emailjs.adminNotification.adminTemplateId) {
+        console.error('Admin notification template ID is not configured. Please set adminTemplateId in config-local.js');
+        return;
+    }
+
     // Format route information if available
     let routeInfoText = '';
     if (formData.routeInfo) {

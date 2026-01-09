@@ -23,7 +23,8 @@ const CONFIG_LOCAL = {
         // Admin Notification Configuration (Optional)
         adminNotification: {
             enabled: true,  // Set to true to enable admin notifications
-            adminEmail: 'huabaohuang622@gmail.com',  // Admin email (can be changed)
+            // Note: You can also set this via environment variable for better security
+            adminEmail: 'huabaohuang622@gmail.com',  // Admin email - consider using environment variable in production
             adminTemplateId: 'YOUR_ADMIN_TEMPLATE_ID_HERE'  // Your EmailJS Template ID for admin notifications
         }
     }
