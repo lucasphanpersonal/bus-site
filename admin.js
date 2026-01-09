@@ -310,8 +310,10 @@ async function getQuotesFromGoogleSheets() {
                         '1. Google Sheets API is enabled: https://console.cloud.google.com/apis/library/sheets.googleapis.com\n' +
                         '2. The spreadsheet is shared publicly: Share → "Anyone with the link" can View\n' +
                         '3. Your API key in config.js is correct and not restricted\n\n' +
-                        'Full error: ' + (errorMessage || response.statusText) + '\n\n' +
                         'See GOOGLE_SHEETS_SETUP.md for complete setup instructions.';
+                    
+                    // Log full error to console for debugging (not shown to user)
+                    console.error('Full API error:', errorMessage || response.statusText);
                 }
                 
                 throw new Error(detailedError);
