@@ -323,10 +323,20 @@ Now that quote management is set up:
 
 If you encounter issues:
 
-1. Check the **Execution logs** in Apps Script editor for detailed error messages
-2. Check the **browser console** (F12) in your admin dashboard for client-side errors
-3. Review this guide step-by-step to ensure nothing was missed
-4. Check that all prerequisites (Google Sheets integration) are working correctly
+1. **Check the detailed troubleshooting guide**: [TROUBLESHOOTING_STATUS_UPDATES.md](TROUBLESHOOTING_STATUS_UPDATES.md)
+2. Check the **Execution logs** in Apps Script editor for detailed error messages
+3. Check the **browser console** (F12) in your admin dashboard for client-side errors
+4. Review this guide step-by-step to ensure nothing was missed
+5. Check that all prerequisites (Google Sheets integration) are working correctly
+
+### Common Issues Quick Reference
+
+- **Authentication failed**: Shared secret mismatch between config.js and Code.gs
+- **CORS errors**: Web app must be deployed with "Anyone" access
+- **Quote saves but UI doesn't update**: Manually refresh the page
+- **Failed to fetch**: Web app URL is incorrect or deployment is broken
+
+See [TROUBLESHOOTING_STATUS_UPDATES.md](TROUBLESHOOTING_STATUS_UPDATES.md) for detailed solutions.
 
 ## Additional Resources
 
