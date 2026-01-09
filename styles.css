@@ -1234,130 +1234,7 @@ body.landing-page {
     }
 }
 
-/* Scenery elements for motion effect */
-.scenery-background,
-.scenery-foreground {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-}
 
-.scenery-background {
-    z-index: 1;
-}
-
-.scenery-foreground {
-    z-index: 3;
-}
-
-.animated-bus {
-    z-index: 2;
-}
-
-.scenery-item {
-    position: absolute;
-    will-change: transform;
-}
-
-/* Clouds - move slowly in background (right to left for parallax) */
-.cloud {
-    top: 10%;
-    font-size: 2rem;
-    opacity: 0.6;
-    animation: moveCloudRightToLeft 150s linear infinite;
-}
-
-.cloud-1 {
-    left: 100%;
-    animation-delay: 0s;
-}
-
-.cloud-2 {
-    left: 100%;
-    animation-delay: -10s;
-}
-
-.cloud-3 {
-    left: 100%;
-    animation-delay: -20s;
-    font-size: 1.5rem;
-}
-
-@keyframes moveCloudRightToLeft {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-120vw);
-    }
-}
-
-/* Trees - move for parallax effect (right to left) */
-/* Background trees move slower (behind the bus) */
-.scenery-background .tree {
-    bottom: 35px;
-    font-size: 2rem;
-    opacity: 0.7;
-    animation: moveTreeBackgroundRightToLeft 60s linear infinite;
-}
-
-/* Foreground trees move faster (in front of the bus) */
-.scenery-foreground .tree {
-    bottom: 35px;
-    font-size: 2.5rem;
-    animation: moveTreeForegroundRightToLeft 40s linear infinite;
-}
-
-.tree-1 {
-    left: 100%;
-    animation-delay: 0s;
-}
-
-.tree-2 {
-    left: 100%;
-    animation-delay: -1.3s;
-}
-
-.tree-3 {
-    left: 100%;
-    animation-delay: -2.6s;
-}
-
-.tree-4 {
-    left: 100%;
-    animation-delay: -4s;
-}
-
-.tree-5 {
-    left: 100%;
-    animation-delay: -5.3s;
-}
-
-.tree-6 {
-    left: 100%;
-    animation-delay: -6.6s;
-}
-
-@keyframes moveTreeBackgroundRightToLeft {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-120vw);
-    }
-}
-
-@keyframes moveTreeForegroundRightToLeft {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-120vw);
-    }
-}
 
 /* Responsive adjustments for bus animation */
 @media (max-width: 768px) {
@@ -1373,20 +1250,6 @@ body.landing-page {
     .bus-animation-container::before {
         bottom: 25px;
     }
-    
-    .cloud {
-        font-size: 1.5rem;
-    }
-    
-    .scenery-background .tree {
-        font-size: 1.5rem;
-        bottom: 20px;
-    }
-    
-    .scenery-foreground .tree {
-        font-size: 2rem;
-        bottom: 20px;
-    }
 }
 
 @media (max-width: 480px) {
@@ -1400,19 +1263,5 @@ body.landing-page {
     
     .bus-animation-container::before {
         bottom: 18px;
-    }
-    
-    .cloud {
-        font-size: 1.2rem;
-    }
-    
-    .scenery-background .tree {
-        font-size: 1.2rem;
-        bottom: 15px;
-    }
-    
-    .scenery-foreground .tree {
-        font-size: 1.5rem;
-        bottom: 15px;
     }
 }
