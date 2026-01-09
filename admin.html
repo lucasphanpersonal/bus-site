@@ -341,10 +341,16 @@
     <!-- Google Maps JavaScript API -->
     <script>
         // Load Google Maps API dynamically with the API key from config
-        function loadGoogleMapsAPI() {
+        function loadGoogleMapsAPI(retryCount = 0) {
+            const maxRetries = 50; // Max 5 seconds (50 * 100ms)
+            
             // Wait for config to be loaded
             if (typeof CONFIG === 'undefined') {
-                setTimeout(loadGoogleMapsAPI, 100);
+                if (retryCount < maxRetries) {
+                    setTimeout(() => loadGoogleMapsAPI(retryCount + 1), 100);
+                } else {
+                    console.error('Failed to load Google Maps API: CONFIG not loaded after timeout');
+                }
                 return;
             }
             
@@ -356,7 +362,6 @@
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=${CONFIG.googleMaps.apiKey}&libraries=places`;
             script.async = true;
-            script.defer = true;
             document.head.appendChild(script);
         }
         
