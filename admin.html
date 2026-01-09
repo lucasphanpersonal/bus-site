@@ -158,6 +158,8 @@
         .quote-detail-value {
             color: var(--text-primary);
             font-weight: 600;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
         
         .modal {
@@ -249,6 +251,8 @@
             color: var(--text-primary);
             font-size: 1.1rem;
             font-weight: 600;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
         
         .map-container {
@@ -375,6 +379,22 @@
                 <div class="stat-card">
                     <h3>Total Quotes</h3>
                     <div class="value" id="totalQuotes">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Pending</h3>
+                    <div class="value" id="pendingQuotes">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Sent</h3>
+                    <div class="value" id="sentQuotes">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Accepted</h3>
+                    <div class="value" id="acceptedQuotes">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Declined</h3>
+                    <div class="value" id="declinedQuotes">0</div>
                 </div>
                 <div class="stat-card">
                     <h3>This Month</h3>
