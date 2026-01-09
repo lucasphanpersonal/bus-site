@@ -1341,15 +1341,6 @@ body.landing-page {
     animation-delay: -6.6s;
 }
 
-@keyframes moveTreeRightToLeft {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-120vw);
-    }
-}
-
 @keyframes moveTreeBackgroundRightToLeft {
     0% {
         transform: translateX(0);
