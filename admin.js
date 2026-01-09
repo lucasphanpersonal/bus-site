@@ -1512,12 +1512,8 @@ ${signature}`;
     // Save quote to Google Sheets if Apps Script is enabled
     if (CONFIG.appsScript && CONFIG.appsScript.enabled) {
         try {
-            // Show saving message in UI (using a temporary element since we don't have direct button reference)
-            const messageDiv = document.getElementById('tempMessage');
-            if (messageDiv) {
-                messageDiv.textContent = '💾 Saving quote...';
-                messageDiv.style.display = 'block';
-            }
+            // Show saving status
+            showTemporaryMessage('💾 Saving quote...', 'info');
             
             const quoteDataToSave = {
                 quoteRequestId: quote.submittedAt, // Use timestamp as unique ID
