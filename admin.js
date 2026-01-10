@@ -179,26 +179,30 @@ async function loadSavedQuoteResponses() {
         }
         
         // Parse the rows into saved quote objects
-        // Column structure: Timestamp, Quote Request ID, Customer Name, Customer Email, Quote Amount, 
-        //                   Additional Details, Status, Admin Name, Sent Date, Trip Summary, Total Miles, Total Passengers, Trip Days, Agreed Price
+        // Column structure (must match Code.gs createQuoteResponsesSheet):
+        // A: Quote Request ID, B: Timestamp, C: Trip Days, D: Total Passengers, E: Customer Name,
+        // F: Customer Email, G: Phone, H: Company, I: Trip Summary, J: Quote Amount,
+        // K: Additional Details, L: Status, M: Admin Name, N: Sent Date, O: Total Miles, P: Agreed Price
         const savedQuotes = [];
         for (let i = 1; i < data.values.length; i++) {
             const row = data.values[i];
             savedQuotes.push({
-                timestamp: row[0] || '',
-                quoteRequestId: row[1] || '',
-                customerName: row[2] || '',
-                customerEmail: row[3] || '',
-                quoteAmount: row[4] || '',
-                additionalDetails: row[5] || '',
-                status: row[6] || '',
-                adminName: row[7] || '',
-                sentDate: row[8] || '',
-                tripSummary: row[9] || '',
-                totalMiles: row[10] || '',
-                totalPassengers: row[11] || '',
-                tripDays: row[12] || '',
-                agreedPrice: row[13] || ''
+                quoteRequestId: row[0] || '',      // Column A
+                timestamp: row[1] || '',           // Column B
+                tripDays: row[2] || '',            // Column C
+                totalPassengers: row[3] || '',     // Column D
+                customerName: row[4] || '',        // Column E
+                customerEmail: row[5] || '',       // Column F
+                phone: row[6] || '',               // Column G
+                company: row[7] || '',             // Column H
+                tripSummary: row[8] || '',         // Column I
+                quoteAmount: row[9] || '',         // Column J
+                additionalDetails: row[10] || '',  // Column K
+                status: row[11] || '',             // Column L
+                adminName: row[12] || '',          // Column M
+                sentDate: row[13] || '',           // Column N
+                totalMiles: row[14] || '',         // Column O
+                agreedPrice: row[15] || ''         // Column P
             });
         }
         
