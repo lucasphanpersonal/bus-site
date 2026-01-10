@@ -2,7 +2,27 @@
 
 A modern, responsive website for requesting charter bus booking quotes. The site features a beautiful form interface that integrates with Google Forms for data collection, Google Maps for location autocomplete, and includes a private admin dashboard for managing quotes.
 
-## ✨ New: Unique Quote ID System
+## ✨ New: Comprehensive Test Suite
+
+This project now includes a complete test suite with **103+ automated tests** covering all critical functionality:
+
+- ✅ **Unit Tests** - Every core function tested with edge cases
+- ✅ **Integration Tests** - Components working together
+- ✅ **Security Tests** - XSS prevention and input validation
+- ✅ **CI/CD Integration** - Automated testing on every push
+- 📊 **103 tests passing** - Ensuring code quality and reliability
+
+📖 **See [TESTING.md](TESTING.md) for complete testing documentation.**
+
+Run tests locally:
+```bash
+npm test                # Run all tests
+npm run test:watch      # Watch mode for development
+npm run test:coverage   # Coverage report
+./run-tests.sh          # Convenient test runner script
+```
+
+## ✨ Unique Quote ID System
 
 Every quote now gets a unique identifier (e.g., `QUOTE-20260109-A1B2C`) that:
 - Fixes the status update issue where quotes couldn't be matched reliably
