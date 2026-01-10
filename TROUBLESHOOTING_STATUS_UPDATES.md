@@ -2,7 +2,33 @@
 
 This guide helps you verify that quote status updates and Google Sheets synchronization are working correctly after the recent fixes.
 
-## What Was Fixed
+## Recent Fixes
+
+### Fix 2: Column Mapping Mismatch (January 2024)
+
+**Problem**: After sending a quote response with status "Sent" to Google Sheets, the admin page still showed the quote as "Pending". The workflow couldn't continue because Accept/Decline options didn't appear.
+
+**Root Cause**: The `loadSavedQuoteResponses()` function in `admin.js` was reading columns in the wrong order. It expected:
+- Column A: Timestamp, Column B: Quote Request ID, Column G: Status
+
+But `Code.gs` actually saves data as:
+- Column A: Quote Request ID, Column B: Timestamp, Column L: Status
+
+This mismatch caused:
+- Quote Request ID read from wrong column (got Timestamp instead)
+- Status read from wrong column (got Additional Details instead)
+- No match found between quote requests and responses
+- Status always showing as "Pending"
+
+**The Fix**: Updated column mapping in `loadSavedQuoteResponses()` to match the exact structure defined in `Code.gs`:
+- ✅ Column A (index 0): Quote Request ID
+- ✅ Column B (index 1): Timestamp
+- ✅ Column L (index 11): Status
+- ✅ All 16 columns properly mapped
+
+**Result**: Admin page now correctly reads quote responses and displays the proper status badges (Sent, Accepted, Declined).
+
+### Fix 1: CORS and Response Handling (Previous Fix)
 
 The previous implementation used `mode: 'no-cors'` for API requests to Google Apps Script, which prevented the admin dashboard from reading responses. This meant:
 - ❌ No way to know if requests succeeded or failed
@@ -165,6 +191,54 @@ This tests declining a quote.
 - Check Google Sheets: Status is "Declined", reason is in Additional Details
 
 ## Common Issues and Solutions
+
+### Issue: Status showing as "Pending" even though quote was sent
+
+**Symptom**: After sending a quote and seeing "✅ Quote saved" message, the quote still shows "⏳ Pending" badge instead of "Sent" badge.
+
+**Cause**: This was a column mapping bug that has been fixed. If you're still experiencing this issue:
+1. The admin.js file may not be updated to the latest version
+2. Browser cache may be serving old JavaScript
+3. The quote may have been saved before the fix was applied
+
+**Solution**:
+1. **Clear browser cache**:
+   - Press Ctrl+Shift+Delete (Chrome/Edge) or Cmd+Shift+Delete (Mac)
+   - Select "Cached images and files"
+   - Clear cache and reload the page (Ctrl+F5 or Cmd+Shift+R)
+
+2. **Verify column structure in Google Sheets**:
+   - Open your Google Sheet
+   - Go to "Quote Responses" tab
+   - Check the header row (Row 1) matches this exact order:
+     ```
+     A: Quote Request ID
+     B: Timestamp
+     C: Trip Days
+     D: Total Passengers
+     E: Customer Name
+     F: Customer Email
+     G: Phone
+     H: Company
+     I: Trip Summary
+     J: Quote Amount
+     K: Additional Details
+     L: Status
+     M: Admin Name
+     N: Sent Date
+     O: Total Miles
+     P: Agreed Price
+     ```
+   - If columns are in a different order, the sheet was created with an older version of Code.gs
+
+3. **If using old Quote Responses sheet structure**:
+   - Option A: Rename the old "Quote Responses" sheet to "Quote Responses - Old"
+   - Option B: Delete the old sheet (after backing up data)
+   - The script will create a new sheet with correct structure on next save
+
+4. **Force reload the page**:
+   - Press Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+   - This forces browser to fetch fresh JavaScript files
 
 ### Issue: "Authentication failed"
 
