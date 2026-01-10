@@ -23,6 +23,9 @@ build/
 *.min.js
 *.min.css
 
+# Test coverage
+coverage/
+
 # Environment and config files with secrets
 .env
 .env.local
