@@ -249,14 +249,16 @@ python -m http.server 8000
 
 ```
 bus-site/
-├── index.html      # Main HTML file with form structure
-├── success.html    # Confirmation page shown after form submission
-├── admin.html      # Admin dashboard for viewing quote requests
-├── styles.css      # All styling including responsive design
-├── script.js       # Form handling and API integrations
-├── admin.js        # Admin dashboard functionality
-├── config.js       # Configuration for API keys (customize this)
-└── README.md       # This file
+├── index.html                  # Main HTML file with form structure
+├── success.html                # Confirmation page shown after form submission
+├── admin.html                  # Admin dashboard for viewing quote requests
+├── test-data-generator.html    # Test data generator tool for developers
+├── styles.css                  # All styling including responsive design
+├── script.js                   # Form handling and API integrations
+├── admin.js                    # Admin dashboard functionality
+├── test-data-generator.js      # Test data generation logic
+├── config.js                   # Configuration for API keys (customize this)
+└── README.md                   # This file
 ```
 
 ## Admin Dashboard
@@ -449,6 +451,36 @@ This allows you to test the website before setting up the APIs.
 5. **Consider removing from git history** - see [SECURITY_SETUP.md](SECURITY_SETUP.md)
 
 📖 **Full security guide**: [SECURITY_SETUP.md](SECURITY_SETUP.md)
+
+## Test Data Generator
+
+### 🧪 Generate Realistic Test Data
+
+The project includes a test data generator tool for developers and testers:
+
+- **Access**: Navigate to `test-data-generator.html`
+- **Purpose**: Generate realistic quote data for testing and development
+- **Features**:
+  - Generate 1-100 quotes with configurable options
+  - Control trip complexity (single/multi-day, number of stops)
+  - Export as JSON or CSV format
+  - Copy to clipboard or download files
+  - Realistic names, locations, companies, and trip descriptions
+
+**Configuration Options**:
+- Number of quotes to generate
+- Min/Max trip days per quote
+- Min/Max dropoff locations per day
+- Date range for future trips
+
+**Use Cases**:
+- Test form submission and validation
+- Populate admin dashboard with sample data
+- Load testing with large datasets
+- API integration testing
+- Development and debugging
+
+📖 **Complete guide**: [TEST_DATA_GENERATOR_GUIDE.md](TEST_DATA_GENERATOR_GUIDE.md)
 
 ## Future Enhancements
 
