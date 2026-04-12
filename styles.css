@@ -625,14 +625,13 @@ body.success-page {
 }
 
 .cta-buttons {
-.cta-buttons {
     display: flex;
     gap: 20px;
     justify-content: center;
     flex-wrap: wrap;
     margin-bottom: 60px;
 }
-.cta-button {
+
 .cta-button {
     display: inline-flex;
     gap: 12px;
@@ -722,33 +721,32 @@ body.success-page {
 .feature-icon {
     display: flex;
     align-items: center;
-    align-items: center;
+    justify-content: center;
     width: 28px;
     height: 28px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     color: white;
     font-size: 0.9rem;
-    text-decoration: none;
     flex-shrink: 0;
-    position: relative;
-    overflow: hidden;
+}
+
 .feature-item:nth-child(2) .feature-icon {
     background: linear-gradient(135deg, var(--accent-lime) 0%, #65a30d 100%);
+}
 
-.cta-button::before {
 .feature-item:nth-child(3) .feature-icon {
     background: linear-gradient(135deg, var(--accent-orange) 0%, #ea580c 100%);
-    width: 0;
-    height: 0;
+}
+
 .feature-item:nth-child(4) .feature-icon {
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-lime) 100%);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
+}
+
 .feature-text {
     font-weight: 500;
-    height: 300px;
 }
+
 .stats-section {
     display: flex;
     justify-content: center;
@@ -756,8 +754,8 @@ body.success-page {
     flex-wrap: wrap;
     width: 100%;
     max-width: 900px;
-    color: white;
 }
+
 .stat-card {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
@@ -767,60 +765,40 @@ body.success-page {
     text-align: center;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid rgba(135, 206, 235, 0.2);
-    transform: translateY(-3px);
-    box-shadow: 0 12px 30px rgba(135, 206, 235, 0.4);
+}
+
 .stat-card:hover {
     transform: translateY(-5px) scale(1.05);
     box-shadow: 0 20px 40px rgba(135, 206, 235, 0.25);
     background: white;
-    color: var(--accent-orange);
+}
+
 .stat-number {
     font-size: 3rem;
     font-weight: 800;
-    color: var(--primary-dark);
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, var(--accent-orange) 0%, #ea580c 100%);
-    color: white;
+}
+
 .stat-label {
     font-size: 0.95rem;
     color: var(--text-secondary);
     font-weight: 500;
-.button-text {
-    position: relative;
-.bus-animation-container {
-    width: 100%;
-    max-width: 900px;
-    height: 110px;
-    position: relative;
-    overflow: hidden;
-    border-radius: 999px;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.1));
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    position: relative;
-    z-index: 1;
-.animated-bus {
-    position: absolute;
-    left: -80px;
-    bottom: 18px;
-    font-size: 3rem;
-    animation: drive-across 12s ease-in-out infinite;
-    filter: drop-shadow(0 12px 18px rgba(52, 152, 219, 0.35));
 }
 
 .landing-footer {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: var(--spacing-sm);
     padding: 20px 0 12px;
     color: var(--text-secondary);
     font-size: 0.95rem;
-    display: flex;
-    align-items: center;
+}
+
 .success-container {
     position: relative;
     z-index: 1;
@@ -829,8 +807,8 @@ body.success-page {
     place-items: center;
     padding-top: 40px;
     padding-bottom: 40px;
+}
 
-.feature-icon {
 .success-card {
     width: min(100%, 760px);
     background: rgba(255, 255, 255, 0.92);
@@ -840,8 +818,8 @@ body.success-page {
     padding: 48px;
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.5);
-    justify-content: center;
-    width: 28px;
+}
+
 .success-mark {
     width: 88px;
     height: 88px;
@@ -854,8 +832,7 @@ body.success-page {
     font-size: 2.3rem;
     font-weight: 700;
     box-shadow: 0 12px 32px rgba(52, 199, 89, 0.24);
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-    color: white;
+}
 .success-card h1 {
     font-size: clamp(2.2rem, 5vw, 3.2rem);
     margin-bottom: 16px;
@@ -899,7 +876,7 @@ body.success-page {
 }
 .success-details ul {
     list-style: none;
-.animate-fade-in {
+}
 
 .success-details li {
     position: relative;
@@ -1189,7 +1166,6 @@ body.success-page {
 
     .animated-bus {
         font-size: 2.3rem;
-        bottom: 16px;
     }
 }
 
@@ -1216,20 +1192,21 @@ body.success-page {
         page-break-inside: avoid;
     }
 }
-    
+
+@media (max-width: 480px) {
     .logo-icon {
         font-size: 2rem;
     }
-    
+
     .logo-text {
         font-size: 1.5rem;
     }
-    
+
     .stats-section {
         flex-direction: column;
         gap: 15px;
     }
-    
+
     .stat-card {
         width: 100%;
     }
