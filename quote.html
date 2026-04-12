@@ -20,13 +20,13 @@
 
         <main class="main-content">
             <section class="intro-section">
-                <p>This form stays on your site and sends the details directly to Google Forms behind the scenes. Include every scheduled date, pickup, drop-off, and time window so the quote can be accurate on the first pass.</p>
+                <p>This form stays on your site and sends the details directly to Google Forms behind the scenes. Add each service day, then list every stop in order. Departure time is optional for each stop and should be included only when it matters operationally.</p>
             </section>
 
             <form id="bookingForm" class="booking-form">
                 <div class="form-section">
                     <h2>Trip Details</h2>
-                    <p class="section-guidance">Use one trip day card for each service day and list every pickup, every drop-off, and the planned time window in travel order.</p>
+                    <p class="section-guidance">Use one trip day card for each service date. Under that date, add every stop in service order. If you know when the bus should leave a stop, add that departure time. If traffic or venue timing makes it flexible, leave the time blank.</p>
 
                     <div id="dateTimeContainer">
                         <div class="date-time-group" data-index="0">
@@ -41,43 +41,49 @@
                                 </div>
                             </div>
 
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="start_time_0">Start Time *</label>
-                                    <input type="time" id="start_time_0" name="start_time_0" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="end_time_0">End Time *</label>
-                                    <input type="time" id="end_time_0" name="end_time_0" required>
-                                    <div class="checkbox-inline">
-                                        <input type="checkbox" id="next_day_0" name="next_day_0">
-                                        <label for="next_day_0" class="checkbox-label">Ends next day</label>
-                                    </div>
-                                    <small>Use this when service continues past midnight.</small>
-                                </div>
-                            </div>
-
                             <div class="locations-subsection">
-                                <h4>Locations</h4>
+                                <h4>Stops &amp; Departure Times</h4>
 
-                                <div class="form-group">
-                                    <label for="pickup_0">Pick-up Location *</label>
-                                    <input type="text" id="pickup_0" name="pickup_0" class="location-input" placeholder="Enter the address, venue, city, or airport" required>
-                                    <small>Type the location as clearly as possible. No Maps autocomplete is required.</small>
-                                </div>
+                                <div class="stop-container" data-day-index="0">
+                                    <div class="itinerary-stop" data-stop-index="0">
+                                        <div class="stop-header">
+                                            <span class="stop-title">Stop #1</span>
+                                        </div>
+                                        <div class="form-row stop-fields">
+                                            <div class="form-group">
+                                                <label for="stop_location_0_0">Location *</label>
+                                                <input type="text" id="stop_location_0_0" name="stop_location_0_0" class="location-input" placeholder="Enter the address, venue, city, or airport" required>
+                                                <small>Use the actual property, venue, hotel, airport, school, or neighborhood name.</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="stop_departure_0_0">Departure Time</label>
+                                                <input type="time" id="stop_departure_0_0" name="stop_departure_0_0">
+                                                <small>Optional. Add only if the bus is expected to leave this stop at a known time.</small>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                <div class="dropoff-container" data-day-index="0">
-                                    <div class="dropoff-group" data-dropoff-index="0">
-                                        <div class="form-group">
-                                            <label for="dropoff_0_0">Drop-off Location *</label>
-                                            <input type="text" id="dropoff_0_0" name="dropoff_0_0" class="location-input" placeholder="Enter the destination, venue, or stop" required>
-                                            <small>Add the final destination or the first scheduled stop.</small>
+                                    <div class="itinerary-stop" data-stop-index="1">
+                                        <div class="stop-header">
+                                            <span class="stop-title">Stop #2</span>
+                                        </div>
+                                        <div class="form-row stop-fields">
+                                            <div class="form-group">
+                                                <label for="stop_location_0_1">Location *</label>
+                                                <input type="text" id="stop_location_0_1" name="stop_location_0_1" class="location-input" placeholder="Enter the destination, venue, or next stop" required>
+                                                <small>Continue listing the route exactly in service order.</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="stop_departure_0_1">Departure Time</label>
+                                                <input type="time" id="stop_departure_0_1" name="stop_departure_0_1">
+                                                <small>Optional. Leave blank if departure timing depends on traffic or event flow.</small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <button type="button" class="btn-secondary add-dropoff-btn" data-day-index="0">+ Add Another Drop-off</button>
-                                <small class="location-note">Add stops in travel order so the itinerary reads clearly in the Google Sheet.</small>
+                                <button type="button" class="btn-secondary add-stop-btn" data-day-index="0">+ Add Another Stop</button>
+                                <small class="location-note">The Google Sheet will receive this exactly as an ordered stop list with optional departure times.</small>
                             </div>
                         </div>
                     </div>

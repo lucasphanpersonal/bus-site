@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 const QUOTE_REFERENCE_STORAGE_KEY = 'yhTravelsLastQuoteId';
 
 let dateTimeCounter = 1;
-let dropoffCounters = { 0: 1 };
+let stopCounters = { 0: 2 };
 
 function initializeForm() {
     const today = new Date().toISOString().split('T')[0];
@@ -26,12 +26,12 @@ function setupEventListeners() {
     }
 
     document.addEventListener('click', (event) => {
-        if (event.target.classList.contains('add-dropoff-btn')) {
-            addDropoffLocation(event.target.dataset.dayIndex);
+        if (event.target.classList.contains('add-stop-btn')) {
+            addStop(event.target.dataset.dayIndex);
         }
 
-        if (event.target.classList.contains('remove-dropoff-btn')) {
-            removeDropoffLocation(event.target.dataset.dayIndex, event.target.dataset.dropoffIndex);
+        if (event.target.classList.contains('remove-stop-btn')) {
+            removeStop(event.target.dataset.dayIndex, event.target.dataset.stopIndex);
         }
 
         if (event.target.classList.contains('remove-date-btn')) {
@@ -49,7 +49,7 @@ function addDateTimeGroup() {
     const index = dateTimeCounter++;
     const today = new Date().toISOString().split('T')[0];
 
-    dropoffCounters[index] = 1;
+    stopCounters[index] = 2;
 
     const groupHtml = `
         <div class="date-time-group" data-index="${index}">
@@ -65,49 +65,56 @@ function addDateTimeGroup() {
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="start_time_${index}">Start Time *</label>
-                    <input type="time" id="start_time_${index}" name="start_time_${index}" required>
-                </div>
-                <div class="form-group">
-                    <label for="end_time_${index}">End Time *</label>
-                    <input type="time" id="end_time_${index}" name="end_time_${index}" required>
-                    <div class="checkbox-inline">
-                        <input type="checkbox" id="next_day_${index}" name="next_day_${index}">
-                        <label for="next_day_${index}" class="checkbox-label">Ends next day</label>
-                    </div>
-                    <small>Use this when service continues past midnight.</small>
-                </div>
-            </div>
-
             <div class="locations-subsection">
-                <h4>Locations</h4>
+                <h4>Stops &amp; Departure Times</h4>
 
-                <div class="form-group">
-                    <label for="pickup_${index}">Pick-up Location *</label>
-                    <input type="text" id="pickup_${index}" name="pickup_${index}" class="location-input" placeholder="Enter the address, venue, city, or airport" required>
-                    <small>Type the location as clearly as possible.</small>
-                </div>
+                <div class="stop-container" data-day-index="${index}">
+                    <div class="itinerary-stop" data-stop-index="0">
+                        <div class="stop-header">
+                            <span class="stop-title">Stop #1</span>
+                        </div>
+                        <div class="form-row stop-fields">
+                            <div class="form-group">
+                                <label for="stop_location_${index}_0">Location *</label>
+                                <input type="text" id="stop_location_${index}_0" name="stop_location_${index}_0" class="location-input" placeholder="Enter the address, venue, city, or airport" required>
+                                <small>Use the actual property, venue, hotel, airport, school, or neighborhood name.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="stop_departure_${index}_0">Departure Time</label>
+                                <input type="time" id="stop_departure_${index}_0" name="stop_departure_${index}_0">
+                                <small>Optional. Add only if the bus is expected to leave this stop at a known time.</small>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="dropoff-container" data-day-index="${index}">
-                    <div class="dropoff-group" data-dropoff-index="0">
-                        <div class="form-group">
-                            <label for="dropoff_${index}_0">Drop-off Location *</label>
-                            <input type="text" id="dropoff_${index}_0" name="dropoff_${index}_0" class="location-input" placeholder="Enter the destination, venue, or stop" required>
-                            <small>Add the final destination or the first scheduled stop.</small>
+                    <div class="itinerary-stop" data-stop-index="1">
+                        <div class="stop-header">
+                            <span class="stop-title">Stop #2</span>
+                        </div>
+                        <div class="form-row stop-fields">
+                            <div class="form-group">
+                                <label for="stop_location_${index}_1">Location *</label>
+                                <input type="text" id="stop_location_${index}_1" name="stop_location_${index}_1" class="location-input" placeholder="Enter the destination, venue, or next stop" required>
+                                <small>Continue listing the route exactly in service order.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="stop_departure_${index}_1">Departure Time</label>
+                                <input type="time" id="stop_departure_${index}_1" name="stop_departure_${index}_1">
+                                <small>Optional. Leave blank if departure timing depends on traffic or event flow.</small>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <button type="button" class="btn-secondary add-dropoff-btn" data-day-index="${index}">+ Add Another Drop-off</button>
-                <small class="location-note">Add stops in travel order so the itinerary is easy to review.</small>
+                <button type="button" class="btn-secondary add-stop-btn" data-day-index="${index}">+ Add Another Stop</button>
+                <small class="location-note">The Google Sheet will receive this exactly as an ordered stop list with optional departure times.</small>
             </div>
         </div>
     `;
 
     container.insertAdjacentHTML('beforeend', groupHtml);
     renumberTripDayTitles();
+    renumberStops(index);
 }
 
 function removeDateTimeGroup(index) {
@@ -118,45 +125,63 @@ function removeDateTimeGroup(index) {
     }
 
     group.remove();
-    delete dropoffCounters[index];
+    delete stopCounters[index];
     renumberTripDayTitles();
 }
 
-function addDropoffLocation(dayIndex) {
-    const container = document.querySelector(`.dropoff-container[data-day-index="${dayIndex}"]`);
+function addStop(dayIndex) {
+    const container = document.querySelector(`.stop-container[data-day-index="${dayIndex}"]`);
 
     if (!container) {
         return;
     }
 
-    const dropoffIndex = dropoffCounters[dayIndex]++;
-    const dropoffHtml = `
-        <div class="dropoff-group" data-dropoff-index="${dropoffIndex}">
-            <div class="form-group">
-                <label for="dropoff_${dayIndex}_${dropoffIndex}">
-                    Drop-off Location *
-                    <button type="button" class="remove-dropoff-btn" data-day-index="${dayIndex}" data-dropoff-index="${dropoffIndex}">Remove</button>
-                </label>
-                <input type="text" id="dropoff_${dayIndex}_${dropoffIndex}" name="dropoff_${dayIndex}_${dropoffIndex}" class="location-input" placeholder="Enter the destination, venue, or stop" required>
-                <small>Add any extra stop, transfer point, or destination in order.</small>
+    const stopIndex = stopCounters[dayIndex]++;
+    const stopHtml = `
+        <div class="itinerary-stop" data-stop-index="${stopIndex}">
+            <div class="stop-header">
+                <span class="stop-title">Stop</span>
+                <button type="button" class="remove-stop-btn" data-day-index="${dayIndex}" data-stop-index="${stopIndex}">Remove</button>
+            </div>
+            <div class="form-row stop-fields">
+                <div class="form-group">
+                    <label for="stop_location_${dayIndex}_${stopIndex}">Location *</label>
+                    <input type="text" id="stop_location_${dayIndex}_${stopIndex}" name="stop_location_${dayIndex}_${stopIndex}" class="location-input" placeholder="Enter the destination, venue, or next stop" required>
+                    <small>Add any extra stop, transfer point, or destination in order.</small>
+                </div>
+                <div class="form-group">
+                    <label for="stop_departure_${dayIndex}_${stopIndex}">Departure Time</label>
+                    <input type="time" id="stop_departure_${dayIndex}_${stopIndex}" name="stop_departure_${dayIndex}_${stopIndex}">
+                    <small>Optional. Leave blank if you do not need to pin a departure time at this stop.</small>
+                </div>
             </div>
         </div>
     `;
 
-    container.insertAdjacentHTML('beforeend', dropoffHtml);
+    container.insertAdjacentHTML('beforeend', stopHtml);
+    renumberStops(dayIndex);
 }
 
-function removeDropoffLocation(dayIndex, dropoffIndex) {
-    const container = document.querySelector(`.dropoff-container[data-day-index="${dayIndex}"]`);
+function removeStop(dayIndex, stopIndex) {
+    const container = document.querySelector(`.stop-container[data-day-index="${dayIndex}"]`);
 
     if (!container) {
         return;
     }
 
-    const group = container.querySelector(`.dropoff-group[data-dropoff-index="${dropoffIndex}"]`);
-    if (group) {
-        group.remove();
+    const stops = container.querySelectorAll('.itinerary-stop');
+    if (stops.length <= 2) {
+        showStatusMessage('error', 'Each trip day needs at least two stops so the route order is clear.');
+        return;
     }
+
+    const stop = container.querySelector(`.itinerary-stop[data-stop-index="${stopIndex}"]`);
+    if (!stop) {
+        return;
+    }
+
+    stop.remove();
+    renumberStops(dayIndex);
 }
 
 function renumberTripDayTitles() {
@@ -168,6 +193,39 @@ function renumberTripDayTitles() {
             title.textContent = `Trip Day #${index + 1}`;
         }
     });
+}
+
+function renumberStops(dayIndex) {
+    const stopContainer = document.querySelector(`.stop-container[data-day-index="${dayIndex}"]`);
+    if (!stopContainer) {
+        return;
+    }
+
+    const stops = stopContainer.querySelectorAll('.itinerary-stop');
+    stops.forEach((stop, index) => {
+        const title = stop.querySelector('.stop-title');
+        if (title) {
+            title.textContent = `Stop #${index + 1}`;
+        }
+    });
+}
+
+function formatTimeForDisplay(timeValue) {
+    if (!timeValue) {
+        return '';
+    }
+
+    const [hourText, minuteText] = timeValue.split(':');
+    const hour = Number(hourText);
+    const minute = Number(minuteText);
+
+    if (Number.isNaN(hour) || Number.isNaN(minute)) {
+        return timeValue;
+    }
+
+    const meridiem = hour >= 12 ? 'PM' : 'AM';
+    const normalizedHour = hour % 12 || 12;
+    return `${normalizedHour}:${String(minute).padStart(2, '0')} ${meridiem}`;
 }
 
 function generateQuoteId() {
@@ -202,33 +260,29 @@ function collectFormData() {
     dateGroups.forEach((group) => {
         const index = group.dataset.index;
         const dateInput = group.querySelector(`#date_${index}`);
-        const startTimeInput = group.querySelector(`#start_time_${index}`);
-        const endTimeInput = group.querySelector(`#end_time_${index}`);
-        const pickupInput = group.querySelector(`#pickup_${index}`);
-        const nextDayInput = group.querySelector(`#next_day_${index}`);
 
-        if (!dateInput || !startTimeInput || !endTimeInput || !pickupInput) {
+        if (!dateInput) {
             return;
         }
 
         const tripDay = {
             date: dateInput.value,
-            startTime: startTimeInput.value,
-            endTime: endTimeInput.value,
-            endsNextDay: Boolean(nextDayInput?.checked),
-            pickup: pickupInput.value.trim(),
-            dropoffs: []
+            stops: []
         };
 
-        const dropoffContainer = group.querySelector(`.dropoff-container[data-day-index="${index}"]`);
-        if (dropoffContainer) {
-            const dropoffGroups = dropoffContainer.querySelectorAll('.dropoff-group');
-            dropoffGroups.forEach((dropoffGroup) => {
-                const dropoffIndex = dropoffGroup.dataset.dropoffIndex;
-                const dropoffInput = dropoffGroup.querySelector(`#dropoff_${index}_${dropoffIndex}`);
+        const stopContainer = group.querySelector(`.stop-container[data-day-index="${index}"]`);
+        if (stopContainer) {
+            const stops = stopContainer.querySelectorAll('.itinerary-stop');
+            stops.forEach((stop) => {
+                const stopIndex = stop.dataset.stopIndex;
+                const locationInput = stop.querySelector(`#stop_location_${index}_${stopIndex}`);
+                const departureInput = stop.querySelector(`#stop_departure_${index}_${stopIndex}`);
 
-                if (dropoffInput && dropoffInput.value.trim()) {
-                    tripDay.dropoffs.push(dropoffInput.value.trim());
+                if (locationInput && locationInput.value.trim()) {
+                    tripDay.stops.push({
+                        location: locationInput.value.trim(),
+                        departureTime: departureInput ? departureInput.value : ''
+                    });
                 }
             });
         }
@@ -253,15 +307,11 @@ function validateFormData(formData) {
     }
 
     for (const day of formData.tripDays) {
-        if (!day.date || !day.startTime || !day.endTime) {
+        if (!day.date) {
             return false;
         }
 
-        if (!day.pickup) {
-            return false;
-        }
-
-        if (!day.dropoffs.length || day.dropoffs.some((dropoff) => !dropoff)) {
+        if (!day.stops.length || day.stops.length < 2 || day.stops.some((stop) => !stop.location)) {
             return false;
         }
     }
@@ -280,10 +330,12 @@ function validateFormData(formData) {
 
 function formatTripDaysForSubmission(tripDays) {
     return tripDays.map((day, index) => {
-        const dropoffsText = day.dropoffs.map((dropoff, dropoffIndex) => `  Drop-off ${dropoffIndex + 1}: ${dropoff}`).join('\n');
-        const overnightIndicator = day.endsNextDay ? ' (overnight)' : '';
+        const stopText = day.stops.map((stop, stopIndex) => {
+            const departureText = stop.departureTime ? ` (depart ${formatTimeForDisplay(stop.departureTime)})` : '';
+            return `  Stop ${stopIndex + 1}: ${stop.location}${departureText}`;
+        }).join('\n');
 
-        return `Day ${index + 1}: ${day.date} from ${day.startTime} to ${day.endTime}${overnightIndicator}\n  Pick-up: ${day.pickup}\n${dropoffsText}`;
+        return `Day ${index + 1}: ${day.date}\n${stopText}`;
     }).join('\n\n');
 }
 

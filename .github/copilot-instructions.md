@@ -47,7 +47,7 @@ The previous Google Maps, EmailJS, admin dashboard, and Apps Script architecture
 - Use semantic HTML5 elements where appropriate
 - Keep labels, required attributes, and accessibility affordances intact
 - Preserve the integrated on-site form experience rather than replacing it with a plain external link
-- Maintain the current itinerary workflow that captures all dates, times, pickups, and ordered drop-offs
+- Maintain the current itinerary workflow that captures service dates plus ordered stops with optional departure times
 
 ### CSS Conventions
 
@@ -79,12 +79,10 @@ The previous Google Maps, EmailJS, admin dashboard, and Apps Script architecture
 
 - Each trip day includes:
 	- date
-	- start time
-	- end time
-	- optional overnight flag
-	- one pickup location
-	- multiple ordered drop-off locations
-- The client must still be able to document every pickup, drop-off, and time window clearly
+	- an ordered list of stops
+	- a required location for each stop
+	- an optional departure time for each stop
+- The client must still be able to document the actual operating sequence clearly, including stops that do not have a fixed time
 
 ### Google Forms Submission
 
@@ -111,7 +109,7 @@ The previous Google Maps, EmailJS, admin dashboard, and Apps Script architecture
 ### Manual Testing
 
 - Test landing, form, and success pages on desktop and mobile
-- Test multi-day itinerary creation, removal, and ordered drop-offs
+- Test multi-day itinerary creation, removal, and ordered timed-stop entry
 - Test required field validation and email validation
 - Test end-to-end submission into Google Forms / Google Sheets
 - Test that the success page shows the generated quote reference
@@ -142,7 +140,7 @@ The previous Google Maps, EmailJS, admin dashboard, and Apps Script architecture
 ### Modifying Itinerary Formatting
 
 - Keep the structured text output from `formatTripDaysForSubmission()` readable in Google Sheets
-- Preserve ordered stops and explicit time windows
+- Preserve ordered stops and optional departure times
 - Update documentation if the formatting contract changes
 
 ### Contact / Business Inbox Changes

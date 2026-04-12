@@ -220,19 +220,34 @@ img {
     margin-top: var(--spacing-md);
 }
 
-.dropoff-container {
+.stop-container {
     margin-bottom: var(--spacing-sm);
 }
 
-.dropoff-group {
+.itinerary-stop {
     margin-bottom: var(--spacing-sm);
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(135, 206, 235, 0.22);
+    border-radius: var(--radius-md);
 }
 
-.dropoff-group label {
+.stop-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.stop-title {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.stop-fields {
+    align-items: start;
 }
 
 .location-note {
@@ -243,7 +258,7 @@ img {
     font-size: 0.9375rem;
 }
 
-.remove-dropoff-btn,
+.remove-stop-btn,
 .remove-date-btn {
     background: var(--error-color);
     color: white;
@@ -254,7 +269,7 @@ img {
     opacity: 0.92;
 }
 
-.remove-dropoff-btn {
+.remove-stop-btn {
     padding: 6px 14px;
     border-radius: var(--radius-sm);
     font-size: 0.875rem;
@@ -266,7 +281,7 @@ img {
     font-size: 0.9375rem;
 }
 
-.remove-dropoff-btn:hover,
+.remove-stop-btn:hover,
 .remove-date-btn:hover {
     opacity: 1;
     transform: scale(1.04);
@@ -1094,6 +1109,11 @@ body.success-page {
     }
 
     .date-time-group h3 {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .stop-header {
         flex-direction: column;
         align-items: flex-start;
     }
