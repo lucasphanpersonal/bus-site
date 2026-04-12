@@ -145,21 +145,12 @@ For the itinerary itself, the best storage format is one long-answer Google Form
 
 Recommended manual-use columns to add to the right of the form response columns:
 
-1. `Request Status`
-2. `Internal Notes`
-3. `Owner Quote Number`
-4. `Quote Amount`
-5. `Send Quote?`
-6. `Quote PDF Link`
-7. `Quote Sent Date`
-8. `Outcome`
-
-Recommended values:
-
-- `Request Status`: `New`, `Quoted`, `Won`, `Lost`
-- `Outcome`: `Pending`, `Accepted`, `Declined`
+1. `Quote Amount`
+2. `Send Quote?`
 
 Use `Send Quote?` as a checkbox column. The owner can work directly on the linked Google Sheet row for that request instead of trying to edit the Google Form submission itself.
+
+You do **not** need to add an `Email Address` column manually here, because that column is already part of the original form response data coming from the site.
 
 ## Quote PDF Workflow
 
@@ -180,10 +171,10 @@ Recommended row-level workflow:
 1. Customer submits the site form.
 2. Google Forms writes one row into the linked Sheet.
 3. Owner opens that row in Google Sheets.
-4. Owner fills in `Owner Quote Number` if needed, plus `Quote Amount`, `Internal Notes`, and `Request Status`.
+4. Owner fills in `Quote Amount`.
 5. Owner checks `Send Quote?`.
 6. Autocrat generates the PDF from a Google Doc template and emails it to the customer.
-7. Autocrat writes the PDF URL and sent timestamp back to the same row.
+7. Owner clears `Send Quote?` after the send so the row is not picked up again on the next manual run.
 
 ### Recommended columns for Autocrat
 
@@ -201,23 +192,15 @@ Already supplied by the site.
 4. `Email Address`
 Already supplied by the site.
 
-5. `Owner Quote Number`
-Optional internal or customer-facing quote number.
-
-6. `Quote Amount`
+5. `Quote Amount`
 The final price the owner calculated manually.
 
-7. `Internal Notes`
-Optional notes for terms, exclusions, deposit language, or custom wording.
-
-8. `Send Quote?`
+6. `Send Quote?`
 Checkbox used to mark the row ready for Autocrat.
 
-9. `Quote PDF Link`
-Written back after the PDF is generated.
+Those are the only two owner-managed columns needed for the basic workflow.
 
-10. `Quote Sent Date`
-Written back after the email is sent.
+`Email Address` is still required for Autocrat, but it already exists on the response row from Google Forms, so it does not need to be added as an extra owner-side column.
 
 ### Set up Autocrat
 
@@ -229,10 +212,16 @@ Written back after the email is sent.
 <<Quote Reference>>
 <<Full Name>>
 <<Trip Days / Schedule and Locations>>
-<<Owner Quote Number>>
 <<Quote Amount>>
-<<Internal Notes>>
 ```
+
+If you want the customer email shown inside the PDF itself, you can also add:
+
+```text
+<<Email Address>>
+```
+
+That merge tag is optional for the document body. It is not required just to send the email, because Autocrat can use the existing `Email Address` column directly as the recipient field.
 
 4. In Autocrat, create a new merge job using that template.
 5. Map the merge tags to the matching columns.
@@ -248,7 +237,8 @@ Written back after the email is sent.
     - Subject: something like `Your Charter Quote - <<Quote Reference>>`
     - Body: short owner-facing message with the PDF attached
     - Attachment: merged PDF
-9. Set Autocrat to write back values such as merge URL and merge time if those options are available in your job settings.
+
+You do not need extra owner-side columns like quote number, notes, PDF link, or sent date unless you decide later that you want more tracking inside the Sheet.
 
 ### Best trigger model
 
@@ -257,16 +247,17 @@ The lowest-overhead approach is:
 - Owner fills in the row.
 - Owner checks `Send Quote?`.
 - Owner runs the Autocrat job manually.
+- Owner unchecks `Send Quote?` after the quote is sent.
 
 That keeps control with the owner and avoids accidental sends while a quote is still being edited.
 
-If your Autocrat version supports merge conditions, configure it so only rows with `Send Quote? = TRUE` and blank `Quote Sent Date` are processed.
+If your Autocrat version supports merge conditions, configure it so only rows with `Send Quote? = TRUE` are processed.
 
 If that condition UI is not available in your version, the fallback is:
 
 - keep using the `Send Quote?` checkbox
 - manually run only ready rows
-- or use a filtered helper sheet that only shows ready-to-send rows
+- clear the checkbox after each successful send so the row does not get emailed again later
 
 ### Best practical recommendation
 

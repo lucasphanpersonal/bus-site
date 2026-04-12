@@ -15,7 +15,7 @@ const CONFIG = {
     },
 
     contact: {
-        email: 'huabaohuang622@gmail.com',
+        email: 'lucasphanpersonal@gmail.com',
         subject: 'Charter Quote Question'
     },
 
