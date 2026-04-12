@@ -3,44 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Get a quote for charter bus bookings - easy and convenient">
-    <title>YH Travels - Quote Request</title>
+    <meta name="description" content="Request a custom charter transportation quote from YH Travels.">
+    <title>YH Travels | Custom Quote Request</title>
     <link rel="stylesheet" href="styles.css">
-    
-    <!-- EmailJS for automatic confirmation emails -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <a href="index.html" style="color: var(--primary-dark); text-decoration: none; font-weight: 600;">← Back to Home</a>
-                <a href="admin.html" class="admin-link">Admin Portal →</a>
+            <div class="header-actions">
+                <a href="index.html" class="utility-link">&larr; Back to Home</a>
+                <a id="questionLink" href="mailto:huabaohuang622@gmail.com?subject=Charter%20Quote%20Question" class="utility-link utility-link-accent">Ask A Question &rarr;</a>
             </div>
-            <h1>🚌 YH Travels</h1>
-            <p class="subtitle">Request a Quote for Your Charter Bus Booking</p>
+            <h1>&#128652; YH Travels</h1>
+            <p class="subtitle">Share your itinerary below. We review each request manually and send a written quote PDF by email.</p>
         </header>
 
         <main class="main-content">
             <section class="intro-section">
-                <p>Fill out the form below to receive a personalized quote for your charter bus needs. We'll get back to you as soon as possible!</p>
+                <p>This form stays on your site and sends the details directly to Google Forms behind the scenes. Include every scheduled date, pickup, drop-off, and time window so the quote can be accurate on the first pass.</p>
             </section>
 
             <form id="bookingForm" class="booking-form">
-                <!-- Trip Details Section -->
                 <div class="form-section">
                     <h2>Trip Details</h2>
-                    
+                    <p class="section-guidance">Use one trip day card for each service day and list every pickup, every drop-off, and the planned time window in travel order.</p>
+
                     <div id="dateTimeContainer">
                         <div class="date-time-group" data-index="0">
-                            <h3>Trip Day #1</h3>
-                            
+                            <h3>
+                                <span class="trip-day-title">Trip Day #1</span>
+                            </h3>
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="date_0">Date *</label>
                                     <input type="date" id="date_0" name="date_0" required>
                                 </div>
                             </div>
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="start_time_0">Start Time *</label>
@@ -53,49 +53,46 @@
                                         <input type="checkbox" id="next_day_0" name="next_day_0">
                                         <label for="next_day_0" class="checkbox-label">Ends next day</label>
                                     </div>
-                                    <small>Check "Ends next day" if the trip continues past midnight (e.g., 11 PM to 1 AM)</small>
+                                    <small>Use this when service continues past midnight.</small>
                                 </div>
                             </div>
-                            
-                            <!-- Locations for this day -->
+
                             <div class="locations-subsection">
-                                <h4>Locations for This Day</h4>
-                                
+                                <h4>Locations</h4>
+
                                 <div class="form-group">
                                     <label for="pickup_0">Pick-up Location *</label>
-                                    <input type="text" id="pickup_0" name="pickup_0" class="location-input" placeholder="Enter pick-up address or location" required>
-                                    <small>Start typing to see suggestions</small>
+                                    <input type="text" id="pickup_0" name="pickup_0" class="location-input" placeholder="Enter the address, venue, city, or airport" required>
+                                    <small>Type the location as clearly as possible. No Maps autocomplete is required.</small>
                                 </div>
-                                
+
                                 <div class="dropoff-container" data-day-index="0">
                                     <div class="dropoff-group" data-dropoff-index="0">
                                         <div class="form-group">
-                                            <label for="dropoff_0_0">Drop-off Location #1 *</label>
-                                            <input type="text" id="dropoff_0_0" name="dropoff_0_0" class="location-input" placeholder="Enter drop-off address or location" required>
-                                            <small>Start typing to see suggestions</small>
+                                            <label for="dropoff_0_0">Drop-off Location *</label>
+                                            <input type="text" id="dropoff_0_0" name="dropoff_0_0" class="location-input" placeholder="Enter the destination, venue, or stop" required>
+                                            <small>Add the final destination or the first scheduled stop.</small>
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <button type="button" class="btn-secondary add-dropoff-btn" data-day-index="0">+ Add Another Drop-off</button>
-                                <small class="location-note">The final drop-off location will be your final destination for this day.</small>
+                                <small class="location-note">Add stops in travel order so the itinerary reads clearly in the Google Sheet.</small>
                             </div>
                         </div>
                     </div>
-                    
+
                     <button type="button" id="addDateBtn" class="btn-secondary">+ Add Another Trip Day</button>
                 </div>
 
-                <!-- Passenger Information -->
                 <div class="form-section">
                     <h2>Passenger Information</h2>
                     <div class="form-group">
                         <label for="passengers">Number of Passengers *</label>
-                        <input type="number" id="passengers" name="passengers" min="1" max="500" placeholder="e.g., 50" required>
+                        <input type="number" id="passengers" name="passengers" min="1" max="500" placeholder="e.g. 54" required>
                     </div>
                 </div>
 
-                <!-- Contact Information -->
                 <div class="form-section">
                     <h2>Contact Information</h2>
                     <div class="form-row">
@@ -114,102 +111,53 @@
                             <input type="tel" id="phone" name="phone" placeholder="(555) 123-4567" required>
                         </div>
                         <div class="form-group">
-                            <label for="company">Company/Organization (Optional)</label>
+                            <label for="company">Company or Organization</label>
                             <input type="text" id="company" name="company" placeholder="ABC Company">
                         </div>
                     </div>
                 </div>
 
-                <!-- Description Section -->
                 <div class="form-section">
                     <h2>Trip Description</h2>
                     <div class="form-group">
-                        <label for="description">Brief Description *</label>
-                        <textarea id="description" name="description" rows="4" placeholder="Tell us about your trip (e.g., corporate event, wedding, field trip)" required></textarea>
+                        <label for="description">Trip Summary *</label>
+                        <textarea id="description" name="description" rows="4" placeholder="Tell us what the trip is for, who is traveling, and any timing or operational context we should know." required></textarea>
                     </div>
                     <div class="form-group">
                         <label for="notes">Special Notes or Requirements</label>
-                        <textarea id="notes" name="notes" rows="4" placeholder="Any additional information, special requests, or requirements"></textarea>
+                        <textarea id="notes" name="notes" rows="4" placeholder="Accessibility needs, luggage requirements, venue instructions, or any other details."></textarea>
                     </div>
                 </div>
 
-                <!-- Submit Button -->
                 <div class="form-actions">
                     <button type="submit" id="submitBtn" class="btn-primary">
-                        <span class="btn-text">Get Your Quote</span>
+                        <span class="btn-text">Submit Request</span>
                         <span class="btn-loader" style="display: none;">
                             <span class="spinner"></span> Submitting...
                         </span>
                     </button>
                 </div>
 
-                <!-- Status Messages -->
                 <div id="statusMessage" class="status-message" style="display: none;"></div>
             </form>
         </main>
 
         <footer class="footer">
-            <p>&copy; 2024 YH Travels. All rights reserved.</p>
+            <p>Custom quote requests submitted directly to your Google Form.</p>
         </footer>
     </div>
 
-    <!-- Load local config first (git-ignored, contains API keys) -->
-    <!-- The onerror handler silently continues if file doesn't exist (expected in production) -->
-    <script src="config-local.js" onerror="console.log('ℹ️ No local config found, using environment defaults')"></script>
-    
-    <!-- Load base config -->
     <script src="config.js"></script>
-    
-    <!-- Merge local config with base config -->
     <script>
-        // Merge CONFIG_LOCAL into CONFIG if it exists
-        if (typeof CONFIG_LOCAL !== 'undefined') {
-            console.log('🔧 Merging local configuration...');
-            
-            // Deep merge function
-            function deepMerge(target, source) {
-                for (const key in source) {
-                    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-                        target[key] = target[key] || {};
-                        deepMerge(target[key], source[key]);
-                    } else {
-                        target[key] = source[key];
-                    }
-                }
-                return target;
+        document.addEventListener('DOMContentLoaded', () => {
+            const questionLink = document.getElementById('questionLink');
+            const contactEmail = CONFIG?.contact?.email;
+            const contactSubject = CONFIG?.contact?.subject || 'Charter Quote Question';
+
+            if (questionLink && contactEmail) {
+                questionLink.href = `mailto:${contactEmail}?subject=${encodeURIComponent(contactSubject)}`;
             }
-            
-            // Merge configurations
-            if (CONFIG_LOCAL.googleMaps) {
-                CONFIG.googleMaps = { ...CONFIG.googleMaps, ...CONFIG_LOCAL.googleMaps };
-            }
-            if (CONFIG_LOCAL.emailjs) {
-                CONFIG.emailjs = deepMerge({ ...CONFIG.emailjs }, CONFIG_LOCAL.emailjs);
-            }
-            
-            console.log('✅ Local configuration loaded successfully');
-            console.log('🔑 API Keys loaded:', {
-                googleMaps: CONFIG.googleMaps.apiKey ? '✅' : '❌',
-                emailjs: CONFIG.emailjs.publicKey ? '✅' : '❌'
-            });
-        } else {
-            console.log('ℹ️ Using default configuration with embedded API key');
-            console.log('🔑 API Keys loaded:', {
-                googleMaps: CONFIG.googleMaps.apiKey ? '✅' : '❌',
-                emailjs: CONFIG.emailjs.publicKey ? '✅' : '❌'
-            });
-        }
-        
-        // Initialize EmailJS if configured
-        try {
-            if (typeof emailjs !== 'undefined' && CONFIG.emailjs && CONFIG.emailjs.enabled && CONFIG.emailjs.publicKey) {
-                emailjs.init(CONFIG.emailjs.publicKey);
-                console.log('✅ EmailJS initialized successfully');
-            }
-        } catch (error) {
-            console.warn('⚠️ Failed to initialize EmailJS:', error);
-            // Site will continue to work without email functionality
-        }
+        });
     </script>
     <script src="script.js"></script>
 </body>

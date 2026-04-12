@@ -3,180 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Quote request received successfully">
-    <title>Quote Request Received - YH Travels</title>
+    <meta name="description" content="Your YH Travels quote request has been received.">
+    <title>YH Travels | Request Received</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        .success-container {
-            max-width: 800px;
-            margin: 60px auto;
-            text-align: center;
-        }
-        
-        .success-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            animation: checkmark 0.6s ease-in-out;
-        }
-        
-        @keyframes checkmark {
-            0% {
-                transform: scale(0);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1.2);
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        
-        .success-content {
-            background: var(--card-background);
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .success-content h1 {
-            color: var(--success-color);
-            font-size: 2rem;
-            margin-bottom: 20px;
-        }
-        
-        .success-content p {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            margin-bottom: 15px;
-            line-height: 1.8;
-        }
-        
-        .info-box {
-            background: #f0fdf4;
-            border: 2px solid var(--success-color);
-            border-radius: 8px;
-            padding: 20px;
-            margin: 30px 0;
-            text-align: left;
-        }
-        
-        .info-box h3 {
-            color: var(--success-color);
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-        
-        .info-box ul {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .info-box li {
-            padding: 8px 0;
-            color: var(--text-primary);
-        }
-        
-        .info-box li::before {
-            content: "✓ ";
-            color: var(--success-color);
-            font-weight: bold;
-            margin-right: 8px;
-        }
-        
-        .contact-info {
-            background: var(--background);
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 30px;
-        }
-        
-        .contact-info p {
-            margin: 5px 0;
-            font-size: 1rem;
-        }
-        
-        .home-button {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 14px 32px;
-            background: var(--primary-color);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        
-        .home-button:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
-        }
-    </style>
 </head>
-<body>
-    <div class="container">
-        <div class="success-container">
-            <div class="success-content">
-                <div class="success-icon">✓</div>
-                <h1>Quote Request Received!</h1>
-                <p>Thank you for your interest in our charter bus services.</p>
-                
-                <div class="info-box" style="background: #eff6ff; border-color: var(--primary-color);">
-                    <h3 style="color: var(--primary-color);">Your Quote Reference Number</h3>
-                    <p style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color); margin: 10px 0; font-family: monospace;" id="quoteId">Loading...</p>
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 10px;">Please reference this number in all communications about your quote.</p>
-                </div>
-                
-                <div class="info-box">
-                    <h3>What Happens Next?</h3>
-                    <ul>
-                        <li>You'll receive a confirmation email at <span id="userEmail"></span> shortly</li>
-                        <li>Our team will review your trip details and calculate a personalized quote</li>
-                        <li>We'll contact you within 24 hours via email or phone</li>
-                        <li>Feel free to reach out if you have any questions in the meantime</li>
-                    </ul>
-                </div>
-                
-                <div class="contact-info">
-                    <p><strong>Need immediate assistance?</strong></p>
-                    <p>Call us or email us directly</p>
-                </div>
-                
-                <a href="index.html" class="home-button">← Back to Home</a>
+<body class="success-page">
+    <div class="landing-background" aria-hidden="true">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <div class="container success-container">
+        <div class="success-card">
+            <div class="success-mark" aria-hidden="true">&#10003;</div>
+            <p class="hero-kicker">Request Received</p>
+            <h1>We have your itinerary.</h1>
+            <p class="success-copy">A transportation coordinator will review the request and send a written quote PDF by email.</p>
+
+            <div id="referenceBox" class="reference-chip" style="display: none;">
+                Reference: <span id="quoteReference"></span>
+            </div>
+
+            <div class="success-details">
+                <h2>What happens next</h2>
+                <ul>
+                    <li>Your request is already in the internal Google Sheet.</li>
+                    <li>We review dates, passenger count, stops, and special requirements.</li>
+                    <li>You receive a written quote PDF by email.</li>
+                </ul>
+            </div>
+
+            <div class="success-actions">
+                <a href="quote.html" class="btn-secondary">Submit Another Request</a>
+                <a href="index.html" class="btn-primary">Back To Home</a>
             </div>
         </div>
-        
-        <footer class="footer">
-            <p>&copy; 2024 YH Travels. All rights reserved.</p>
-        </footer>
     </div>
-    
+
     <script>
-        // Get parameters from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const email = urlParams.get('email');
-        const name = urlParams.get('name');
-        const quoteId = urlParams.get('quoteId');
-        
-        // Display quote ID
-        if (quoteId) {
-            document.getElementById('quoteId').textContent = quoteId;
-        } else {
-            document.getElementById('quoteId').textContent = 'Not available';
-        }
-        
-        if (email) {
-            document.getElementById('userEmail').textContent = email;
-        } else {
-            document.getElementById('userEmail').textContent = 'your email address';
-        }
-        
-        // Update page title with name if available
-        if (name) {
-            document.querySelector('h1').textContent = `Thank you, ${name.split(' ')[0]}!`;
+        const quoteReferenceKey = 'yhTravelsLastQuoteId';
+        const referenceBox = document.getElementById('referenceBox');
+        const quoteReference = document.getElementById('quoteReference');
+        const storedQuoteId = sessionStorage.getItem(quoteReferenceKey);
+
+        if (storedQuoteId && referenceBox && quoteReference) {
+            quoteReference.textContent = storedQuoteId;
+            referenceBox.style.display = 'inline-flex';
         }
     </script>
 </body>

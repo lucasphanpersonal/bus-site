@@ -3,106 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="YH Travels - Professional Charter Bus Services">
-    <title>YH Travels - Charter Bus Services</title>
+    <meta name="description" content="YH Travels charter quote requests. Share your itinerary through our custom request form and receive a written quote PDF by email.">
+    <title>YH Travels | Charter Quote Requests</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="landing-page">
-    <!-- Animated Background -->
-    <div class="landing-background">
+    <div class="landing-background" aria-hidden="true">
         <div class="gradient-orb orb-1"></div>
         <div class="gradient-orb orb-2"></div>
         <div class="gradient-orb orb-3"></div>
     </div>
 
-    <!-- Main Landing Content -->
     <div class="landing-container">
-        <!-- Header with Logo -->
         <header class="landing-header">
             <div class="logo-container">
-                <span class="logo-icon">🚌</span>
+                <span class="logo-icon" aria-hidden="true">&#128652;</span>
                 <span class="logo-text">YH Travels</span>
             </div>
         </header>
 
-        <!-- Hero Section -->
         <main class="landing-hero">
             <div class="hero-content">
+                <p class="hero-kicker animate-fade-in-up">Charter Quote Requests</p>
                 <h1 class="hero-title">
-                    <span class="title-line animate-fade-in-up">Your Journey,</span>
-                    <span class="title-line animate-fade-in-up delay-1">Our Commitment</span>
+                    <span class="title-line animate-fade-in-up">Tell Us The Itinerary.</span>
+                    <span class="title-line animate-fade-in-up delay-1">We Will Send The Quote.</span>
                 </h1>
-                
+
                 <p class="hero-subtitle animate-fade-in-up delay-2">
-                    Professional charter bus services for all your transportation needs.
-                    <span class="subtitle-accent">Comfortable. Reliable. Affordable.</span>
+                    Custom transportation requests for schools, companies, events, airports, and private groups.
+                    <span class="subtitle-accent">Every request is reviewed manually so your quote matches the actual trip.</span>
                 </p>
 
-                <!-- Call-to-Action Buttons -->
                 <div class="cta-buttons animate-fade-in-up delay-3">
                     <a href="quote.html" class="cta-button primary-cta">
-                        <span class="button-text">Get a Quote</span>
-                        <span class="button-icon">→</span>
+                        <span class="button-text">Start Your Request</span>
+                        <span class="button-icon">&rarr;</span>
                     </a>
-                    <a href="admin.html" class="cta-button secondary-cta">
-                        <span class="button-text">Admin Portal</span>
-                        <span class="button-icon">🔐</span>
+                    <a id="questionLink" href="mailto:huabaohuang622@gmail.com?subject=Charter%20Quote%20Question" class="cta-button secondary-cta">
+                        <span class="button-text">Ask A Question</span>
+                        <span class="button-icon">&#9993;</span>
                     </a>
                 </div>
 
-                <!-- Feature Highlights -->
-                <div class="feature-highlights animate-fade-in delay-4">
+                <div class="feature-highlights animate-fade-in delay-4" aria-label="Service highlights">
                     <div class="feature-item">
-                        <div class="feature-icon">✓</div>
-                        <div class="feature-text">Instant Quotes</div>
+                        <div class="feature-icon">&#10003;</div>
+                        <div class="feature-text">Custom Requests</div>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">✓</div>
-                        <div class="feature-text">Modern Fleet</div>
+                        <div class="feature-icon">&#10003;</div>
+                        <div class="feature-text">All Stops &amp; Times</div>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">✓</div>
-                        <div class="feature-text">24/7 Support</div>
+                        <div class="feature-icon">&#10003;</div>
+                        <div class="feature-text">Manual Review</div>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">✓</div>
-                        <div class="feature-text">Licensed Drivers</div>
+                        <div class="feature-icon">&#10003;</div>
+                        <div class="feature-text">Written PDF Quotes</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Animated Stats (configured in config.js) -->
-            <div id="statsSection" class="stats-section animate-slide-in-bottom delay-5" style="display: none;">
-                <!-- Stats will be dynamically inserted here if enabled in config -->
-            </div>
+            <div id="statsSection" class="stats-section animate-slide-in-bottom delay-5" style="display: none;"></div>
 
-            <!-- Animated Bus Element -->
-            <div class="bus-animation-container">
-                <div class="animated-bus">
-                    🚌
-                </div>
+            <div class="bus-animation-container" aria-hidden="true">
+                <div class="animated-bus">&#128652;</div>
             </div>
         </main>
 
-        <!-- Footer -->
         <footer class="landing-footer">
-            <p>&copy; 2024 YH Travels. All rights reserved.</p>
+            <p>YH Travels</p>
+            <p>Quote requests for schools, companies, event planners, airports, and private groups.</p>
         </footer>
     </div>
 
     <script src="config.js"></script>
     <script>
-        // Load stats configuration and display if enabled
         document.addEventListener('DOMContentLoaded', () => {
+            const questionLink = document.getElementById('questionLink');
+            const contactEmail = CONFIG?.contact?.email;
+            const contactSubject = CONFIG?.contact?.subject || 'Charter Quote Question';
+
+            if (questionLink && contactEmail) {
+                questionLink.href = `mailto:${contactEmail}?subject=${encodeURIComponent(contactSubject)}`;
+            }
+
             const statsConfig = CONFIG?.landingPage?.stats;
-            
-            if (statsConfig && statsConfig.enabled && statsConfig.items && statsConfig.items.length > 0) {
+            if (statsConfig && statsConfig.enabled && Array.isArray(statsConfig.items) && statsConfig.items.length > 0) {
                 const statsSection = document.getElementById('statsSection');
                 statsSection.style.display = 'flex';
-                
-                // Clear existing content and add configured stats
                 statsSection.innerHTML = '';
-                statsConfig.items.forEach(stat => {
+
+                statsConfig.items.forEach((stat) => {
                     const statCard = document.createElement('div');
                     statCard.className = 'stat-card';
                     statCard.innerHTML = `
@@ -114,23 +108,24 @@
             }
         });
 
-        // Add subtle parallax effect on mouse move with throttling for better performance
         let rafId = null;
-        document.addEventListener('mousemove', (e) => {
-            if (rafId) return;
-            
+        document.addEventListener('mousemove', (event) => {
+            if (rafId) {
+                return;
+            }
+
             rafId = requestAnimationFrame(() => {
                 const orbs = document.querySelectorAll('.gradient-orb');
-                const x = e.clientX / window.innerWidth;
-                const y = e.clientY / window.innerHeight;
-                
+                const x = event.clientX / window.innerWidth;
+                const y = event.clientY / window.innerHeight;
+
                 orbs.forEach((orb, index) => {
                     const speed = (index + 1) * 10;
                     const xMove = (x - 0.5) * speed;
                     const yMove = (y - 0.5) * speed;
                     orb.style.transform = `translate(${xMove}px, ${yMove}px)`;
                 });
-                
+
                 rafId = null;
             });
         });
